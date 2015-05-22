@@ -1,0 +1,14 @@
+.bChart_legend {
+  cursor: pointer;
+}
+.bChart_legend.inactive, .bChart_legend.unhover {
+  opacity: 0.5;
+}
+
+.bChart_legend.active {
+  opacity: 1 !important;
+}
+
+.bChart_groups.inactive, .bChart_groups.unhover {
+  opacity: 0.5;
+}
