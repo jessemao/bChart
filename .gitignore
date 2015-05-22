@@ -1,0 +1,6 @@
+# npm modules
+node_modules
+d3.js
+d3.min.js
+.sass-cache
+.idea
