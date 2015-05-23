@@ -8,13 +8,37 @@ module.exports = function(grunt) {
     banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
       '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
       '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
-      '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
+      '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author %>;' +
       ' Licensed <%= pkg.license %> */\n',
     // Task configuration.
+    usebanner: {
+      dist: {
+        options: {
+          position: 'top',
+          banner: '<%= banner %>'
+        },
+        files: {
+          src: ['bChart.js', 'bChart.min.js']
+        }
+      }
+    },
     concat: {
 
       dist: {
-        src: ['src/head.js','src/core.js', 'src/barchart.js', 'src/tail.js'],
+        options: {
+          process: function (src, filepath) {
+            var lines;
+            if (filepath !== 'src/head.js' && filepath !== 'src/tail.js') {
+              lines = [];
+              src.split('\n').forEach(function(line) {
+                return lines.push((line.length > 0 ? '    ' : '') + line);
+              });
+              src = lines.join('\n');
+            }
+            return src;
+          }
+        },
+        src: ['src/headtail/head.js', 'src/headtail/core.js', 'src/*.js', 'src/headtail/tail.js'],
         dest: 'bChart.js'
       }
     },
@@ -66,8 +90,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-sass');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-banner');
 
   // Default task.
-  grunt.registerTask('default', ['jshint', 'concat', 'sass', 'cssmin', 'uglify']);
+  grunt.registerTask('default', ['jshint', 'concat', 'sass', 'cssmin', 'uglify', 'usebanner']);
 
 };
