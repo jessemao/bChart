@@ -239,7 +239,7 @@ var _defaultsBar = {
 };
 
 var BarChart = function (options) {
-	return bChart._runMethodsInConstructor(this, options, arguments, 'bar');
+	return bChart._customConstructor(this, options, arguments, 'bar');
 
 };
 

@@ -1,7 +1,7 @@
 /**
  * Created by CaptainMao on 5/22/15.
  */
-var _defaultsScatter = {
+var _defaultsLine = {
     selector: "",
     colors: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"],
     colorOpacity: 1,
@@ -91,7 +91,7 @@ var _defaultsScatter = {
 
     title: {
         "display": true,
-        "text": "Scatter Chart",
+        "text": "Line Chart",
         "fontType": "helvetica",
         "fontSize": 18,
         "fontBold": false,
@@ -244,20 +244,25 @@ var _defaultsScatter = {
         size: {},
         fillOpacity: {},
         strokeWidth: {}
+    },
+    line: {
+        type: {},
+        width: {},
+        opacity: {}
     }
 
 };
 
-var ScatterChart = function (options) {
-    return bChart._customConstructor(this, options, arguments, 'scatter');
+var LineChart = function (options) {
+    return bChart._customConstructor(this, options, arguments, 'line');
 };
 
-bChart.ScatterChart = ScatterChart;
+bChart.LineChart = LineChart;
 
-ScatterChart.prototype = Object.create(bChart.prototype);
-ScatterChart.prototype.constructor = ScatterChart;
+LineChart.prototype = Object.create(bChart.prototype);
+LineChart.prototype.constructor = LineChart;
 
-ScatterChart.prototype.draw = function () {
+LineChart.prototype.draw = function () {
     var self = this;
     if (!bChart.getLength(d3.select(self._options.selector))) {
         console.log("Please make sure the element exists in your template.");
@@ -279,12 +284,13 @@ ScatterChart.prototype.draw = function () {
 };
 
 
-ScatterChart.prototype._drawScatterChart = function () {
+LineChart.prototype._drawLineChart = function () {
     var self = this;
     var xyOptions = self._initXYAxis();
-    self._drawNodeSVG(xyOptions).node('refresh');
-
+    self._drawLineSVG(xyOptions)._drawNodeSVG(xyOptions).node('refresh');
     return self;
+
+
 
 
 };

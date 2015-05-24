@@ -137,8 +137,9 @@ bChart.prototype.legend = function (options) {
                         return bChart.getIndexOfElement(a, self._options._uniqueGroupTmp) - bChart.getIndexOfElement(b, self._options._uniqueGroupTmp);
                     });
 
-                    self._options.secondAxis = bChart.isOverlapArray(self._options._uniqueGroupArray2, _checkedLegend) || (!_checkedLegend.length && self._options._uniqueGroupArray2.length);
-
+                    if (bChart.existy(self._options.secondAxis)) {
+                        self._options.secondAxis = bChart.isOverlapArray(self._options._uniqueGroupArray2, _checkedLegend) || (!_checkedLegend.length && self._options._uniqueGroupArray2.length);
+                    }
 
                     if (!_checkedLegend.length || _checkedLegend.length === self._options._uniqueGroupTmp.length) {
                         allLegend.classed('inactive', false)
@@ -174,6 +175,12 @@ bChart.prototype._updateDatasetBySelection = function (selections) {
             return selections.indexOf(el.group) >= 0;
         });
     }
-    self.setOptions([displayDataset], '_dataset').min('refresh').max('refresh').yAxis2('refresh').updateMin()._drawChartSVG().tooltip('refresh');
+    if (self.constructor === PieChart) {
+        self.setOptions([displayDataset], '_dataset')._drawChartSVG();
+
+        self.title('refresh').tooltip('refresh');
+    } else {
+        self.setOptions([displayDataset], '_dataset').min('refresh').max('refresh').updateMin()._drawChartSVG().yLabel2('refresh').yAxis2('refresh').tooltip('refresh');
+    }
 
 };

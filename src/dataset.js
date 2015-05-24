@@ -44,10 +44,17 @@ bChart.prototype.load = function (options) {
 
 
     if (!d3.select(self._options.selector).select('svg').empty()) {
-        if (self._options.secondAxis) {
-            self.min2('refresh').max2('refresh').updateMin2();
+        if (self.constructor === PieChart) {
+            self.colors('refresh')._drawChartSVG();
+
+            self.title('refresh').legend('refresh').tooltip('refresh');
+        } else {
+            if (self._options.secondAxis) {
+                self.min2('refresh').max2('refresh').updateMin2();
+            }
+            self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().legend('refresh').tooltip('refresh');
         }
-        self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().legend('refresh').tooltip('refresh');
+
     }
 
     return self;
@@ -81,7 +88,7 @@ bChart.prototype.loadObjectData = function (obj) {
 
 bChart.prototype.loadArrayData = function (array, obj) {
     var self = this;
-    var isUniqueXEmpty = self._options._uniqueXArray.length > 0;
+    var isUniqueXNotEmpty = self._options._uniqueXArray.length > 0;
     if (bChart.isArrayLike(array[0])) {
         if (!bChart.typeNumber(array[0][0])) {
             for (var i = 0; i < array.length; i += 1) {
@@ -95,7 +102,7 @@ bChart.prototype.loadArrayData = function (array, obj) {
                     self._options._uniqueGroupArrayAll.push(groupName);
                 }
                 if (bChart.hasProperty(self._options, 'node')) {
-                    if (bChart.hasProperty(obj, 'nodeType')) {
+                    if (bChart.existy(obj) && bChart.hasProperty(obj, 'nodeType')) {
                         bChart.initNodeType.call(self, groupName, obj.nodeType[i]);
                     } else {
                         bChart.initNodeType.call(self, groupName, "circle");
@@ -105,6 +112,24 @@ bChart.prototype.loadArrayData = function (array, obj) {
                     bChart.initNodeStrokeWidth.call(self, groupName, 1);
 
                 }
+
+                if (bChart.hasProperty(self._options, 'line')) {
+                    bChart.initLineType.call(self, groupName, 'linear');
+                    bChart.initLineStrokeWidth.call(self, groupName, '3');
+                    bChart.initLineStrokeOpacity.call(self, groupName, '1');
+                }
+
+                if (bChart.hasProperty(self._options, 'area')) {
+                    if (self.options.isStack) {
+                        bChart.initAreaFillOpacity.call(self, groupName, '0.8');
+
+                    } else {
+                        bChart.initAreaFillOpacity.call(self, groupName, '0.4');
+                    }
+                    bChart.initAreaStrokeOpacity.call(self, groupName, '1');
+                    bChart.initAreaStrokeWidth.call(self, groupName, '1');
+                }
+
                 loopDataValue(array, obj);
             }
         }
@@ -120,8 +145,19 @@ bChart.prototype.loadArrayData = function (array, obj) {
                 } else {
                     dataItem = setDataXValue(dataItem, obj, idx-1);
                 }
+                
+                if (bChart.existy(obj) && bChart.hasProperty(obj, 'bubbleValue')) {
+                    var bubbleArray = obj.bubbleValue.filter(function (el) {
+                        return el[0] === groupName;
+                    });
+                    if (bChart.existy(bubbleArray[0]) && bubbleArray[0].length > 0) {
+                        self._options.bubble[groupName] = bubbleArray[0];
+                        dataItem.size = bubbleArray[0][idx];
+                    }
 
-                if (!isUniqueXEmpty) {
+                }
+
+                if (!isUniqueXNotEmpty) {
                     self._options._uniqueXArray.push(dataItem.x);
                 }
 
@@ -136,10 +172,14 @@ bChart.prototype.loadArrayData = function (array, obj) {
     }
 
     function setDataXValue(dataItem, obj, idx) {
-        if (bChart.hasProperty(obj, 'x') && bChart.existy(obj.x[idx])) {
+        if (bChart.existy(obj) && bChart.hasProperty(obj, 'x') && bChart.existy(obj.x[idx])) {
             dataItem.x = obj.x[idx];
         } else {
-            dataItem.x = idx;
+            if (bChart.existy(self._options._uniqueXArray[idx])) {
+                dataItem.x = self._options._uniqueXArray[idx];
+            } else {
+                dataItem.x = idx;
+            }
         }
         return dataItem;
     }
@@ -151,7 +191,7 @@ bChart.prototype.unload = function (options) {
         bChart.each(collection, function (elem) {
             bChart.removeElementFromArray(elem, self._options._uniqueGroupArrayAll);
             self._options._dataset = self._options._dataset.filter(function (el) {
-                return elem.group !== el;
+                return elem !== el.group;
             });
             if (bChart.isElementInArray(elem, self._options._uniqueGroupArray2)) {
                 bChart.removeElementFromArray(elem, self._options._uniqueGroupArray2);
@@ -161,8 +201,21 @@ bChart.prototype.unload = function (options) {
             if (bChart.hasProperty(self._options, 'node') && bChart.existy(self._options.node.type[elem.group])) {
                 bChart.removeNodeType.call(self, elem.group);
                 bChart.removeNodeSize.call(self, elem.group);
+                bChart.removeNodeStrokeWidth.call(self, elem.group);
+                bChart.removeNodeStrokeOpacity.call(self, elem.group);
                 bChart.removeNodeFillOpacity.call(self, elem.group);
-                bChart.removeNodeFillOpacity.call(self, elem.group);
+            }
+
+            if (bChart.hasProperty(self._options, 'line') && bChart.existy(self._options.line.type[elem.group])) {
+                bChart.removeLineType.call(self, elem.group);
+                bChart.removeLineStrokeWidth.call(self, elem.group);
+                bChart.removeLineStrokeOpacity.call(self, elem.group);
+            }
+
+            if (bChart.hasProperty(self._options, 'area') && bChart.existy(self._options.area.fillOpacity[elem.group])) {
+                bChart.removeAreaFillOpacity.call(self, elem.group);
+                bChart.removeAreaStrokeOpacity.call(self, elem.group);
+                bChart.removeAreaStrokeWidth.call(self, elem.group);
             }
         });
     };
@@ -174,7 +227,7 @@ bChart.prototype.unload = function (options) {
                 bChart.each(options.x, function (elem) {
                     bChart.removeElementFromArray(elem, self._options._uniqueXArray);
                     self._options._dataset = self._options._dataset.filter(function (el) {
-                        return elem.x !== el;
+                        return elem !== el.x;
                     });
                 });
             }
@@ -187,10 +240,17 @@ bChart.prototype.unload = function (options) {
     }
 
     if (!d3.select(self._options.selector).select('svg').empty()) {
-        if (self._options.secondAxis) {
-            self.min2('refresh').max2('refresh').updateMin2();
+        if (self.constructor === PieChart) {
+            self.colors('refresh')._drawChartSVG();
+
+            self.title('refresh').legend('refresh').tooltip('refresh');
+        } else {
+            if (self._options.secondAxis) {
+                self.min2('refresh').max2('refresh').updateMin2();
+            }
+            self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().yAxis2('refresh').yLabel2('refresh').legend('refresh').tooltip('refresh');
         }
-        self.min('refresh').max('refresh').updateMin().colors('refresh').yAxis2('refresh').yLabel2('refresh')._drawChartSVG().legend('refresh').tooltip('refresh');
+
     }
 };
 

@@ -1,7 +1,7 @@
 /**
- * Created by CaptainMao on 5/22/15.
+ * Created by CaptainMao on 5/23/15.
  */
-var _defaultsScatter = {
+var _defaultsBubble = {
     selector: "",
     colors: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"],
     colorOpacity: 1,
@@ -21,6 +21,9 @@ var _defaultsScatter = {
     _dataset: [
 
     ],
+    bubble: {
+
+    },
     minDefault: -1,
     maxDefault: -1,
     minDefault2: -1,
@@ -91,7 +94,7 @@ var _defaultsScatter = {
 
     title: {
         "display": true,
-        "text": "Scatter Chart",
+        "text": "Bubble Chart",
         "fontType": "helvetica",
         "fontSize": 18,
         "fontBold": false,
@@ -248,16 +251,16 @@ var _defaultsScatter = {
 
 };
 
-var ScatterChart = function (options) {
-    return bChart._customConstructor(this, options, arguments, 'scatter');
+var BubbleChart = function (options) {
+    return bChart._customConstructor(this, options, arguments, 'bubble');
 };
 
-bChart.ScatterChart = ScatterChart;
+bChart.BubbleChart = BubbleChart;
 
-ScatterChart.prototype = Object.create(bChart.prototype);
-ScatterChart.prototype.constructor = ScatterChart;
+BubbleChart.prototype = Object.create(bChart.prototype);
+BubbleChart.prototype.constructor = BubbleChart;
 
-ScatterChart.prototype.draw = function () {
+BubbleChart.prototype.draw = function () {
     var self = this;
     if (!bChart.getLength(d3.select(self._options.selector))) {
         console.log("Please make sure the element exists in your template.");
@@ -279,12 +282,12 @@ ScatterChart.prototype.draw = function () {
 };
 
 
-ScatterChart.prototype._drawScatterChart = function () {
+BubbleChart.prototype._drawBubbleChart = function () {
     var self = this;
-    var xyOptions = self._initXYAxis();
-    self._drawNodeSVG(xyOptions).node('refresh');
+
+    var xyOption = self._initXYAxis();
+    self._drawNodeSVG(xyOption).node('refresh');
 
     return self;
-
 
 };

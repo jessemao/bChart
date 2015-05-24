@@ -12,6 +12,18 @@ var bChart = function (options) {
 				case 'scatter':
 					chartType = "ScatterChart";
 					break;
+				case 'bubble':
+					chartType = "BubbleChart";
+					break;
+				case 'line':
+					chartType = "LineChart";
+					break;
+				case 'area':
+					chartType = 'AreaChart';
+					break;
+				case 'pie':
+					chartType = 'PieChart';
+					break;
 			}
 			if (arguments.length === 3) {
 				return new bChart[chartType](arguments[0], arguments[2]);
@@ -35,6 +47,18 @@ bChart._init = function (options, chartType) {
 		case 'scatter':
 			defaultType = _defaultsScatter;
 			break;
+		case 'bubble':
+			defaultType = _defaultsBubble;
+			break;
+		case 'line':
+			defaultType = _defaultsLine;
+			break;
+		case 'area':
+			defaultType = _defaultsArea;
+			break;
+		case 'pie':
+			defaultType = _defaultsPie;
+			break;
 	}
 	_options = bChart.clone(defaultType);
 	if (bChart.typeString(options) && bChart.isSelector(options)) {
@@ -49,10 +73,18 @@ bChart._init = function (options, chartType) {
 			return new BarChart(_options.selector, _options);
 		case 'scatter':
 			return new ScatterChart(_options.selector, _options);
+		case 'bubble':
+			return new BubbleChart(_options.selector, _options);
+		case 'line':
+			return new LineChart(_options.selector, _options);
+		case 'area':
+			return new AreaChart(_options.selector, _options);
+		case 'pie':
+			return new PieChart(_options.selector, _options);
 	}
 };
 
-bChart._runMethodsInConstructor = function (self, options, args, chartType) {
+bChart._customConstructor = function (self, options, args, chartType) {
 	var newOptions = {};
 	if (bChart.existy(options)) { // check if options exists first.
 		if (args.length === 1) { // selector.
@@ -287,4 +319,3 @@ bChart.getSubArray = function (parentArray, childArray) {
 		});
 	}
 };
-

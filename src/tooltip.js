@@ -33,15 +33,21 @@ bChart.prototype.tooltip = function (options) {
 
             var groupSVG = parentSVG.selectAll('.bChart_groups');
             groupSVG.on('mouseover', function (d) {
-                d3.select(this).style('opacity', 0.7);
-                tooltipDIV.transition()
-                    .duration(self._options.duration)
-                    .style('opacity', 1)
-                    .style('display', 'block');
-            })
+                    d3.select(this).style('opacity', 0.7);
+                    tooltipDIV.transition()
+                        .duration(self._options.duration)
+                        .style('opacity', 1)
+                        .style('display', 'block');
+                })
                 .on('mousemove', function (d) {
                     var selectedBar = this;
-                    var tooltip_html = d.group + '(' + d.x + ') :' + d.value;
+                    var tooltip_html;
+                    if (self.constructor === PieChart) {
+                        tooltip_html = d.data.group + " : " + d.value;
+                    } else {
+                        tooltip_html = d.group + '(' + d.x + ') :' + d.value;
+
+                    }
                     var selectedColor = d3.select(this).style('fill');
                     var offx = d3.event.hasOwnProperty('offsetX') ? d3.event.offsetX : d3.event.layerX;
                     var offy = d3.event.hasOwnProperty('offsetY') ? d3.event.offsetY : d3.event.layerY;
@@ -70,6 +76,20 @@ bChart.prototype.tooltip = function (options) {
                         .style('opacity', 0)
                         .style('display', 'none');
                 });
+            if (!parentSVG.select('.bChart_lines').empty()) {
+                var groupLineSVG = parentSVG.select('.bChart_lines').selectAll('.bChart_groups');
+                groupLineSVG.on('mouseover', null)
+                    .on('mousemove', null)
+                    .on('mouseout', null);
+            }
+
+            if (!parentSVG.select('.bChart_areas').empty()) {
+                var groupAreaSVG = parentSVG.select('.bChart_areas').selectAll('.bChart_groups');
+                groupAreaSVG.on('mouseover', null)
+                    .on('mousemove', null)
+                    .on('mouseout', null);
+            }
+
         } else {
             tooltipDIV.remove();
         }

@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-05-23
+/*! bChart - v0.1.0 - 2015-05-24
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -25,6 +25,18 @@
     				case 'scatter':
     					chartType = "ScatterChart";
     					break;
+    				case 'bubble':
+    					chartType = "BubbleChart";
+    					break;
+    				case 'line':
+    					chartType = "LineChart";
+    					break;
+    				case 'area':
+    					chartType = 'AreaChart';
+    					break;
+    				case 'pie':
+    					chartType = 'PieChart';
+    					break;
     			}
     			if (arguments.length === 3) {
     				return new bChart[chartType](arguments[0], arguments[2]);
@@ -48,6 +60,18 @@
     		case 'scatter':
     			defaultType = _defaultsScatter;
     			break;
+    		case 'bubble':
+    			defaultType = _defaultsBubble;
+    			break;
+    		case 'line':
+    			defaultType = _defaultsLine;
+    			break;
+    		case 'area':
+    			defaultType = _defaultsArea;
+    			break;
+    		case 'pie':
+    			defaultType = _defaultsPie;
+    			break;
     	}
     	_options = bChart.clone(defaultType);
     	if (bChart.typeString(options) && bChart.isSelector(options)) {
@@ -62,10 +86,18 @@
     			return new BarChart(_options.selector, _options);
     		case 'scatter':
     			return new ScatterChart(_options.selector, _options);
+    		case 'bubble':
+    			return new BubbleChart(_options.selector, _options);
+    		case 'line':
+    			return new LineChart(_options.selector, _options);
+    		case 'area':
+    			return new AreaChart(_options.selector, _options);
+    		case 'pie':
+    			return new PieChart(_options.selector, _options);
     	}
     };
 
-    bChart._runMethodsInConstructor = function (self, options, args, chartType) {
+    bChart._customConstructor = function (self, options, args, chartType) {
     	var newOptions = {};
     	if (bChart.existy(options)) { // check if options exists first.
     		if (args.length === 1) { // selector.
@@ -301,7 +333,433 @@
     	}
     };
 
+    /**
+     * Created by CaptainMao on 5/23/15.
+     */
+    bChart.prototype.area = function (options) {
+        var self = this;
+        if (!bChart.existy(options)) {
+            return self._options.area;
+        } else {
+            if (bChart.typeString(options) && options === "refresh") {
+                self._drawAreaSVG();
+            } else {
+                if (arguments.length === 2 && arguments[0].indexOf('.') >= 0 && arguments[0].indexOf('$') >= 0) {
+                    var groupIndex = parseInt(arguments[0].split('.')[1].split('$')[1]);
+                    var groupKey = self._options._uniqueGroupArrayAll[groupIndex - 1];
+                    arguments[0] = arguments[0].split('.')[0] + '.' + groupKey;
+                }
 
+                self.setOptions(arguments, 'area');
+                self._drawAreaSVG();
+            }
+            return self;
+        }
+
+
+    };
+
+    bChart.prototype._drawAreaSVG = function (options) {
+        var self = this;
+        var	_datasetTmp = self._options._dataset;
+        var	groupConcat = self._options._uniqueGroupArrayAll;
+        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+
+        var areaSVG, areaPathSVG;
+        var dataArea = [];
+
+        if (chartSVG.select('.bChart_areas').empty()) {
+            areaSVG = chartSVG.append('g')
+                .attr('class', 'bChart_areas');
+        } else {
+            areaSVG = chartSVG.select('.bChart_areas');
+        }
+
+        if (bChart.existy(options)) {
+            if (self._options.isStack) {
+                _datasetTmp = self.stackDataset(_datasetTmp, groupConcat, self._options._uniqueXArray);
+
+            }
+            var drawLineCallBack = function (elem) {
+                var singleAreaArray = _datasetTmp.filter(function (el) {
+                    return self._options.isStack ? el[0].group === elem : el.group === elem;
+                });
+                if (self._options.isStack) {
+                    dataArea.push(singleAreaArray[0]);
+                } else {
+                    dataArea.push(singleAreaArray);
+                }
+            };
+            bChart.each(self._options._uniqueGroupArrayAll, drawLineCallBack);
+
+            areaPathSVG = areaSVG.selectAll('.bChart_groups')
+                .data(dataArea);
+
+            areaPathSVG.exit().remove();
+
+            areaPathSVG.enter().append('path');
+            var area = d3.svg.area()
+                .x(function (d) {
+                    return options.x0(d.x);
+                })
+                .y0(function (d) {
+                    if (self._options.isStack) {
+                        return d.y0 < self._options.minDefault ? options.y(self._options.minDefault) : options.y(d.y0);
+                    } else {
+                        return self._options._chartSVGHeight;
+                    }
+                })
+                .y1(function (d) {
+                    if (self._options.isStack) {
+                        return options.y(parseFloat(d.y0) + parseFloat(d.y));
+                    } else {
+                        return d.secondAxis? options.y2(d.value) : options.y(d.value);
+
+                    }
+                });
+            areaPathSVG.attr('d', area);
+        }
+
+        areaPathSVG.attr('class', function (d, i) {
+            return 'bChart_groups bChart_groups' + groupConcat.indexOf(d[i].group);
+        })
+            .attr('fill', function (d, i) {
+                return self._options._colorMap[d[i].group];
+            })
+            .attr('fill-opacity', function (d, i) {
+                return self._options.area.fillOpacity[d[i].group];
+            })
+            .attr('stroke', function (d, i) {
+                return self._options._colorMap[d[i].group];
+            })
+            .attr('stroke-width', function (d, i) {
+                return self._options.area.strokeWidth[d[i].group];
+            })
+            .attr('stroke-opacity', function (d, i) {
+                return self._options.area.strokeOpacity[d[i].group];
+            })
+            .style('opacity', 0.1)
+            .transition()
+            .duration(self._options.duration)
+            .style('opacity', 1);
+
+        return self;
+
+    };
+
+    bChart.initAreaStyle = function (property) {
+        return function (group, value) {
+            var self = this;
+            self._options.area[property][group] = bChart.hasProperty(self._options.area[property], group)?self._options.area[property][group]: value;
+        };
+    };
+
+    bChart.initAreaType = bChart.initAreaStyle('type');
+    bChart.initAreaFillOpacity = bChart.initAreaStyle('fillOpacity');
+    bChart.initAreaStrokeWidth = bChart.initAreaStyle('strokeWidth');
+    bChart.initAreaStrokeOpacity = bChart.initAreaStyle('strokeOpacity');
+
+    bChart.removeAreaProperty = function (property) {
+        return function (group) {
+            var self = this;
+            if (bChart.hasProperty(self._options.area[property], group)) {
+                delete self._options.area[property][group];
+            }
+        };
+    };
+
+    bChart.removeAreaType = bChart.removeAreaProperty('type');
+    bChart.removeAreaStrokeWidth = bChart.removeAreaProperty('strokeWidth');
+    bChart.removeAreaStrokeOpacity = bChart.removeAreaProperty('strokeOpacity');
+    bChart.removeAreaFillOpacity = bChart.removeAreaProperty('fillOpacity');
+    /**
+     * Created by CaptainMao on 5/22/15.
+     */
+    var _defaultsArea = {
+        selector: "",
+        colors: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"],
+        colorOpacity: 1,
+        duration: 400,
+        padding: {
+            "top": 80,
+            "right": 90,
+            "bottom": 50,
+            "left": 60
+        },
+        _colorMap: {},
+        _datasetTmp: [],
+        _uniqueGroupTmp: [],
+        _uniqueXArray: [],
+        _uniqueGroupArrayAll: [],
+        _uniqueGroupArray2: [],
+        _dataset: [
+
+        ],
+        isStack: false,
+        minDefault: -1,
+        maxDefault: -1,
+        minDefault2: -1,
+        maxDefault2: -1,
+        width: 800,
+        height: 350,
+        background: {
+            "imageURL": "",
+            "color": "#ffffff",
+            "displayImage": false,
+            "opacity": 1
+        },
+        // border: {
+        // 	"opacity": 1,
+        // 	"color": {
+        // 		"top": "#666",
+        // 		"bottom": "#666",
+        // 		"left": "#666",
+        // 		"right": "#666"
+        // 	},
+        // 	"width": {
+        // 		"top": 1,
+        // 		"bottom": 1,
+        // 		"left": 1,
+        // 		"right": 1
+        // 	},
+        // 	"style": {
+        // 		"top": "solid",
+        // 		"bottom": "solid",
+        // 		"left": "solid",
+        // 		"right": "solid"
+        // 	},
+        // 	"radius": {
+        // 		"topleft": 8,
+        // 		"topright": 8,
+        // 		"bottomleft": 8,
+        // 		"bottomright": 8
+        // 	},
+        // 	"boxShadow": {
+        // 		"display": false,
+        // 		"vShadow": 0,
+        // 		"hShadow": 0,
+        // 		"blur": 0,
+        // 		"spread": 0,
+        // 		"color": "#000"
+        // 	}
+        // },
+        secondAxis: false,
+        legend: {
+            "position": "topright",
+            "offsetText": 5,
+            "offsetSymbol": 15,
+            "symbolSize": 10,
+            "multipleLine": false,
+            "textFirst": true,
+            "display": true,
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+
+        title: {
+            "display": true,
+            "text": "Area Chart",
+            "fontType": "helvetica",
+            "fontSize": 18,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        xLabel: {
+            "display": true,
+            "text": "x label",
+            "rotation": 0,
+            "fontType": "helvetica",
+            "fontSize": 14,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+
+        yLabel: {
+            "display": true,
+            "text": "y label",
+            "rotation": -90,
+            "fontType": "helvetica",
+            "fontSize": 14,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        yLabel2: {
+            "display": true,
+            "text": "y label second",
+            "rotation": -90,
+            "fontType": "helvetica",
+            "fontSize": 14,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        yAxis: {
+            "display": true,
+            "displayLine": true,
+            "tickNumber": 8,
+            "tickFormat": d3.format(",.0f"),
+            "tickPadding": 3,
+            "tickSize": 10,
+            "orientation": "left",
+            "tickValue": [],
+            "fontColor": "#000",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "tickLineColor": "#ccc",
+            "tickLineWidth": 0.2,
+            "axisColor": '#000',
+            "axisWidth": 1,
+            "rotation": 0,
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        yAxis2: {
+            "display": true,
+            "displayLine": false,
+            "tickNumber": 8,
+            "tickFormat": d3.format(",.0f"),
+            "tickPadding": 3,
+            "tickSize": 10,
+            "orientation": "right",
+            "tickValue": [],
+            "fontColor": "#000",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "tickLineColor": "#ccc",
+            "tickLineWidth": 0.2,
+            "axisColor": '#000',
+            "axisWidth": 1,
+            "rotation": 0,
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        xAxis: {
+            "display": true,
+            "isTimeSeries": false,
+            "displayLine": true,
+            "tickNumber": 5,
+            "tickFormat": "",
+            "tickPadding": 3,
+            "tickSize": 10,
+            "orientation": "bottom",
+            "tickValue": [],
+            "fontColor": "#000",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "tickLineColor": "#ccc",
+            "tickLineWidth": 0.2,
+            "axisColor": '#000',
+            "axisWidth": 1,
+            "rotation": 0,
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+
+        tooltip: {
+            "display": true,
+            "text": "tooltip",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#fff",
+            "width": "auto",
+            "height": "auto"
+        },
+        area: {
+            type: {},
+            strokeWidth: {},
+            strokeOpacity: {},
+            fillOpacity: {}
+        }
+
+    };
+
+    var AreaChart = function (options) {
+        return bChart._customConstructor(this, options, arguments, 'area');
+    };
+
+    bChart.AreaChart = AreaChart;
+
+    AreaChart.prototype = Object.create(bChart.prototype);
+    AreaChart.prototype.constructor = AreaChart;
+
+    AreaChart.prototype.draw = function () {
+        var self = this;
+        if (!bChart.getLength(d3.select(self._options.selector))) {
+            console.log("Please make sure the element exists in your template.");
+            return void 0;
+        }
+
+        self.min('refresh').max('refresh').updateMin();
+        if (self._options.secondAxis) {
+            self.min2('refresh').max2('refresh').updateMin2();
+        }
+
+        self.colors('refresh')._drawChartSVG();
+
+        self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
+        if (self._options.secondAxis) {
+            self.yLabel2('refresh').yAxis2('refresh');
+        }
+
+    };
+
+
+    AreaChart.prototype._drawAreaChart = function () {
+        var self = this;
+        var xyOptions = self._initXYAxis();
+        self._drawAreaSVG(xyOptions);
+        return self;
+
+    };
     /**
      * Created by CaptainMao on 5/22/15.
      */
@@ -587,7 +1045,7 @@
     };
 
     var BarChart = function (options) {
-    	return bChart._runMethodsInConstructor(this, options, arguments, 'bar');
+    	return bChart._customConstructor(this, options, arguments, 'bar');
 
     };
 
@@ -1005,9 +1463,482 @@
                 return self._drawBarChart();
             case ScatterChart:
                 return self._drawScatterChart();
+            case BubbleChart:
+                return self._drawBubbleChart();
+            case LineChart:
+                return self._drawLineChart();
+            case AreaChart:
+                return self._drawAreaChart();
+            case PieChart:
+                return self._drawPieChart();
 
         }
             
+    };
+
+    bChart.prototype._initXYAxis = function () {
+        var self = this;
+        self._updateChartSize();
+
+        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+        var x0, y, y2, yAxis, yAxis2, xAxis;
+        if (!self._options.xAxis.isTimeSeries) {
+            x0 = d3.scale.ordinal()
+                .rangePoints([0, self._options._chartSVGWidth],0.1)
+                .domain(self._options._uniqueXArray);
+        }
+
+        // set default tickSize;
+        self._options.xAxis.tickSize = -self._options._chartSVGHeight;
+        self._options.yAxis.tickSize = -self._options._chartSVGWidth;
+
+        xAxis = d3.svg.axis()
+            .scale(x0)
+            .orient(self._options.xAxis.orientation)
+            .ticks(self._options.xAxis.tickNumber)
+            .tickSize(self._options.xAxis.tickSize, 0, 0);
+
+
+        if (chartSVG.select('.bChart_x_axis').empty()) {
+            chartSVG.append('g')
+                .attr('class', 'bChart_x_axis bChart_grid')
+                .attr('transform', 'translate(0,' + self._options._chartSVGHeight + ')')
+                .call(xAxis);
+        } else {
+            chartSVG.select('.bChart_x_axis')
+                .transition()
+                .duration(self._options.duration)
+                .ease("sin-in-out")
+                .call(xAxis);
+        }
+
+        y = d3.scale.linear()
+            .range([self._options._chartSVGHeight, 0])
+            .domain([self._options.minDefault, self._options.maxDefault]);
+
+        yAxis = d3.svg.axis()
+            .scale(y)
+            .orient(self._options.yAxis.orientation)
+            .tickFormat(self._options.yAxis.tickFormat)
+            .ticks(self._options.yAxis.tickNumber)
+            .tickSize(self._options.yAxis.tickSize, 0, 0);
+
+        if (chartSVG.select('.bChart_y_axis').empty()) {
+            chartSVG.append('g')
+                .attr('class', 'bChart_y_axis bChart_grid')
+                .call(yAxis);
+        } else {
+            chartSVG.select('.bChart_y_axis')
+                .transition()
+                .duration(self._options.duration)
+                .ease("sin-in-out")
+                .call(yAxis);
+        }
+
+        if (self._options.secondAxis) {
+            y2 = d3.scale.linear()
+                .range([self._options._chartSVGHeight, 0])
+                .domain([self._options.minDefault2, self._options.maxDefault2]);
+            yAxis2 = d3.svg.axis()
+                .scale(y2)
+                .orient(self._options.yAxis2.orientation)
+                .tickFormat(self._options.yAxis2.tickFormat)
+                .ticks(self._options.yAxis2.tickNumber)
+                .tickSize(self._options.yAxis2.tickSize, 0, 0);
+            if (chartSVG.select('.bChart_y_axis_2').empty()) {
+                chartSVG.append('g')
+                    .attr('class', 'bChart_y_axis_2 bChart_grid')
+                    .attr('transform', 'translate(' + self._options._chartSVGWidth + ',0)')
+                    .call(yAxis2);
+            } else {
+                chartSVG.select('.bChart_y_axis_2')
+                    .attr('transform', 'translate(' + self._options._chartSVGWidth + ',0)')
+                    .transition()
+                    .duration(self._options.duration)
+                    .ease("sin-in-out")
+                    .call(yAxis2);
+            }
+        }
+
+        return {
+            x0: x0,
+            y: y,
+            y2: y2
+        };
+    };
+    /**
+     * Created by CaptainMao on 5/23/15.
+     */
+    bChart.prototype.bubble = function (options) {
+        var self = this;
+        if (!bChart.existy(options)) {
+            return self._options.bubble;
+        } else {
+            if (bChart.typeString(options)) {
+                if (options === 'refresh') {
+                    drawBubble();
+                } else if (options === 'clear') {
+                    self._options.bubble = {};
+                }
+            } else {
+                var objOption;
+                if (bChart.isArrayLike(options)) {
+                    objOption = {};
+                    bChart.each(options, function (elem, idx) {
+                        var groupName, valueArray;
+                        if (bChart.typeNumber(elem[0])) {
+                            if (bChart.existy(self._options._uniqueGroupArrayAll[idx])) {
+                                groupName = self._options._uniqueGroupArrayAll[idx];
+                                valueArray = elem;
+                            }
+                        } else {
+                            groupName = elem[0];
+                            valueArray = elem;
+                            valueArray.shift();
+                        }
+                        objOption[groupName] = valueArray;
+                        var indexOfBubble = 0;
+
+                        bChart.each(self._options._dataset, function (el) {
+                            if (el.group === groupName) {
+                                el.size = valueArray[indexOfBubble];
+                                indexOfBubble++;
+                            }
+                        });
+                    });
+                } else {
+                    if (arguments.length === 2) {
+                        var indexOfBubble = 0;
+                        var args = arguments;
+                        bChart.each(self._options._dataset, function (el) {
+                            if (el.group === args[0]) {
+                                el.size = args[1][indexOfBubble];
+                                indexOfBubble++;
+                            }
+                        });
+
+                        objOption = args;
+                    } else {
+                        bChart.each(options, function (value, key) {
+                            var indexOfBubble = 0;
+                            bChart.each(self._options._dataset, function (el) {
+                                if (el.group === key) {
+                                    el.size = value[indexOfBubble];
+                                    indexOfBubble++;
+                                }
+                            });
+                        });
+
+                        objOption = options;
+                    }
+
+                }
+                self.setOptions(objOption, 'bubble');
+
+                drawBubble();
+            }
+
+            return self;
+        }
+
+        function drawBubble() {
+
+
+            self._drawChartSVG();
+        }
+    };
+    /**
+     * Created by CaptainMao on 5/23/15.
+     */
+    var _defaultsBubble = {
+        selector: "",
+        colors: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"],
+        colorOpacity: 1,
+        duration: 400,
+        padding: {
+            "top": 80,
+            "right": 90,
+            "bottom": 50,
+            "left": 60
+        },
+        _colorMap: {},
+        _datasetTmp: [],
+        _uniqueGroupTmp: [],
+        _uniqueXArray: [],
+        _uniqueGroupArrayAll: [],
+        _uniqueGroupArray2: [],
+        _dataset: [
+
+        ],
+        bubble: {
+
+        },
+        minDefault: -1,
+        maxDefault: -1,
+        minDefault2: -1,
+        maxDefault2: -1,
+        width: 800,
+        height: 350,
+        background: {
+            "imageURL": "",
+            "color": "#ffffff",
+            "displayImage": false,
+            "opacity": 1
+        },
+        // border: {
+        // 	"opacity": 1,
+        // 	"color": {
+        // 		"top": "#666",
+        // 		"bottom": "#666",
+        // 		"left": "#666",
+        // 		"right": "#666"
+        // 	},
+        // 	"width": {
+        // 		"top": 1,
+        // 		"bottom": 1,
+        // 		"left": 1,
+        // 		"right": 1
+        // 	},
+        // 	"style": {
+        // 		"top": "solid",
+        // 		"bottom": "solid",
+        // 		"left": "solid",
+        // 		"right": "solid"
+        // 	},
+        // 	"radius": {
+        // 		"topleft": 8,
+        // 		"topright": 8,
+        // 		"bottomleft": 8,
+        // 		"bottomright": 8
+        // 	},
+        // 	"boxShadow": {
+        // 		"display": false,
+        // 		"vShadow": 0,
+        // 		"hShadow": 0,
+        // 		"blur": 0,
+        // 		"spread": 0,
+        // 		"color": "#000"
+        // 	}
+        // },
+        secondAxis: false,
+        legend: {
+            "position": "topright",
+            "offsetText": 5,
+            "offsetSymbol": 15,
+            "symbolSize": 10,
+            "multipleLine": false,
+            "textFirst": true,
+            "display": true,
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+
+        title: {
+            "display": true,
+            "text": "Bubble Chart",
+            "fontType": "helvetica",
+            "fontSize": 18,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        xLabel: {
+            "display": true,
+            "text": "x label",
+            "rotation": 0,
+            "fontType": "helvetica",
+            "fontSize": 14,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+
+        yLabel: {
+            "display": true,
+            "text": "y label",
+            "rotation": -90,
+            "fontType": "helvetica",
+            "fontSize": 14,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        yLabel2: {
+            "display": true,
+            "text": "y label second",
+            "rotation": -90,
+            "fontType": "helvetica",
+            "fontSize": 14,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        yAxis: {
+            "display": true,
+            "displayLine": true,
+            "tickNumber": 8,
+            "tickFormat": d3.format(",.0f"),
+            "tickPadding": 3,
+            "tickSize": 10,
+            "orientation": "left",
+            "tickValue": [],
+            "fontColor": "#000",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "tickLineColor": "#ccc",
+            "tickLineWidth": 0.2,
+            "axisColor": '#000',
+            "axisWidth": 1,
+            "rotation": 0,
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        yAxis2: {
+            "display": true,
+            "displayLine": false,
+            "tickNumber": 8,
+            "tickFormat": d3.format(",.0f"),
+            "tickPadding": 3,
+            "tickSize": 10,
+            "orientation": "right",
+            "tickValue": [],
+            "fontColor": "#000",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "tickLineColor": "#ccc",
+            "tickLineWidth": 0.2,
+            "axisColor": '#000',
+            "axisWidth": 1,
+            "rotation": 0,
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        xAxis: {
+            "display": true,
+            "isTimeSeries": false,
+            "displayLine": true,
+            "tickNumber": 5,
+            "tickFormat": "",
+            "tickPadding": 3,
+            "tickSize": 10,
+            "orientation": "bottom",
+            "tickValue": [],
+            "fontColor": "#000",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "tickLineColor": "#ccc",
+            "tickLineWidth": 0.2,
+            "axisColor": '#000',
+            "axisWidth": 1,
+            "rotation": 0,
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+
+        tooltip: {
+            "display": true,
+            "text": "tooltip",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#fff",
+            "width": "auto",
+            "height": "auto"
+        },
+        node: {
+            display: true,
+            type: {},
+            size: {},
+            fillOpacity: {},
+            strokeWidth: {}
+        }
+
+    };
+
+    var BubbleChart = function (options) {
+        return bChart._customConstructor(this, options, arguments, 'bubble');
+    };
+
+    bChart.BubbleChart = BubbleChart;
+
+    BubbleChart.prototype = Object.create(bChart.prototype);
+    BubbleChart.prototype.constructor = BubbleChart;
+
+    BubbleChart.prototype.draw = function () {
+        var self = this;
+        if (!bChart.getLength(d3.select(self._options.selector))) {
+            console.log("Please make sure the element exists in your template.");
+            return void 0;
+        }
+
+        self.min('refresh').max('refresh').updateMin();
+        if (self._options.secondAxis) {
+            self.min2('refresh').max2('refresh').updateMin2();
+        }
+
+        self.colors('refresh')._drawChartSVG();
+
+        self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
+        if (self._options.secondAxis) {
+            self.yLabel2('refresh').yAxis2('refresh');
+        }
+
+    };
+
+
+    BubbleChart.prototype._drawBubbleChart = function () {
+        var self = this;
+
+        var xyOption = self._initXYAxis();
+        self._drawNodeSVG(xyOption).node('refresh');
+
+        return self;
+
     };
     /**
      * Created by CaptainMao on 5/22/15.
@@ -1084,10 +2015,17 @@
 
 
         if (!d3.select(self._options.selector).select('svg').empty()) {
-            if (self._options.secondAxis) {
-                self.min2('refresh').max2('refresh').updateMin2();
+            if (self.constructor === PieChart) {
+                self.colors('refresh')._drawChartSVG();
+
+                self.title('refresh').legend('refresh').tooltip('refresh');
+            } else {
+                if (self._options.secondAxis) {
+                    self.min2('refresh').max2('refresh').updateMin2();
+                }
+                self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().legend('refresh').tooltip('refresh');
             }
-            self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().legend('refresh').tooltip('refresh');
+
         }
 
         return self;
@@ -1121,7 +2059,7 @@
 
     bChart.prototype.loadArrayData = function (array, obj) {
         var self = this;
-        var isUniqueXEmpty = self._options._uniqueXArray.length > 0;
+        var isUniqueXNotEmpty = self._options._uniqueXArray.length > 0;
         if (bChart.isArrayLike(array[0])) {
             if (!bChart.typeNumber(array[0][0])) {
                 for (var i = 0; i < array.length; i += 1) {
@@ -1135,7 +2073,7 @@
                         self._options._uniqueGroupArrayAll.push(groupName);
                     }
                     if (bChart.hasProperty(self._options, 'node')) {
-                        if (bChart.hasProperty(obj, 'nodeType')) {
+                        if (bChart.existy(obj) && bChart.hasProperty(obj, 'nodeType')) {
                             bChart.initNodeType.call(self, groupName, obj.nodeType[i]);
                         } else {
                             bChart.initNodeType.call(self, groupName, "circle");
@@ -1145,6 +2083,24 @@
                         bChart.initNodeStrokeWidth.call(self, groupName, 1);
 
                     }
+
+                    if (bChart.hasProperty(self._options, 'line')) {
+                        bChart.initLineType.call(self, groupName, 'linear');
+                        bChart.initLineStrokeWidth.call(self, groupName, '3');
+                        bChart.initLineStrokeOpacity.call(self, groupName, '1');
+                    }
+
+                    if (bChart.hasProperty(self._options, 'area')) {
+                        if (self.options.isStack) {
+                            bChart.initAreaFillOpacity.call(self, groupName, '0.8');
+
+                        } else {
+                            bChart.initAreaFillOpacity.call(self, groupName, '0.4');
+                        }
+                        bChart.initAreaStrokeOpacity.call(self, groupName, '1');
+                        bChart.initAreaStrokeWidth.call(self, groupName, '1');
+                    }
+
                     loopDataValue(array, obj);
                 }
             }
@@ -1160,8 +2116,19 @@
                     } else {
                         dataItem = setDataXValue(dataItem, obj, idx-1);
                     }
+                    
+                    if (bChart.existy(obj) && bChart.hasProperty(obj, 'bubbleValue')) {
+                        var bubbleArray = obj.bubbleValue.filter(function (el) {
+                            return el[0] === groupName;
+                        });
+                        if (bChart.existy(bubbleArray[0]) && bubbleArray[0].length > 0) {
+                            self._options.bubble[groupName] = bubbleArray[0];
+                            dataItem.size = bubbleArray[0][idx];
+                        }
 
-                    if (!isUniqueXEmpty) {
+                    }
+
+                    if (!isUniqueXNotEmpty) {
                         self._options._uniqueXArray.push(dataItem.x);
                     }
 
@@ -1176,10 +2143,14 @@
         }
 
         function setDataXValue(dataItem, obj, idx) {
-            if (bChart.hasProperty(obj, 'x') && bChart.existy(obj.x[idx])) {
+            if (bChart.existy(obj) && bChart.hasProperty(obj, 'x') && bChart.existy(obj.x[idx])) {
                 dataItem.x = obj.x[idx];
             } else {
-                dataItem.x = idx;
+                if (bChart.existy(self._options._uniqueXArray[idx])) {
+                    dataItem.x = self._options._uniqueXArray[idx];
+                } else {
+                    dataItem.x = idx;
+                }
             }
             return dataItem;
         }
@@ -1191,7 +2162,7 @@
             bChart.each(collection, function (elem) {
                 bChart.removeElementFromArray(elem, self._options._uniqueGroupArrayAll);
                 self._options._dataset = self._options._dataset.filter(function (el) {
-                    return elem.group !== el;
+                    return elem !== el.group;
                 });
                 if (bChart.isElementInArray(elem, self._options._uniqueGroupArray2)) {
                     bChart.removeElementFromArray(elem, self._options._uniqueGroupArray2);
@@ -1201,8 +2172,21 @@
                 if (bChart.hasProperty(self._options, 'node') && bChart.existy(self._options.node.type[elem.group])) {
                     bChart.removeNodeType.call(self, elem.group);
                     bChart.removeNodeSize.call(self, elem.group);
+                    bChart.removeNodeStrokeWidth.call(self, elem.group);
+                    bChart.removeNodeStrokeOpacity.call(self, elem.group);
                     bChart.removeNodeFillOpacity.call(self, elem.group);
-                    bChart.removeNodeFillOpacity.call(self, elem.group);
+                }
+
+                if (bChart.hasProperty(self._options, 'line') && bChart.existy(self._options.line.type[elem.group])) {
+                    bChart.removeLineType.call(self, elem.group);
+                    bChart.removeLineStrokeWidth.call(self, elem.group);
+                    bChart.removeLineStrokeOpacity.call(self, elem.group);
+                }
+
+                if (bChart.hasProperty(self._options, 'area') && bChart.existy(self._options.area.fillOpacity[elem.group])) {
+                    bChart.removeAreaFillOpacity.call(self, elem.group);
+                    bChart.removeAreaStrokeOpacity.call(self, elem.group);
+                    bChart.removeAreaStrokeWidth.call(self, elem.group);
                 }
             });
         };
@@ -1214,7 +2198,7 @@
                     bChart.each(options.x, function (elem) {
                         bChart.removeElementFromArray(elem, self._options._uniqueXArray);
                         self._options._dataset = self._options._dataset.filter(function (el) {
-                            return elem.x !== el;
+                            return elem !== el.x;
                         });
                     });
                 }
@@ -1227,10 +2211,17 @@
         }
 
         if (!d3.select(self._options.selector).select('svg').empty()) {
-            if (self._options.secondAxis) {
-                self.min2('refresh').max2('refresh').updateMin2();
+            if (self.constructor === PieChart) {
+                self.colors('refresh')._drawChartSVG();
+
+                self.title('refresh').legend('refresh').tooltip('refresh');
+            } else {
+                if (self._options.secondAxis) {
+                    self.min2('refresh').max2('refresh').updateMin2();
+                }
+                self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().yAxis2('refresh').yLabel2('refresh').legend('refresh').tooltip('refresh');
             }
-            self.min('refresh').max('refresh').updateMin().colors('refresh').yAxis2('refresh').yLabel2('refresh')._drawChartSVG().legend('refresh').tooltip('refresh');
+
         }
     };
 
@@ -1382,8 +2373,9 @@
                             return bChart.getIndexOfElement(a, self._options._uniqueGroupTmp) - bChart.getIndexOfElement(b, self._options._uniqueGroupTmp);
                         });
 
-                        self._options.secondAxis = bChart.isOverlapArray(self._options._uniqueGroupArray2, _checkedLegend) || (!_checkedLegend.length && self._options._uniqueGroupArray2.length);
-
+                        if (bChart.existy(self._options.secondAxis)) {
+                            self._options.secondAxis = bChart.isOverlapArray(self._options._uniqueGroupArray2, _checkedLegend) || (!_checkedLegend.length && self._options._uniqueGroupArray2.length);
+                        }
 
                         if (!_checkedLegend.length || _checkedLegend.length === self._options._uniqueGroupTmp.length) {
                             allLegend.classed('inactive', false)
@@ -1419,7 +2411,425 @@
                 return selections.indexOf(el.group) >= 0;
             });
         }
-        self.setOptions([displayDataset], '_dataset').min('refresh').max('refresh').yAxis2('refresh').updateMin()._drawChartSVG().tooltip('refresh');
+        if (self.constructor === PieChart) {
+            self.setOptions([displayDataset], '_dataset')._drawChartSVG();
+
+            self.title('refresh').tooltip('refresh');
+        } else {
+            self.setOptions([displayDataset], '_dataset').min('refresh').max('refresh').updateMin()._drawChartSVG().yLabel2('refresh').yAxis2('refresh').tooltip('refresh');
+        }
+
+    };
+    /**
+     * Created by CaptainMao on 5/23/15.
+     */
+    bChart.prototype.line = function (options) {
+        var self = this;
+        if (!bChart.existy(options)) {
+            return self._options.line;
+        } else {
+            if (bChart.typeString(options) && options === "refresh") {
+                self._drawLineSVG();
+            } else {
+                if (arguments.length === 2 && arguments[0].indexOf('.') >= 0 && arguments[0].indexOf('$') >= 0) {
+                    var groupIndex = parseInt(arguments[0].split('.')[1].split('$')[1]);
+                    var groupKey = self._options._uniqueGroupArrayAll[groupIndex - 1];
+                    arguments[0] = arguments[0].split('.')[0] + '.' + groupKey;
+                }
+
+                self.setOptions(arguments, 'line');
+                self._drawLineSVG();
+            }
+            return self;
+        }
+
+
+    };
+
+    bChart.prototype._drawLineSVG = function (options) {
+        var self = this;
+        var	_datasetTmp = self._options._dataset;
+        var	groupConcat = self._options._uniqueGroupArrayAll;
+        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+
+        var lineSVG, linePathSVG;
+        var dataLine = [];
+
+
+        if (chartSVG.select('.bChart_lines').empty()) {
+            lineSVG = chartSVG.append('g')
+                .attr('class', 'bChart_lines');
+        } else {
+            lineSVG = chartSVG.select('.bChart_lines');
+        }
+
+        if (bChart.existy(options)) {
+            var drawLineCallBack = function (elem) {
+                var singleLineArray = _datasetTmp.filter(function (el) {
+                    return el.group === elem;
+                });
+                dataLine.push(singleLineArray);
+            };
+            bChart.each(self._options._uniqueGroupArrayAll, drawLineCallBack);
+
+            linePathSVG = lineSVG.selectAll('.bChart_groups')
+                .data(dataLine);
+
+            linePathSVG.exit().remove();
+
+            linePathSVG.enter().append('path');
+            var line = d3.svg.line()
+                .x(function (d) {
+                    return options.x0(d.x);
+                })
+                .y(function (d) {
+                    return d.secondAxis? options.y2(d.value): options.y(d.value);
+                });
+            linePathSVG.attr('d', line);
+        }
+
+        linePathSVG.attr('class', function (d, i) {
+                return 'bChart_groups bChart_groups' + groupConcat.indexOf(d[i].group);
+            })
+            .attr('fill-opacity', function () {
+                return 0;
+            })
+            .attr('stroke', function (d, i) {
+                return self._options._colorMap[d[i].group];
+            })
+            .attr('stroke-width', function (d, i) {
+                return self._options.line.width[d[i].group];
+            })
+            .attr('stroke-opacity', function (d, i) {
+                return self._options.line.opacity[d[i].group];
+            })
+            .style('opacity', 0.1)
+            .transition()
+
+            .duration(self._options.duration)
+            .style('opacity', 1);
+
+        return self;
+
+    };
+
+    bChart.initLineStyle = function (property) {
+        return function (group, value) {
+            var self = this;
+            self._options.line[property][group] = bChart.hasProperty(self._options.line[property], group)?self._options.line[property][group]: value;
+        };
+    };
+
+    bChart.initLineType = bChart.initLineStyle('type');
+    bChart.initLineStrokeWidth = bChart.initLineStyle('width');
+    bChart.initLineStrokeOpacity = bChart.initLineStyle('opacity');
+
+    bChart.removeLineProperty = function (property) {
+        return function (group) {
+            var self = this;
+            if (bChart.hasProperty(self._options.line[property], group)) {
+                delete self._options.line[property][group];
+            }
+        };
+    };
+
+    bChart.removeLineType = bChart.removeLineProperty('type');
+    bChart.removeLineStrokeWidth = bChart.removeLineProperty('width');
+    bChart.removeLineStrokeOpacity = bChart.removeLineProperty('opacity');
+    /**
+     * Created by CaptainMao on 5/22/15.
+     */
+    var _defaultsLine = {
+        selector: "",
+        colors: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"],
+        colorOpacity: 1,
+        duration: 400,
+        padding: {
+            "top": 80,
+            "right": 90,
+            "bottom": 50,
+            "left": 60
+        },
+        _colorMap: {},
+        _datasetTmp: [],
+        _uniqueGroupTmp: [],
+        _uniqueXArray: [],
+        _uniqueGroupArrayAll: [],
+        _uniqueGroupArray2: [],
+        _dataset: [
+
+        ],
+        minDefault: -1,
+        maxDefault: -1,
+        minDefault2: -1,
+        maxDefault2: -1,
+        width: 800,
+        height: 350,
+        background: {
+            "imageURL": "",
+            "color": "#ffffff",
+            "displayImage": false,
+            "opacity": 1
+        },
+        // border: {
+        // 	"opacity": 1,
+        // 	"color": {
+        // 		"top": "#666",
+        // 		"bottom": "#666",
+        // 		"left": "#666",
+        // 		"right": "#666"
+        // 	},
+        // 	"width": {
+        // 		"top": 1,
+        // 		"bottom": 1,
+        // 		"left": 1,
+        // 		"right": 1
+        // 	},
+        // 	"style": {
+        // 		"top": "solid",
+        // 		"bottom": "solid",
+        // 		"left": "solid",
+        // 		"right": "solid"
+        // 	},
+        // 	"radius": {
+        // 		"topleft": 8,
+        // 		"topright": 8,
+        // 		"bottomleft": 8,
+        // 		"bottomright": 8
+        // 	},
+        // 	"boxShadow": {
+        // 		"display": false,
+        // 		"vShadow": 0,
+        // 		"hShadow": 0,
+        // 		"blur": 0,
+        // 		"spread": 0,
+        // 		"color": "#000"
+        // 	}
+        // },
+        secondAxis: false,
+        legend: {
+            "position": "topright",
+            "offsetText": 5,
+            "offsetSymbol": 15,
+            "symbolSize": 10,
+            "multipleLine": false,
+            "textFirst": true,
+            "display": true,
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+
+        title: {
+            "display": true,
+            "text": "Line Chart",
+            "fontType": "helvetica",
+            "fontSize": 18,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        xLabel: {
+            "display": true,
+            "text": "x label",
+            "rotation": 0,
+            "fontType": "helvetica",
+            "fontSize": 14,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+
+        yLabel: {
+            "display": true,
+            "text": "y label",
+            "rotation": -90,
+            "fontType": "helvetica",
+            "fontSize": 14,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        yLabel2: {
+            "display": true,
+            "text": "y label second",
+            "rotation": -90,
+            "fontType": "helvetica",
+            "fontSize": 14,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        yAxis: {
+            "display": true,
+            "displayLine": true,
+            "tickNumber": 8,
+            "tickFormat": d3.format(",.0f"),
+            "tickPadding": 3,
+            "tickSize": 10,
+            "orientation": "left",
+            "tickValue": [],
+            "fontColor": "#000",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "tickLineColor": "#ccc",
+            "tickLineWidth": 0.2,
+            "axisColor": '#000',
+            "axisWidth": 1,
+            "rotation": 0,
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        yAxis2: {
+            "display": true,
+            "displayLine": false,
+            "tickNumber": 8,
+            "tickFormat": d3.format(",.0f"),
+            "tickPadding": 3,
+            "tickSize": 10,
+            "orientation": "right",
+            "tickValue": [],
+            "fontColor": "#000",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "tickLineColor": "#ccc",
+            "tickLineWidth": 0.2,
+            "axisColor": '#000',
+            "axisWidth": 1,
+            "rotation": 0,
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+        xAxis: {
+            "display": true,
+            "isTimeSeries": false,
+            "displayLine": true,
+            "tickNumber": 5,
+            "tickFormat": "",
+            "tickPadding": 3,
+            "tickSize": 10,
+            "orientation": "bottom",
+            "tickValue": [],
+            "fontColor": "#000",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "tickLineColor": "#ccc",
+            "tickLineWidth": 0.2,
+            "axisColor": '#000',
+            "axisWidth": 1,
+            "rotation": 0,
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+
+        tooltip: {
+            "display": true,
+            "text": "tooltip",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#fff",
+            "width": "auto",
+            "height": "auto"
+        },
+        node: {
+            display: true,
+            type: {},
+            size: {},
+            fillOpacity: {},
+            strokeWidth: {}
+        },
+        line: {
+            type: {},
+            width: {},
+            opacity: {}
+        }
+
+    };
+
+    var LineChart = function (options) {
+        return bChart._customConstructor(this, options, arguments, 'line');
+    };
+
+    bChart.LineChart = LineChart;
+
+    LineChart.prototype = Object.create(bChart.prototype);
+    LineChart.prototype.constructor = LineChart;
+
+    LineChart.prototype.draw = function () {
+        var self = this;
+        if (!bChart.getLength(d3.select(self._options.selector))) {
+            console.log("Please make sure the element exists in your template.");
+            return void 0;
+        }
+
+        self.min('refresh').max('refresh').updateMin();
+        if (self._options.secondAxis) {
+            self.min2('refresh').max2('refresh').updateMin2();
+        }
+
+        self.colors('refresh')._drawChartSVG();
+
+        self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
+        if (self._options.secondAxis) {
+            self.yLabel2('refresh').yAxis2('refresh');
+        }
+
+    };
+
+
+    LineChart.prototype._drawLineChart = function () {
+        var self = this;
+        var xyOptions = self._initXYAxis();
+        self._drawLineSVG(xyOptions)._drawNodeSVG(xyOptions).node('refresh');
+        return self;
+
+
+
 
     };
     /**
@@ -1572,34 +2982,67 @@
             return self._options.node;
         } else {
             if (bChart.typeString(options) && options === "refresh") {
-                drawNode();
+                self._drawNodeSVG();
             } else {
+                if (arguments.length === 2 && arguments[0].indexOf('.') >= 0 && arguments[0].indexOf('$') >= 0) {
+                    var groupIndex = parseInt(arguments[0].split('.')[1].split('$')[1]);
+                    var groupKey = self._options._uniqueGroupArrayAll[groupIndex - 1];
+                    arguments[0] = arguments[0].split('.')[0] + '.' + groupKey;
+                }
                 self.setOptions(arguments, 'node');
-                drawNode();
+                self._drawNodeSVG();
             }
             return self;
         }
 
-        function drawNode() {
-            var chartSVG = d3.select(self._options.selector).select('g.bChart');
-            var nodeSVG;
-            if (chartSVG.selectAll('.bChart_nodes').empty()) {
-                nodeSVG = chartSVG.append('g').attr('class', 'bChart_nodes')
-                    .append('path').attr('class', 'bChart_groups');
-            } else {
-                nodeSVG = chartSVG.selectAll('.bChart_groups');
-            }
+    };
+
+    bChart.prototype._drawNodeSVG = function (options) {
+        var self = this;
+        var	_datasetTmp = self._options._dataset;
+        var	groupConcat = self._options._uniqueGroupArrayAll;
+        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+
+        var nodeSVG, nodePathSVG;
+        if (chartSVG.select('.bChart_nodes').empty()) {
+            nodeSVG = chartSVG.append('g')
+                .attr('class', 'bChart_nodes');
+        } else {
+            nodeSVG = chartSVG.select('.bChart_nodes');
+        }
+
+        var nodeGenerator = d3.svg.symbol()
+            .type(function (d) {
+                return self._options.node.type[d.group];
+            }).size(function (d) {
+                return bChart.existy(d.size) ? d.size : self._options.node.size[d.group];
+            });
+
+        if (bChart.existy(options)) {
+            nodePathSVG = nodeSVG.selectAll('.bChart_groups')
+                .data(_datasetTmp);
+
+
+            nodePathSVG.exit().remove();
+
+            nodePathSVG.enter().append('path');
+
+            nodePathSVG.attr('class', function(d) {
+                    return 'bChart_groups bChart_groups' + groupConcat.indexOf(d.group);
+                })
+                .attr('d', nodeGenerator)
+                .attr('transform', function (d) {
+                    return d.secondAxis? "translate(" + options.x0(d.x) + "," + options.y2(d.value) + ")": "translate(" + options.x0(d.x) + "," + options.y(d.value) + ")";
+                })
+                .style('opacity', 0)
+                .transition()
+                .duration(self._options.duration)
+                .style('opacity', 1);
+        } else {
+            nodePathSVG = nodeSVG.selectAll('.bChart_groups');
             if (self._options.node.display) {
-                nodeSVG.style('display', 'block');
-
-                var nodeGenerator = d3.svg.symbol()
-                    .type(function (d) {
-                        return self._options.node.type[d.group];
-                    }).size(function (d) {
-                        return self._options.node.size[d.group];
-                    });
-
-                nodeSVG.attr('fill', function (d) {
+                nodePathSVG.style('display', 'block');
+                nodePathSVG.attr('fill', function (d) {
                         var nodeFill = self._options._colorMap[d.group];
                         var colorElem = nodeFill.split(',');
                         return colorElem[0] + ',' + colorElem[1] + ',' + colorElem[2] + ',' + self._options.node.fillOpacity[d.group] + ')';
@@ -1609,10 +3052,12 @@
                     })
                     .attr('d', nodeGenerator);
             } else {
-                nodeSVG.style('display', 'none');
+                nodePathSVG.style('display', 'none');
             }
-
         }
+
+        return self;
+
     };
 
     bChart.initNodeStyle = function (property) {
@@ -1642,6 +3087,266 @@
     bChart.removeNodeFillOpacity = bChart.removeNodeProperty('fillOpacity');
     bChart.removeNodeStrokeWidth = bChart.removeNodeProperty('strokeWidth');
     bChart.removeNodeStrokeOpacity = bChart.removeNodeProperty('strokeOpacity');
+    /**
+     * Created by CaptainMao on 5/22/15.
+     */
+    var _defaultsPie = {
+        selector: "",
+        colors: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"],
+        colorOpacity: 1,
+        duration: 400,
+        padding: {
+            "top": 80,
+            "right": 90,
+            "bottom": 50,
+            "left": 60
+        },
+        _colorMap: {},
+        _datasetTmp: [],
+        _uniqueXArray: [],
+        _uniqueGroupTmp: [],
+        _uniqueGroupArrayAll: [],
+        _dataset: [
+
+        ],
+
+        width: 400,
+        height: 400,
+        textRadiusDefault: '',
+        outerRadiusDefault: '',
+        background: {
+            "imageURL": "",
+            "color": "#ffffff",
+            "displayImage": false,
+            "opacity": 1
+        },
+
+        valueDisplay: {
+            display: true
+
+        },
+
+        // border: {
+        // 	"opacity": 1,
+        // 	"color": {
+        // 		"top": "#666",
+        // 		"bottom": "#666",
+        // 		"left": "#666",
+        // 		"right": "#666"
+        // 	},
+        // 	"width": {
+        // 		"top": 1,
+        // 		"bottom": 1,
+        // 		"left": 1,
+        // 		"right": 1
+        // 	},
+        // 	"style": {
+        // 		"top": "solid",
+        // 		"bottom": "solid",
+        // 		"left": "solid",
+        // 		"right": "solid"
+        // 	},
+        // 	"radius": {
+        // 		"topleft": 8,
+        // 		"topright": 8,
+        // 		"bottomleft": 8,
+        // 		"bottomright": 8
+        // 	},
+        // 	"boxShadow": {
+        // 		"display": false,
+        // 		"vShadow": 0,
+        // 		"hShadow": 0,
+        // 		"blur": 0,
+        // 		"spread": 0,
+        // 		"color": "#000"
+        // 	}
+        // },
+        legend: {
+            "position": "topright",
+            "offsetText": 5,
+            "offsetSymbol": 15,
+            "symbolSize": 10,
+            "multipleLine": false,
+            "textFirst": true,
+            "display": true,
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+
+        title: {
+            "display": true,
+            "text": "Pie Chart",
+            "fontType": "helvetica",
+            "fontSize": 18,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#000000",
+            "offsetAdjust": {
+                "horizontal": 0,
+                "vertical": 0
+            }
+        },
+
+        tooltip: {
+            "display": true,
+            "text": "tooltip",
+            "fontType": "helvetica",
+            "fontSize": 12,
+            "fontBold": false,
+            "fontItalic": false,
+            "fontUnderline": false,
+            "fontColor": "#fff",
+            "width": "auto",
+            "height": "auto"
+        }
+        //pie: {
+        //    type: {},
+        //    strokeWidth: {},
+        //    strokeOpacity: {},
+        //    fillOpacity: {}
+        //}
+
+    };
+
+    var PieChart = function (options) {
+        return bChart._customConstructor(this, options, arguments, 'pie');
+    };
+
+    bChart.PieChart = PieChart;
+
+    PieChart.prototype = Object.create(bChart.prototype);
+    PieChart.prototype.constructor = PieChart;
+
+    PieChart.prototype.draw = function () {
+        var self = this;
+        if (!bChart.getLength(d3.select(self._options.selector))) {
+            console.log("Please make sure the element exists in your template.");
+            return void 0;
+        }
+
+        self.colors('refresh')._drawChartSVG();
+
+        self.title('refresh').legend('refresh').tooltip('refresh');
+
+
+    };
+
+
+    PieChart.prototype._drawPieChart = function () {
+        var self = this;
+        self._updateChartSize();
+
+        var	_datasetTmp = self._options._dataset;
+        var	groupConcat = self._options._uniqueGroupArrayAll;
+        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+        var pieSUM = d3.sum(_datasetTmp, function (d) {
+            return parseFloat(d.value);
+        });
+        if (bChart.existy(self._options.outerRadius)) {
+            self._options.outerRadiusDefault = self._options.outerRadius;
+        } else {
+            self._options.outerRadiusDefault = self._options._chartSVGWidth > self._options._chartSVGHeight ? self._options._chartSVGHeight /2 : self._options._chartSVGWidth / 2;
+        }
+        if (bChart.existy(self._options.textRadius)) {
+            self._options.textRadiusDefault = self._options.textRadius;
+        } else {
+            self._options.textRadiusDefault = self._options.outerRadiusDefault / 2;
+        }
+
+        var arc = d3.svg.arc()
+            .outerRadius(self._options.outerRadiusDefault)
+            .startAngle(function (d) {
+                return d.startAngle;
+            })
+            .endAngle(function (d) {
+                return d.endAngle;
+            });
+        var arc_init = d3.svg.arc()
+            .outerRadius(1);
+
+        var pie = d3.layout.pie()
+            .value(function (d) {
+                return d.value;
+            })
+            .sort(null);
+
+        var pieSVG, arcSVG, pieDataset, textSVG;
+        pieDataset = pie(_datasetTmp);
+
+        if (chartSVG.select('.bChart_pie').empty()) {
+            pieSVG = chartSVG.append('g')
+                .attr('class', 'bChart_pie');
+        } else {
+            pieSVG = chartSVG.select('.bChart_pie');
+        }
+        pieSVG.attr('transform', 'translate(' + self._options._chartSVGWidth / 2 + ',' + self._options._chartSVGHeight/ 2 + ')');
+
+        arcSVG = pieSVG.selectAll('.bChart_arc')
+            .data(pieDataset);
+
+
+
+
+
+        arcSVG.exit().remove();
+
+        arcSVG.enter().append('path')
+            .attr('class', function (d) {
+                return 'bChart_arc bChart_groups bChart_groups' + groupConcat.indexOf(d.data.group);
+            });
+
+        arcSVG
+            .attr('fill', function (d) {
+                return self._options._colorMap[d.data.group];
+            })
+            .attr('d', arc_init)
+            .style('opacity', 0)
+            .transition()
+            .duration(self._options.duration)
+            .attr('d', arc)
+            .attr('stroke', '#ffffff')
+            .style('opacity', 1);
+
+        textSVG = pieSVG.selectAll('.bChart_arc_text')
+            .data(pieDataset);
+        if (self._options.valueDisplay.display) {
+            textSVG.style('display', 'block');
+
+            textSVG.exit().remove();
+            textSVG.enter().append('text')
+                .attr('class', function (d) {
+                    return 'bChart_arc_text bChart_groups bChart_groups' + groupConcat.indexOf(d.data.group);
+                });
+
+            textSVG
+                .attr('transform', function (d) {
+                    return 'translate(' + Math.cos((d.startAngle + d.endAngle - Math.PI) / 2) * self._options.textRadiusDefault + ',' + Math.sin((d.startAngle + d.endAngle - Math.PI) / 2) * self._options.textRadiusDefault + ')';
+                })
+                .attr('text-anchor', 'middle')
+                .text(function (d) {
+                    return d3.format('%')(d.data.value / pieSUM);
+                })
+                .attr('fill', '#ffffff');
+        } else {
+            textSVG.style('display', 'none');
+        }
+
+
+
+
+        return self;
+
+    };
+
     /**
      * Created by CaptainMao on 5/22/15.
      */
@@ -1735,7 +3440,7 @@
 
         title: {
             "display": true,
-            "text": "Bar Chart",
+            "text": "Scatter Chart",
             "fontType": "helvetica",
             "fontSize": 18,
             "fontBold": false,
@@ -1893,7 +3598,7 @@
     };
 
     var ScatterChart = function (options) {
-        return bChart._runMethodsInConstructor(this, options, arguments, 'scatter');
+        return bChart._customConstructor(this, options, arguments, 'scatter');
     };
 
     bChart.ScatterChart = ScatterChart;
@@ -1925,130 +3630,12 @@
 
     ScatterChart.prototype._drawScatterChart = function () {
         var self = this;
-        self._updateChartSize();
-
-        var chartSVG = d3.select(self._options.selector).select('g.bChart');
-        var x0;
-        if (!self._options.xAxis.isTimeSeries) {
-            x0 = d3.scale.ordinal()
-                .rangePoints([0, self._options._chartSVGWidth],0.1)
-                .domain(self._options._uniqueXArray);
-        }
-
-        // set default tickSize;
-        self._options.xAxis.tickSize = -self._options._chartSVGHeight;
-        self._options.yAxis.tickSize = -self._options._chartSVGWidth;
-
-        var	xAxis = d3.svg.axis()
-            .scale(x0)
-            .orient(self._options.xAxis.orientation)
-            .ticks(self._options.xAxis.tickNumber)
-            .tickSize(self._options.xAxis.tickSize, 0, 0);
-
-
-        if (chartSVG.select('.bChart_x_axis').empty()) {
-            chartSVG.append('g')
-                .attr('class', 'bChart_x_axis bChart_grid')
-                .attr('transform', 'translate(0,' + self._options._chartSVGHeight + ')')
-                .call(xAxis);
-        } else {
-            chartSVG.select('.bChart_x_axis')
-                .transition()
-                .duration(self._options.duration)
-                .ease("sin-in-out")
-                .call(xAxis);
-        }
-
-        var	y = d3.scale.linear()
-            .range([self._options._chartSVGHeight, 0])
-            .domain([self._options.minDefault, self._options.maxDefault]);
-
-        var	yAxis = d3.svg.axis()
-            .scale(y)
-            .orient(self._options.yAxis.orientation)
-            .tickFormat(self._options.yAxis.tickFormat)
-            .ticks(self._options.yAxis.tickNumber)
-            .tickSize(self._options.yAxis.tickSize, 0, 0);
-
-        if (chartSVG.select('.bChart_y_axis').empty()) {
-            chartSVG.append('g')
-                .attr('class', 'bChart_y_axis bChart_grid')
-                .call(yAxis);
-        } else {
-            chartSVG.select('.bChart_y_axis')
-                .transition()
-                .duration(self._options.duration)
-                .ease("sin-in-out")
-                .call(yAxis);
-        }
-
-        if (self._options.secondAxis) {
-            var	y2 = d3.scale.linear()
-                .range([self._options._chartSVGHeight, 0])
-                .domain([self._options.minDefault2, self._options.maxDefault2]);
-            var	yAxis2 = d3.svg.axis()
-                .scale(y2)
-                .orient(self._options.yAxis2.orientation)
-                .tickFormat(self._options.yAxis2.tickFormat)
-                .ticks(self._options.yAxis2.tickNumber)
-                .tickSize(self._options.yAxis2.tickSize, 0, 0);
-            if (chartSVG.select('.bChart_y_axis_2').empty()) {
-                chartSVG.append('g')
-                    .attr('class', 'bChart_y_axis_2 bChart_grid')
-                    .attr('transform', 'translate(' + self._options._chartSVGWidth + ',0)')
-                    .call(yAxis2);
-            } else {
-                chartSVG.select('.bChart_y_axis_2')
-                    .attr('transform', 'translate(' + self._options._chartSVGWidth + ',0)')
-                    .transition()
-                    .duration(self._options.duration)
-                    .ease("sin-in-out")
-                    .call(yAxis2);
-            }
-        }
-
-        drawSVG();
-        self.node('refresh');
+        var xyOptions = self._initXYAxis();
+        self._drawNodeSVG(xyOptions).node('refresh');
 
         return self;
 
-        function drawSVG(){
-            var	_datasetTmp = self._options._dataset;
-            var	groupConcat = self._options._uniqueGroupArrayAll;
 
-            var scatterSVG, scatterPathSVG;
-            if (chartSVG.select('.bChart_nodes').empty()) {
-                scatterSVG = chartSVG.append('g')
-                    .attr('class', 'bChart_nodes');
-            } else {
-                scatterSVG = chartSVG.select('.bChart_nodes');
-            }
-            scatterPathSVG = scatterSVG.selectAll('.bChart_groups')
-                .data(_datasetTmp);
-
-            var nodeGenerator = d3.svg.symbol()
-                .type(function (d) {
-                    return self._options.node.type[d.group];
-                }).size(function (d) {
-                    return self._options.node.size[d.group];
-                });
-
-            scatterPathSVG.exit().remove();
-            scatterPathSVG.enter().append('path')
-                .attr('class', function(d) {
-                    return 'bChart_groups bChart_groups' + groupConcat.indexOf(d.group);
-                })
-                .attr('d', nodeGenerator)
-                .attr('transform', function (d) {
-                    return d.secondAxis? "translate(" + x0(d.x) + "," + y2(d.value) + ")": "translate(" + x0(d.x) + "," + y(d.value) + ")";
-                })
-                .style('opacity', 0)
-                .transition()
-                .duration(self._options.duration)
-                .style('opacity', 1);
-
-
-        }
     };
     /**
      * Created by CaptainMao on 5/22/15.
@@ -2135,15 +3722,21 @@
 
                 var groupSVG = parentSVG.selectAll('.bChart_groups');
                 groupSVG.on('mouseover', function (d) {
-                    d3.select(this).style('opacity', 0.7);
-                    tooltipDIV.transition()
-                        .duration(self._options.duration)
-                        .style('opacity', 1)
-                        .style('display', 'block');
-                })
+                        d3.select(this).style('opacity', 0.7);
+                        tooltipDIV.transition()
+                            .duration(self._options.duration)
+                            .style('opacity', 1)
+                            .style('display', 'block');
+                    })
                     .on('mousemove', function (d) {
                         var selectedBar = this;
-                        var tooltip_html = d.group + '(' + d.x + ') :' + d.value;
+                        var tooltip_html;
+                        if (self.constructor === PieChart) {
+                            tooltip_html = d.data.group + " : " + d.value;
+                        } else {
+                            tooltip_html = d.group + '(' + d.x + ') :' + d.value;
+
+                        }
                         var selectedColor = d3.select(this).style('fill');
                         var offx = d3.event.hasOwnProperty('offsetX') ? d3.event.offsetX : d3.event.layerX;
                         var offy = d3.event.hasOwnProperty('offsetY') ? d3.event.offsetY : d3.event.layerY;
@@ -2172,6 +3765,20 @@
                             .style('opacity', 0)
                             .style('display', 'none');
                     });
+                if (!parentSVG.select('.bChart_lines').empty()) {
+                    var groupLineSVG = parentSVG.select('.bChart_lines').selectAll('.bChart_groups');
+                    groupLineSVG.on('mouseover', null)
+                        .on('mousemove', null)
+                        .on('mouseout', null);
+                }
+
+                if (!parentSVG.select('.bChart_areas').empty()) {
+                    var groupAreaSVG = parentSVG.select('.bChart_areas').selectAll('.bChart_groups');
+                    groupAreaSVG.on('mouseover', null)
+                        .on('mousemove', null)
+                        .on('mouseout', null);
+                }
+
             } else {
                 tooltipDIV.remove();
             }

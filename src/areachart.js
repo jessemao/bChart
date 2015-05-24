@@ -1,7 +1,7 @@
 /**
  * Created by CaptainMao on 5/22/15.
  */
-var _defaultsScatter = {
+var _defaultsArea = {
     selector: "",
     colors: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"],
     colorOpacity: 1,
@@ -21,6 +21,7 @@ var _defaultsScatter = {
     _dataset: [
 
     ],
+    isStack: false,
     minDefault: -1,
     maxDefault: -1,
     minDefault2: -1,
@@ -91,7 +92,7 @@ var _defaultsScatter = {
 
     title: {
         "display": true,
-        "text": "Scatter Chart",
+        "text": "Area Chart",
         "fontType": "helvetica",
         "fontSize": 18,
         "fontBold": false,
@@ -238,26 +239,25 @@ var _defaultsScatter = {
         "width": "auto",
         "height": "auto"
     },
-    node: {
-        display: true,
+    area: {
         type: {},
-        size: {},
-        fillOpacity: {},
-        strokeWidth: {}
+        strokeWidth: {},
+        strokeOpacity: {},
+        fillOpacity: {}
     }
 
 };
 
-var ScatterChart = function (options) {
-    return bChart._customConstructor(this, options, arguments, 'scatter');
+var AreaChart = function (options) {
+    return bChart._customConstructor(this, options, arguments, 'area');
 };
 
-bChart.ScatterChart = ScatterChart;
+bChart.AreaChart = AreaChart;
 
-ScatterChart.prototype = Object.create(bChart.prototype);
-ScatterChart.prototype.constructor = ScatterChart;
+AreaChart.prototype = Object.create(bChart.prototype);
+AreaChart.prototype.constructor = AreaChart;
 
-ScatterChart.prototype.draw = function () {
+AreaChart.prototype.draw = function () {
     var self = this;
     if (!bChart.getLength(d3.select(self._options.selector))) {
         console.log("Please make sure the element exists in your template.");
@@ -279,12 +279,10 @@ ScatterChart.prototype.draw = function () {
 };
 
 
-ScatterChart.prototype._drawScatterChart = function () {
+AreaChart.prototype._drawAreaChart = function () {
     var self = this;
     var xyOptions = self._initXYAxis();
-    self._drawNodeSVG(xyOptions).node('refresh');
-
+    self._drawAreaSVG(xyOptions);
     return self;
-
 
 };
