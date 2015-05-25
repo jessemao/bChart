@@ -80,6 +80,14 @@ module.exports = function(grunt) {
           'bChart.css': 'src/scss/core.scss'
         }
       }
+    },
+    copy: {
+      main: {
+        files: [
+          {src: 'bChart.css', dest: 'example/nodejs/public/js/lib/'},
+          {src: 'bChart.js', dest: 'example/nodejs/public/js/lib/'}
+        ]
+      }
     }
   });
 
@@ -91,8 +99,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-sass');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-banner');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 
   // Default task.
-  grunt.registerTask('default', ['jshint', 'concat', 'sass', 'cssmin', 'uglify', 'usebanner']);
+  grunt.registerTask('default', ['jshint', 'concat', 'sass', 'cssmin', 'uglify', 'usebanner', 'copy']);
 
 };

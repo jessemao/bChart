@@ -1,0 +1,58 @@
+/*-- Chart --*/
+.bCharts {
+  border: 1px solid #000; }
+
+/*-- Axis --*/
+.bChart_grid path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges; }
+
+.bChart_y_axis line {
+  fill: none;
+  stroke: #bbb;
+  stroke-width: 0.2; }
+
+.bChart_x_axis line {
+  fill: none;
+  stroke: #bbb;
+  stroke-width: 0.2; }
+
+/*-- Grid --*/
+.bChart_legend {
+  cursor: pointer; }
+
+.bChart_legend.inactive, .bChart_legend.unhover {
+  opacity: 0.5; }
+
+.bChart_legend.active {
+  opacity: 1 !important; }
+
+.bChart_groups.inactive, .bChart_groups.unhover {
+  opacity: 0.3 !important; }
+
+/*-- Tooltip --*/
+.bChart_tooltip {
+  position: absolute;
+  z-index: 1070;
+  display: block;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1.42857143;
+  text-align: left;
+  text-align: start;
+  text-decoration: none;
+  text-shadow: none;
+  text-transform: none;
+  letter-spacing: normal;
+  word-break: normal;
+  word-spacing: normal;
+  word-wrap: normal;
+  white-space: normal;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  line-break: auto;
+  border-radius: 10px;
+  padding: 10px; }
