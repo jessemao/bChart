@@ -45,6 +45,14 @@ Tutorial
         var myBarChart = bChart("#chart");
         myBarChart.background("color", "#ccc").load([['data1', '45', '32', '15']]);
     
+Example
+----
+1. Download or clone this git to your machine. 
+2. Traverse to example/nodejs folder. 
+3. Type in "node app.js" in your terminal. 
+4. Goto your browser and type in "localhost:3000/index.html" or "localhost:3000/indexAMD.html" for AMD support example.
+5. You can go to mainUnAMD (main) and change any configuration you want to play with the charts.
+
 
 Group
 ---
