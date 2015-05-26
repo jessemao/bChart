@@ -36,42 +36,6 @@ var _defaultsPie = {
         display: true
 
     },
-
-    // border: {
-    // 	"opacity": 1,
-    // 	"color": {
-    // 		"top": "#666",
-    // 		"bottom": "#666",
-    // 		"left": "#666",
-    // 		"right": "#666"
-    // 	},
-    // 	"width": {
-    // 		"top": 1,
-    // 		"bottom": 1,
-    // 		"left": 1,
-    // 		"right": 1
-    // 	},
-    // 	"style": {
-    // 		"top": "solid",
-    // 		"bottom": "solid",
-    // 		"left": "solid",
-    // 		"right": "solid"
-    // 	},
-    // 	"radius": {
-    // 		"topleft": 8,
-    // 		"topright": 8,
-    // 		"bottomleft": 8,
-    // 		"bottomright": 8
-    // 	},
-    // 	"boxShadow": {
-    // 		"display": false,
-    // 		"vShadow": 0,
-    // 		"hShadow": 0,
-    // 		"blur": 0,
-    // 		"spread": 0,
-    // 		"color": "#000"
-    // 	}
-    // },
     legend: {
         "position": "topright",
         "offsetText": 5,
@@ -181,8 +145,8 @@ PieChart.prototype._drawPieChart = function () {
         .endAngle(function (d) {
             return d.endAngle;
         });
-    var arc_init = d3.svg.arc()
-        .outerRadius(1);
+    //var arc_init = d3.svg.arc()
+    //    .outerRadius(1);
 
     var pie = d3.layout.pie()
         .value(function (d) {
@@ -200,32 +164,47 @@ PieChart.prototype._drawPieChart = function () {
         pieSVG = chartSVG.select('.bChart_pie');
     }
     pieSVG.attr('transform', 'translate(' + self._options._chartSVGWidth / 2 + ',' + self._options._chartSVGHeight/ 2 + ')');
-
+    var arcTween = function (a) {
+        var interpolate = d3.interpolate(this._current, a);
+        this._current = interpolate(0);
+        return function(t) {
+            return arc(interpolate(t));
+        };
+    };
     arcSVG = pieSVG.selectAll('.bChart_arc')
         .data(pieDataset);
 
-
-
-
-
-    arcSVG.exit().remove();
+    arcSVG.exit()
+        .remove();
 
     arcSVG.enter().append('path')
         .attr('class', function (d) {
             return 'bChart_arc bChart_groups bChart_groups' + groupConcat.indexOf(d.data.group);
-        });
+        })
+        .attr('fill', function (d) {
+            return self._options._colorMap[d.data.group];
+        })
+        .attr('stroke', '#ffffff')
+        .each(function (d, i) {
+            if (i > 0) {
+                this._current = pieDataset[i-1];
+            } else {
+                this._current = {startAngle: 0, endAngle: 0};
+
+            }
+        })
+        .transition()
+        .duration(self._options.duration)
+        .attr('d', arcTween);
 
     arcSVG
         .attr('fill', function (d) {
             return self._options._colorMap[d.data.group];
         })
-        .attr('d', arc_init)
-        .style('opacity', 0)
         .transition()
         .duration(self._options.duration)
-        .attr('d', arc)
-        .attr('stroke', '#ffffff')
-        .style('opacity', 1);
+        .attrTween("d", arcTween);
+
 
     textSVG = pieSVG.selectAll('.bChart_arc_text')
         .data(pieDataset);

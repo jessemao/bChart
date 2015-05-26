@@ -13,7 +13,7 @@
 
     var _selectorToChartObject = {};
     var _options = {};
-
+    
     var bChart = function (options) {
     	if (bChart.existy(options) && bChart.typeString(options)) {
     		if (arguments.length >= 2) {
@@ -50,7 +50,7 @@
     		}
     	}
     };
-
+    
     bChart._init = function (options, chartType) {
     	var defaultType = {};
     	switch (chartType) {
@@ -96,7 +96,7 @@
     			return new PieChart(_options.selector, _options);
     	}
     };
-
+    
     bChart._customConstructor = function (self, options, args, chartType) {
     	var newOptions = {};
     	if (bChart.existy(options)) { // check if options exists first.
@@ -107,7 +107,7 @@
     				if (_options.selector !== options ||!bChart.truthy(_options.selector)) {
     					self = bChart._init(options, chartType);
     				}
-
+    
     			}
     		} else {
     			if (args[0] !== _options.selector ||!bChart.truthy(_options.selector)) {
@@ -119,31 +119,31 @@
     				bChart.setObjectOfSelector(options, self);
     				self.setOptions(bChart.clone(args[1])).draw();
     			}
-
+    
     		}
     	}
     	return self;
     };
-
+    
     bChart.getObjectBySelector = function (options) {
     	return _selectorToChartObject[options];
     };
-
+    
     bChart.setObjectOfSelector = function (selector, chart) {
     	_selectorToChartObject[selector] = chart;
     };
-
+    
     bChart.isSelector = function (options) {
     	return options.indexOf('#')>=0||options.indexOf('.')>=0;
     };
-
+    
     bChart.clone = function (obj) {
     	if (bChart.typeObject(obj)) {
     		return JSON.parse(JSON.stringify(obj));
     	}
     };
-
-
+    
+    
     bChart.generateArray = function(length) {
     	var array = [];
     	for (var i = 0; i < length; i += 1) {
@@ -151,19 +151,19 @@
     	}
     	return array;
     };
-
+    
     bChart.setChart = function (obj, type) {
     	var self = this;
     	self[type] = obj;
     	return self;
     };
-
+    
     bChart.existy = function (obj) {
     	return obj != null;
     };
-
+    
     bChart.getUniqueValueArray = function (key) {
-
+    
     	return function(collection) {
     		if (bChart.existy(collection)) {
     			var uniqueArray = [];
@@ -176,15 +176,15 @@
     		}
     	};
     };
-
+    
     bChart.sorted = function (collection, sortFunc) {
     	return collection.sort(sortFunc);
     };
-
+    
     bChart.typeDate = function(obj) {
     	return isNaN(new Date(obj).getTime());
     };
-
+    
     bChart.each = function (obj, iteratee, context) {
     	if (bChart.isArrayLike(obj)) {
     		var length = bChart.getLength(obj);
@@ -197,13 +197,13 @@
     		}
     	}
     };
-
+    
     bChart.property = function (key) {
     	return function (obj) {
     		return bChart.existy(obj) ? obj[key]: void 0;
     	};
     };
-
+    
     bChart.hasProperty = function (obj, key) {
     	if (bChart.typeString(key)) {
     		if (key.indexOf('.') >= 0) {
@@ -213,9 +213,9 @@
     			return bChart.existy(obj[key]);
     		}
     	}
-
+    
     };
-
+    
     bChart.setProperty = function (obj, key, value) {
     	if (bChart.hasProperty(obj, key)) {
     		if (bChart.typeString(key)) {
@@ -228,9 +228,9 @@
     		}
     	}
     };
-
+    
     bChart.getLength = bChart.property('length');
-
+    
     bChart.isArrayLike = function (collection) {
     	if (bChart.typeString(collection)) {
     		return false;
@@ -238,75 +238,75 @@
     		var length = bChart.getLength(collection);
     		return bChart.typeNumber(length) && length >= 0;
     	}
-
+    
     };
-
+    
     bChart.typeofObject = function (func) {
     	return function (obj) {
     		return func(obj);
     	};
     };
-
+    
     bChart.typeNumber = bChart.typeofObject(function (obj) {
     	return !isNaN(obj);
     });
-
+    
     bChart.typeString = bChart.typeofObject(function (obj) {
     	return typeof obj === "string";
     });
-
+    
     bChart.typeObject = bChart.typeofObject(function (obj) {
     	return typeof obj === "object";
     });
-
+    
     bChart.existy = function (obj) {
     	return obj != null;
     };
-
+    
     bChart.truthy = function (obj) {
     	return obj !== false && bChart.existy(obj);
     };
-
+    
     bChart.hexToRGBA = function (hexString, opacity) {
     	var hex = hexString.replace('#', '');
     	var r = parseInt(hex.substring(0,2), 16);
     	var g = parseInt(hex.substring(2,4), 16);
     	var b = parseInt(hex.substring(4,6), 16);
-
+    
     	return 'rgba(' + r + ',' + g + ',' + b + ',' + opacity + ')';
     };
-
+    
     bChart.getIndexOfElement = function (elem, array) {
-
+    
     	return bChart.existy(array) ? array.indexOf(elem) : -1;
-
+    
     };
-
+    
     bChart.isElementInArray = function (elem, array) {
     	return bChart.getIndexOfElement(elem, array) >= 0;
     };
-
+    
     bChart.concatNoDuplicate = function (array1, array2) {
     	var duplicateArray = array1.concat(array2);
-
+    
     	return duplicateArray.filter(function (elem, idx) {
     		return bChart.getIndexOfElement(elem, duplicateArray) === idx;
     	});
     };
-
+    
     bChart.removeElementFromArray = function (elem, array) {
     	if (bChart.isElementInArray(elem, array)) {
     		array.splice(bChart.getIndexOfElement(elem, array), 1);
     		return array;
     	}
     };
-
+    
     bChart.removeArrayFromArray = function (array1, array2) {
     	return array1.filter(function (elem, idx) {
     		return !bChart.isElementInArray(elem, array2);
     	});
     };
-
+    
     bChart.isOverlapArray = function (array1, array2) {
     	var duplicateArray = array1.concat(array2);
     	var noDuplicateArray = duplicateArray.filter(function (elem, idx) {
@@ -314,15 +314,15 @@
     	});
     	return duplicateArray.length !== noDuplicateArray.length;
     };
-
+    
     bChart.isSubArray = function (parentArray, childArray) {
     	var newArray = childArray.filter(function (elem, idx) {
     		return !bChart.isElementInArray(elem, parentArray);
     	});
-
+    
     	return newArray.length > 0 ? false: true;
     };
-
+    
     bChart.getSubArray = function (parentArray, childArray) {
     	if (bChart.isSubArray(parentArray, childArray)) {
     		return childArray;
@@ -349,36 +349,36 @@
                     var groupKey = self._options._uniqueGroupArrayAll[groupIndex - 1];
                     arguments[0] = arguments[0].split('.')[0] + '.' + groupKey;
                 }
-
+    
                 self.setOptions(arguments, 'area');
                 self._drawAreaSVG();
             }
             return self;
         }
-
-
+    
+    
     };
-
+    
     bChart.prototype._drawAreaSVG = function (options) {
         var self = this;
         var	_datasetTmp = self._options._dataset;
         var	groupConcat = self._options._uniqueGroupArrayAll;
         var chartSVG = d3.select(self._options.selector).select('g.bChart');
-
+    
         var areaSVG, areaPathSVG;
         var dataArea = [];
-
+    
         if (chartSVG.select('.bChart_areas').empty()) {
             areaSVG = chartSVG.append('g')
                 .attr('class', 'bChart_areas');
         } else {
             areaSVG = chartSVG.select('.bChart_areas');
         }
-
+    
         if (bChart.existy(options)) {
             if (self._options.isStack) {
                 _datasetTmp = self.stackDataset(_datasetTmp, groupConcat, self._options._uniqueXArray);
-
+    
             }
             var drawLineCallBack = function (elem) {
                 var singleAreaArray = _datasetTmp.filter(function (el) {
@@ -391,12 +391,12 @@
                 }
             };
             bChart.each(self._options._uniqueGroupArrayAll, drawLineCallBack);
-
+    
             areaPathSVG = areaSVG.selectAll('.bChart_groups')
                 .data(dataArea);
-
+    
             areaPathSVG.exit().remove();
-
+    
             areaPathSVG.enter().append('path');
             var area = d3.svg.area()
                 .x(function (d) {
@@ -414,12 +414,12 @@
                         return options.y(parseFloat(d.y0) + parseFloat(d.y));
                     } else {
                         return d.secondAxis? options.y2(d.value) : options.y(d.value);
-
+    
                     }
                 });
             areaPathSVG.attr('d', area);
         }
-
+    
         areaPathSVG.attr('class', function (d, i) {
             return 'bChart_groups bChart_groups' + groupConcat.indexOf(d[i].group);
         })
@@ -442,23 +442,23 @@
             .transition()
             .duration(self._options.duration)
             .style('opacity', 1);
-
+    
         return self;
-
+    
     };
-
+    
     bChart.initAreaStyle = function (property) {
         return function (group, value) {
             var self = this;
             self._options.area[property][group] = bChart.hasProperty(self._options.area[property], group)?self._options.area[property][group]: value;
         };
     };
-
+    
     bChart.initAreaType = bChart.initAreaStyle('type');
     bChart.initAreaFillOpacity = bChart.initAreaStyle('fillOpacity');
     bChart.initAreaStrokeWidth = bChart.initAreaStyle('strokeWidth');
     bChart.initAreaStrokeOpacity = bChart.initAreaStyle('strokeOpacity');
-
+    
     bChart.removeAreaProperty = function (property) {
         return function (group) {
             var self = this;
@@ -467,7 +467,7 @@
             }
         };
     };
-
+    
     bChart.removeAreaType = bChart.removeAreaProperty('type');
     bChart.removeAreaStrokeWidth = bChart.removeAreaProperty('strokeWidth');
     bChart.removeAreaStrokeOpacity = bChart.removeAreaProperty('strokeOpacity');
@@ -493,7 +493,7 @@
         _uniqueGroupArrayAll: [],
         _uniqueGroupArray2: [],
         _dataset: [
-
+    
         ],
         isStack: false,
         minDefault: -1,
@@ -563,7 +563,7 @@
                 "vertical": 0
             }
         },
-
+    
         title: {
             "display": true,
             "text": "Area Chart",
@@ -593,7 +593,7 @@
                 "vertical": 0
             }
         },
-
+    
         yLabel: {
             "display": true,
             "text": "y label",
@@ -700,7 +700,7 @@
                 "vertical": 0
             }
         },
-
+    
         tooltip: {
             "display": true,
             "text": "tooltip",
@@ -719,46 +719,46 @@
             strokeOpacity: {},
             fillOpacity: {}
         }
-
+    
     };
-
+    
     var AreaChart = function (options) {
         return bChart._customConstructor(this, options, arguments, 'area');
     };
-
+    
     bChart.AreaChart = AreaChart;
-
+    
     AreaChart.prototype = Object.create(bChart.prototype);
     AreaChart.prototype.constructor = AreaChart;
-
+    
     AreaChart.prototype.draw = function () {
         var self = this;
         if (!bChart.getLength(d3.select(self._options.selector))) {
             console.log("Please make sure the element exists in your template.");
             return void 0;
         }
-
+    
         self.min('refresh').max('refresh').updateMin();
         if (self._options.secondAxis) {
             self.min2('refresh').max2('refresh').updateMin2();
         }
-
+    
         self.colors('refresh')._drawChartSVG();
-
+    
         self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
         if (self._options.secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
-
+    
     };
-
-
+    
+    
     AreaChart.prototype._drawAreaChart = function () {
         var self = this;
         var xyOptions = self._initXYAxis();
         self._drawAreaSVG(xyOptions);
         return self;
-
+    
     };
     /**
      * Created by CaptainMao on 5/22/15.
@@ -788,12 +788,12 @@
             backgroundDIV
                 .style('width', self._options.width + 'px')
                 .style('height', self._options.height + 'px');
-
+    
             if (self._options.background.displayImage) {
                 if (bChart.existy(self._options.background.imageURL)) {
                     backgroundDIV.style('background-image', 'url(' + self._options.background.imageURL + ')')
                         .style('opacity', self._options.background.opacity);
-
+    
                 } else {
                     self._options.background.displayImage = false;
                 }
@@ -823,7 +823,7 @@
     	_uniqueGroupArrayAll: [],
     	_uniqueGroupArray2: [],
     	_dataset: [
-
+    
     	],
     	minDefault: -1,
     	maxDefault: -1,
@@ -893,7 +893,7 @@
     			"vertical": 0
     		}
     	},
-
+    
     	title: {
     		"display": true,
     		"text": "Bar Chart",
@@ -923,7 +923,7 @@
     			"vertical": 0
     		}
     	},
-
+    
     	yLabel: {
     		"display": true,
     		"text": "y label",
@@ -1029,7 +1029,7 @@
     			"vertical": 0
     		}
     	},
-
+    
     	tooltip: {
     		"display": true,
     		"text": "tooltip",
@@ -1043,64 +1043,64 @@
     		"height": "auto"
     	}
     };
-
+    
     var BarChart = function (options) {
     	return bChart._customConstructor(this, options, arguments, 'bar');
-
+    
     };
-
+    
     bChart.BarChart = BarChart;
-
+    
     BarChart.prototype = Object.create(bChart.prototype);
     BarChart.prototype.constructor = BarChart;
-
+    
     BarChart.prototype.draw = function () {
     	var self = this;
     	if (!bChart.getLength(d3.select(self._options.selector))) {
     		console.log("Please make sure the element exists in your template.");
     		return void 0;
     	}
-
+    
     	self.min('refresh').max('refresh').updateMin();
     	if (self._options.secondAxis) {
     		self.min2('refresh').max2('refresh').updateMin2();
     	}
-
+    
     	self.colors('refresh')._drawChartSVG();
-
+    
     	self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
     	if (self._options.secondAxis) {
     		self.yLabel2('refresh').yAxis2('refresh');
     	}
-
+    
     };
     BarChart.prototype._drawBarChart = function () {
     	var self = this;
     	self._updateChartSize();
-
+    
     	var chartSVG = d3.select(self._options.selector).select('g.bChart');
-
-
+    
+    
     	var x0 = d3.scale.ordinal()
     		.rangeRoundBands([0, self._options._chartSVGWidth],0.1)
     		.domain(self._options._uniqueXArray);
     	var	x1 = d3.scale.ordinal()
     		.rangeRoundBands([0, x0.rangeBand()])
     		.domain(self._options._uniqueGroupArrayAll);
-
-
-
+    
+    
+    
     	// set default tickSize;
     	self._options.xAxis.tickSize = -self._options._chartSVGHeight;
     	self._options.yAxis.tickSize = -self._options._chartSVGWidth;
-
+    
     	var	xAxis = d3.svg.axis()
     		.scale(x0)
     		.orient(self._options.xAxis.orientation)
     		.ticks(self._options.xAxis.tickNumber)
     		.tickSize(self._options.xAxis.tickSize, 0, 0);
-
-
+    
+    
     	if (chartSVG.select('.bChart_x_axis').empty()) {
     		chartSVG.append('g')
     			.attr('class', 'bChart_x_axis bChart_grid')
@@ -1113,18 +1113,18 @@
     			.ease("sin-in-out")
     			.call(xAxis);
     	}
-
+    
     	var	y = d3.scale.linear()
     		.range([self._options._chartSVGHeight, 0])
     		.domain([self._options.minDefault, self._options.maxDefault]);
-
+    
     	var	yAxis = d3.svg.axis()
     		.scale(y)
     		.orient(self._options.yAxis.orientation)
     		.tickFormat(self._options.yAxis.tickFormat)
     		.ticks(self._options.yAxis.tickNumber)
     		.tickSize(self._options.yAxis.tickSize, 0, 0);
-
+    
     	if (chartSVG.select('.bChart_y_axis').empty()) {
     		chartSVG.append('g')
     			.attr('class', 'bChart_y_axis bChart_grid')
@@ -1136,7 +1136,7 @@
     			.ease("sin-in-out")
     			.call(yAxis);
     	}
-
+    
     	if (self._options.secondAxis) {
     		var	y2 = d3.scale.linear()
     			.range([self._options._chartSVGHeight, 0])
@@ -1161,37 +1161,37 @@
     				.call(yAxis2);
     		}
     	}
-
+    
     	if (self._options.isStack) {
     		drawStackSVG();
     	} else {
     		drawBarSVG();
     	}
     	return self;
-
+    
     	function drawStackSVG () {
-
+    
     		var	_datasetTmp = self._options._dataset;
     		var	groupTmp = self._options._uniqueGroupArrayAll;
-
+    
     		var stackBarArray = self.stackDataset(_datasetTmp, groupTmp, self._options._uniqueXArray);
     		var stackBarSVG = chartSVG.selectAll('.bChart_groupBar')
     			.data(stackBarArray);
-
+    
     		stackBarSVG.exit().remove();
     		stackBarSVG.enter().append('g')
     			.attr('class', function (d,i) {
     				return 'bChart_groupBar';
-
+    
     			});
-
+    
     		var barRects = stackBarSVG.selectAll('rect')
     			.data(function (d) {
     				return d;
     			});
     		barRects.exit().remove();
     		barRects.enter().append('rect');
-
+    
     		barRects.attr('width', x0.rangeBand() - self._options.barDistance)
     			.attr('x', function (d) {
     				return x0(d.x) + self._options.barDistance/2;
@@ -1215,14 +1215,14 @@
     					return self._options._chartSVGHeight - y(d.y + d.y0);
     				} else {
     					return y(d.y0) - y(d.y + d.y0);
-
+    
     				}
     			})
     			.attr('class', function (d) {
     				return 'bChart_groups bChart_groups' + self._options._uniqueGroupArrayAll.indexOf(d.group);
     			});
     	}
-
+    
     	function drawBarSVG(){
     		var	_datasetTmp = self._options._dataset;
     		var	groupConcat = self._options._uniqueGroupArrayAll;
@@ -1231,31 +1231,31 @@
     			var groupBarValue = _datasetTmp.filter(function (el) {
     				return el.x === value;
     			});
-
+    
     			groupBarArray.push({x: value, data: groupBarValue});
     		});
-
+    
     		var groupBarSVG = chartSVG.selectAll('.bChart_groupBar')
     			.data(groupBarArray);
-
+    
     		groupBarSVG.exit().remove();
     		groupBarSVG.enter().append('g')
     			.attr('class', function (d, i) {
     				return 'bChart_groupBar';
     			});
-
+    
     		groupBarSVG.attr('transform', function (d) {
     			return 'translate(' + x0(d.x) + ',0)';
     		});
-
+    
     		var barRects = groupBarSVG.selectAll('rect')
     			.data(function (d) {
     				return d.data;
     			});
-
+    
     		barRects.exit().transition().attr('height', 0).remove();
     		barRects.enter().append('rect');
-
+    
     		barRects.attr('width', x1.rangeBand() - self._options.barDistance)
     			.attr('x', function (d, i) {
     				return x1(d.group) + self._options.barDistance/2;
@@ -1273,7 +1273,7 @@
     			.duration(self._options.duration)
     			.attr('y', function (d) {
     				return d.secondAxis? y2(d.value) : y(d.value);
-
+    
     			})
     			.attr('height', function (d) {
     				return d.secondAxis? self._options._chartSVGHeight - y2(d.value) : self._options._chartSVGHeight - y(d.value);
@@ -1283,8 +1283,8 @@
     			});
     	}
     };
-
-
+    
+    
 
     /**
      * Created by CaptainMao on 5/22/15.
@@ -1308,7 +1308,7 @@
         var composePropertyObject = function (firstLevel) {
             return function (options) {
                 if (bChart.existy(options)) {
-
+    
                     var newOption = {};
                     if (bChart.typeString(options)) {
                         if (arguments.length == 1) {
@@ -1316,19 +1316,19 @@
                         }
                         else {
                             newOption[arguments[0]] = arguments[1];
-
+    
                         }
                     } else {
                         newOption = options;
                     }
                     if (bChart.existy(firstLevel)) {
                         if (bChart.typeString(firstLevel) && (firstLevel === '_dataset') ) {
-
+    
                             bChart.each(options, function (value, key, opt) {
                                 if (!bChart.existy(opt[key].group)) {
                                     opt[key].group = "";
                                 }
-
+    
                             });
                             self._options[firstLevel] = options;
                         } else {
@@ -1336,8 +1336,8 @@
                                 bChart.setProperty(self._options[firstLevel], key, value);
                             });
                         }
-
-
+    
+    
                     } else {
                         bChart.each(newOption, function (value, key) {
                             if (key === "data") {
@@ -1347,11 +1347,11 @@
                             }
                         });
                     }
-
+    
                 }
             };
         };
-
+    
         if (bChart.existy(type)) {
             _setOption = composePropertyObject(type);
         } else {
@@ -1372,9 +1372,9 @@
         } else {
             inputOption = options;
             _setOption(inputOption);
-
+    
         }
-
+    
         return self;
     };
     bChart.prototype.getOptions = function(key) {
@@ -1389,7 +1389,7 @@
             return self.options;
         }
     };
-
+    
     bChart.prototype.width = function (options) {
         var self = this;
         if (bChart.existy(options) && bChart.typeNumber(options)) {
@@ -1405,7 +1405,7 @@
             return self._options.width;
         }
     };
-
+    
     bChart.prototype.height = function (options) {
         var self = this;
         if (bChart.existy(options)) {
@@ -1420,7 +1420,7 @@
             return self._options.height;
         }
     };
-
+    
     bChart.prototype._updateChartSize = function () {
         var self = this;
         var childSVG, chartSVG;
@@ -1429,33 +1429,33 @@
         } else {
             self._options.padding.right = 90;
         }
-
+    
         self._options._chartSVGWidth = self._options.width - self._options.padding.left - self._options.padding.right;
         self._options._chartSVGHeight = self._options.height - self._options.padding.top - self._options.padding.bottom;
-
+    
         var parentSVG = d3.select(self._options.selector);
-
+    
         if (!parentSVG.select('svg').empty()) {
             childSVG = parentSVG.select('svg');
         } else {
             childSVG = parentSVG.append("svg");
         }
-
+    
         childSVG.attr('width', self._options.width).attr('height', self._options.height);
-
+    
         if (!childSVG.select('g.bChart').empty()) {
             chartSVG = childSVG.select('g.bChart');
         } else {
             chartSVG = childSVG.append('g').attr('class', 'bChart');
         }
-
+    
         chartSVG.attr('width', self._options._chartSVGWidth)
             .attr('height', self._options._chartSVGHeight)
             .attr('transform', 'translate(' + self._options.padding.left + ',' + self._options.padding.top + ')');
         return self;
-
+    
     };
-
+    
     bChart.prototype._drawChartSVG = function () {
         var self = this;
         switch (self.constructor) {
@@ -1471,15 +1471,15 @@
                 return self._drawAreaChart();
             case PieChart:
                 return self._drawPieChart();
-
+    
         }
             
     };
-
+    
     bChart.prototype._initXYAxis = function () {
         var self = this;
         self._updateChartSize();
-
+    
         var chartSVG = d3.select(self._options.selector).select('g.bChart');
         var x0, y, y2, yAxis, yAxis2, xAxis;
         if (!self._options.xAxis.isTimeSeries) {
@@ -1487,18 +1487,18 @@
                 .rangePoints([0, self._options._chartSVGWidth],0.1)
                 .domain(self._options._uniqueXArray);
         }
-
+    
         // set default tickSize;
         self._options.xAxis.tickSize = -self._options._chartSVGHeight;
         self._options.yAxis.tickSize = -self._options._chartSVGWidth;
-
+    
         xAxis = d3.svg.axis()
             .scale(x0)
             .orient(self._options.xAxis.orientation)
             .ticks(self._options.xAxis.tickNumber)
             .tickSize(self._options.xAxis.tickSize, 0, 0);
-
-
+    
+    
         if (chartSVG.select('.bChart_x_axis').empty()) {
             chartSVG.append('g')
                 .attr('class', 'bChart_x_axis bChart_grid')
@@ -1511,18 +1511,18 @@
                 .ease("sin-in-out")
                 .call(xAxis);
         }
-
+    
         y = d3.scale.linear()
             .range([self._options._chartSVGHeight, 0])
             .domain([self._options.minDefault, self._options.maxDefault]);
-
+    
         yAxis = d3.svg.axis()
             .scale(y)
             .orient(self._options.yAxis.orientation)
             .tickFormat(self._options.yAxis.tickFormat)
             .ticks(self._options.yAxis.tickNumber)
             .tickSize(self._options.yAxis.tickSize, 0, 0);
-
+    
         if (chartSVG.select('.bChart_y_axis').empty()) {
             chartSVG.append('g')
                 .attr('class', 'bChart_y_axis bChart_grid')
@@ -1534,7 +1534,7 @@
                 .ease("sin-in-out")
                 .call(yAxis);
         }
-
+    
         if (self._options.secondAxis) {
             y2 = d3.scale.linear()
                 .range([self._options._chartSVGHeight, 0])
@@ -1559,7 +1559,7 @@
                     .call(yAxis2);
             }
         }
-
+    
         return {
             x0: x0,
             y: y,
@@ -1598,7 +1598,7 @@
                         }
                         objOption[groupName] = valueArray;
                         var indexOfBubble = 0;
-
+    
                         bChart.each(self._options._dataset, function (el) {
                             if (el.group === groupName) {
                                 el.size = valueArray[indexOfBubble];
@@ -1616,7 +1616,7 @@
                                 indexOfBubble++;
                             }
                         });
-
+    
                         objOption = args;
                     } else {
                         bChart.each(options, function (value, key) {
@@ -1628,22 +1628,22 @@
                                 }
                             });
                         });
-
+    
                         objOption = options;
                     }
-
+    
                 }
                 self.setOptions(objOption, 'bubble');
-
+    
                 drawBubble();
             }
-
+    
             return self;
         }
-
+    
         function drawBubble() {
-
-
+    
+    
             self._drawChartSVG();
         }
     };
@@ -1668,10 +1668,10 @@
         _uniqueGroupArrayAll: [],
         _uniqueGroupArray2: [],
         _dataset: [
-
+    
         ],
         bubble: {
-
+    
         },
         minDefault: -1,
         maxDefault: -1,
@@ -1740,7 +1740,7 @@
                 "vertical": 0
             }
         },
-
+    
         title: {
             "display": true,
             "text": "Bubble Chart",
@@ -1770,7 +1770,7 @@
                 "vertical": 0
             }
         },
-
+    
         yLabel: {
             "display": true,
             "text": "y label",
@@ -1877,7 +1877,7 @@
                 "vertical": 0
             }
         },
-
+    
         tooltip: {
             "display": true,
             "text": "tooltip",
@@ -1897,48 +1897,48 @@
             fillOpacity: {},
             strokeWidth: {}
         }
-
+    
     };
-
+    
     var BubbleChart = function (options) {
         return bChart._customConstructor(this, options, arguments, 'bubble');
     };
-
+    
     bChart.BubbleChart = BubbleChart;
-
+    
     BubbleChart.prototype = Object.create(bChart.prototype);
     BubbleChart.prototype.constructor = BubbleChart;
-
+    
     BubbleChart.prototype.draw = function () {
         var self = this;
         if (!bChart.getLength(d3.select(self._options.selector))) {
             console.log("Please make sure the element exists in your template.");
             return void 0;
         }
-
+    
         self.min('refresh').max('refresh').updateMin();
         if (self._options.secondAxis) {
             self.min2('refresh').max2('refresh').updateMin2();
         }
-
+    
         self.colors('refresh')._drawChartSVG();
-
+    
         self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
         if (self._options.secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
-
+    
     };
-
-
+    
+    
     BubbleChart.prototype._drawBubbleChart = function () {
         var self = this;
-
+    
         var xyOption = self._initXYAxis();
         self._drawNodeSVG(xyOption).node('refresh');
-
+    
         return self;
-
+    
     };
     /**
      * Created by CaptainMao on 5/22/15.
@@ -1956,7 +1956,7 @@
             }
             return self;
         }
-
+    
         function updateColors() {
             var colorTmp = "";
             bChart.each(self._options._uniqueGroupArrayAll, function (value, key) {
@@ -1978,29 +1978,29 @@
         var stackGroup = stack(groupArray.map(function (gd) {
                 var stack_array = [],
                     stack_array_modified = [];
-
+    
                 bChart.each(_datasetInputs, function (value, key, array) {
                     if (gd === array[key].group) {
                         stack_array.push(array[key]);
                     }
                 });
-
+    
                 stack_array_modified = stack_array.filter(function (el, idx) {
-
+    
                     return xArray.indexOf(el.x) >= 0;
                 });
-
+    
                 return stack_array_modified.map(function (d) {
                     return {x: d.x, value: +parseFloat(d.value), secondAxis: d.secondAxis,  y: +parseFloat(d.value),  group: d.group};
                 });
-
-
+    
+    
             }
         ));
         return stackGroup;
-
+    
     };
-
+    
     bChart.prototype.load = function (options) {
         var self = this;
         if (bChart.existy(options)) {
@@ -2011,13 +2011,13 @@
                 self.loadObjectData(options);
             }
         }
-
-
-
+    
+    
+    
         if (!d3.select(self._options.selector).select('svg').empty()) {
             if (self.constructor === PieChart) {
                 self.colors('refresh')._drawChartSVG();
-
+    
                 self.title('refresh').legend('refresh').tooltip('refresh');
             } else {
                 if (self._options.secondAxis) {
@@ -2025,9 +2025,9 @@
                 }
                 self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().legend('refresh').tooltip('refresh');
             }
-
+    
         }
-
+    
         return self;
     };
     bChart.prototype.loadObjectData = function (obj) {
@@ -2037,26 +2037,26 @@
                 obj.groups = obj.groups.splice(0, obj.dataValue.length);
                 self._options._uniqueGroupArrayAll = bChart.concatNoDuplicate(self._options._uniqueGroupArrayAll, obj.groups);
             }
-
+    
             if (bChart.hasProperty(obj, 'x')) {
                 self._options._uniqueXArray = bChart.concatNoDuplicate(self._options._uniqueXArray, obj.x);
             }
-
+    
             if (bChart.hasProperty(obj, 'groups2') && obj.groups2.length > 0) {
                 self._options.secondAxis = true;
                 self._options._uniqueGroupArray2 = bChart.concatNoDuplicate(self._options._uniqueGroupArray2, obj.groups2);
                 //self._options._uniqueGroupArray = bChart.removeArrayFromArray(self._options._uniqueGroupArrayAll, self._options._uniqueGroupArray2);
             }
-
+    
             if (bChart.isArrayLike(obj.dataValue)) {
                 self.loadArrayData(obj.dataValue, obj);
             }
-
-
+    
+    
         }
-
+    
     };
-
+    
     bChart.prototype.loadArrayData = function (array, obj) {
         var self = this;
         var isUniqueXNotEmpty = self._options._uniqueXArray.length > 0;
@@ -2081,35 +2081,35 @@
                         bChart.initNodeSize.call(self, groupName, 128);
                         bChart.initNodeFillOpacity.call(self, groupName, 1);
                         bChart.initNodeStrokeWidth.call(self, groupName, 1);
-
+    
                     }
-
+    
                     if (bChart.hasProperty(self._options, 'line')) {
                         bChart.initLineType.call(self, groupName, 'linear');
                         bChart.initLineStrokeWidth.call(self, groupName, '3');
                         bChart.initLineStrokeOpacity.call(self, groupName, '1');
                     }
-
+    
                     if (bChart.hasProperty(self._options, 'area')) {
                         if (self.options.isStack) {
                             bChart.initAreaFillOpacity.call(self, groupName, '0.8');
-
+    
                         } else {
                             bChart.initAreaFillOpacity.call(self, groupName, '0.4');
                         }
                         bChart.initAreaStrokeOpacity.call(self, groupName, '1');
                         bChart.initAreaStrokeWidth.call(self, groupName, '1');
                     }
-
+    
                     loopDataValue(array, obj);
                 }
             }
         }
-
+    
         function loopDataValue (array, obj) {
             bChart.each(array[i], function (elem, idx) {
                 if (bChart.typeNumber(array[i][idx])) {
-
+    
                     var dataItem = {x: "", group: groupName, value: array[i][idx]};
                     if (bChart.typeNumber(array[i][0])) {
                         dataItem = setDataXValue(dataItem, obj, idx);
@@ -2125,13 +2125,13 @@
                             self._options.bubble[groupName] = bubbleArray[0];
                             dataItem.size = bubbleArray[0][idx];
                         }
-
+    
                     }
-
+    
                     if (!isUniqueXNotEmpty) {
                         self._options._uniqueXArray.push(dataItem.x);
                     }
-
+    
                     if (bChart.isElementInArray(groupName, self._options._uniqueGroupArray2)) {
                         dataItem.secondAxis = true;
                     } else {
@@ -2141,7 +2141,7 @@
                 }
             });
         }
-
+    
         function setDataXValue(dataItem, obj, idx) {
             if (bChart.existy(obj) && bChart.hasProperty(obj, 'x') && bChart.existy(obj.x[idx])) {
                 dataItem.x = obj.x[idx];
@@ -2155,7 +2155,7 @@
             return dataItem;
         }
     };
-
+    
     bChart.prototype.unload = function (options) {
         var self = this;
         var unloadGroup = function (collection) {
@@ -2168,7 +2168,7 @@
                     bChart.removeElementFromArray(elem, self._options._uniqueGroupArray2);
                         self._options.secondAxis = !!self._options._uniqueGroupArray2.length;
                 }
-
+    
                 if (bChart.hasProperty(self._options, 'node') && bChart.existy(self._options.node.type[elem.group])) {
                     bChart.removeNodeType.call(self, elem.group);
                     bChart.removeNodeSize.call(self, elem.group);
@@ -2176,13 +2176,13 @@
                     bChart.removeNodeStrokeOpacity.call(self, elem.group);
                     bChart.removeNodeFillOpacity.call(self, elem.group);
                 }
-
+    
                 if (bChart.hasProperty(self._options, 'line') && bChart.existy(self._options.line.type[elem.group])) {
                     bChart.removeLineType.call(self, elem.group);
                     bChart.removeLineStrokeWidth.call(self, elem.group);
                     bChart.removeLineStrokeOpacity.call(self, elem.group);
                 }
-
+    
                 if (bChart.hasProperty(self._options, 'area') && bChart.existy(self._options.area.fillOpacity[elem.group])) {
                     bChart.removeAreaFillOpacity.call(self, elem.group);
                     bChart.removeAreaStrokeOpacity.call(self, elem.group);
@@ -2207,13 +2207,13 @@
                     unloadGroup(options.groups);
                 }
             }
-
+    
         }
-
+    
         if (!d3.select(self._options.selector).select('svg').empty()) {
             if (self.constructor === PieChart) {
                 self.colors('refresh')._drawChartSVG();
-
+    
                 self.title('refresh').legend('refresh').tooltip('refresh');
             } else {
                 if (self._options.secondAxis) {
@@ -2221,10 +2221,10 @@
                 }
                 self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().yAxis2('refresh').yLabel2('refresh').legend('refresh').tooltip('refresh');
             }
-
+    
         }
     };
-
+    
     bChart.prototype._dataset = function (options) {
         var self = this;
         if (bChart.existy(options) && bChart.typeString(options) && options === 'option') {
@@ -2250,23 +2250,23 @@
             }
             return self;
         }
-
+    
         function drawLegend () {
             var _checkedLegend = [];
             var chartSVG = d3.select(self._options.selector).select('g.bChart');
-
+    
             if (self._options.legend.display) {
                 if (!chartSVG.selectAll('.bChart_legend').empty()) {
                     chartSVG.selectAll('.bChart_legend').remove();
                 }
                 var legendRectX, legendRectY, legendTextX, legendTextY, legendTextAnchor;
-
+    
                 var groupConcat = self._options._uniqueGroupArrayAll;
                 var legendSVG = chartSVG.selectAll('.bChart_legend')
                     .data(groupConcat)
                     .enter().append('g')
                     .attr('class', 'bChart_legend');
-
+    
                 switch (self._options.legend.position) {
                     case 'topright':
                         legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
@@ -2274,7 +2274,7 @@
                         legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20- self._options.legend.offsetText;
                         legendTextY = -56 - self._options.legend.offsetAdjust.vertical;
                         legendTextAnchor = 'end';
-
+    
                         break;
                     case 'right':
                         legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
@@ -2290,7 +2290,7 @@
                         legendTextY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 56;
                         legendTextAnchor = 'end';
                 }
-
+    
                 legendSVG.attr('transform', function (d, i) {
                     return 'translate(0, ' + (i * self._options.legend.offsetSymbol) + ')';
                 })
@@ -2314,8 +2314,8 @@
                     .text(function (d) {
                         return d;
                     });
-
-
+    
+    
                 legendSVG.append('rect')
                     .attr('x', legendRectX)
                     .attr('y', legendRectY)
@@ -2324,39 +2324,39 @@
                     .style('fill', function (d, i) {
                         return self._options._colorMap[d];
                     });
-
+    
                 legendSVG.on('mouseover', function(d) {
                     chartSVG.selectAll('.bChart_legend').classed('unhover',true);
                     chartSVG.selectAll('.bChart_groups').classed('unhover',true);
                     d3.select(this).classed('unhover',false);
-
+    
                     var groupConcat = self._options._uniqueGroupArrayAll;
-
+    
                     var matchingBarIndex = groupConcat.indexOf(d);
                     var matchingClass = '.bChart_groups' + matchingBarIndex;
                     chartSVG.selectAll(matchingClass)
                         .classed('unhover', false);
-
-
+    
+    
                 })
                     .on('mouseout', function (d) {
                         chartSVG.selectAll('.bChart_legend').classed('unhover',false);
                         chartSVG.selectAll('.bChart_groups').classed('unhover',false);
-
-
+    
+    
                     })
                     .on('click', function(d){
                         var allLegend = chartSVG.selectAll('.bChart_legend');
-
+    
                         if (!_checkedLegend.length) {
                             allLegend.classed('inactive', true);
                             self._options._datasetTmp = self._options._dataset;
-
+    
                             self._options._uniqueGroupTmp = self._options._uniqueGroupArrayAll;
-
+    
                         }
-
-
+    
+    
                         if (!bChart.isElementInArray(d, _checkedLegend)) {
                             _checkedLegend.push(d);
                             d3.select(this).classed('inactive', false)
@@ -2366,26 +2366,26 @@
                             d3.select(this).classed('inactive', true)
                                 .classed('active', false);
                         }
-
+    
                         self._options._uniqueGroupArrayAll = _checkedLegend;
-
+    
                         self._options._uniqueGroupArrayAll.sort(function (a, b) {
                             return bChart.getIndexOfElement(a, self._options._uniqueGroupTmp) - bChart.getIndexOfElement(b, self._options._uniqueGroupTmp);
                         });
-
+    
                         if (bChart.existy(self._options.secondAxis)) {
                             self._options.secondAxis = bChart.isOverlapArray(self._options._uniqueGroupArray2, _checkedLegend) || (!_checkedLegend.length && self._options._uniqueGroupArray2.length);
                         }
-
+    
                         if (!_checkedLegend.length || _checkedLegend.length === self._options._uniqueGroupTmp.length) {
                             allLegend.classed('inactive', false)
                                 .classed('active', false)
                                 .classed('unhover', false);
-
+    
                             self._options._uniqueGroupArrayAll = self._options._uniqueGroupTmp;
-
+    
                         }
-
+    
                         self._updateDatasetBySelection(_checkedLegend);
                         if (_checkedLegend.length === self._options._uniqueGroupTmp.length) {
                             _checkedLegend = [];
@@ -2396,16 +2396,16 @@
             }
         }
     };
-
+    
     bChart.prototype._updateDatasetBySelection = function (selections) {
         var self = this;
         var displayDataset = [];
-
+    
         if (!selections.length) {
             displayDataset = self._options._datasetTmp;
             self._options._datasetTmp = [];
             self._options._uniqueGroupTmp = [];
-
+    
         } else {
             displayDataset = self._options._datasetTmp.filter(function (el, idx) {
                 return selections.indexOf(el.group) >= 0;
@@ -2413,12 +2413,12 @@
         }
         if (self.constructor === PieChart) {
             self.setOptions([displayDataset], '_dataset')._drawChartSVG();
-
+    
             self.title('refresh').tooltip('refresh');
         } else {
             self.setOptions([displayDataset], '_dataset').min('refresh').max('refresh').updateMin()._drawChartSVG().yLabel2('refresh').yAxis2('refresh').tooltip('refresh');
         }
-
+    
     };
     /**
      * Created by CaptainMao on 5/23/15.
@@ -2436,33 +2436,33 @@
                     var groupKey = self._options._uniqueGroupArrayAll[groupIndex - 1];
                     arguments[0] = arguments[0].split('.')[0] + '.' + groupKey;
                 }
-
+    
                 self.setOptions(arguments, 'line');
                 self._drawLineSVG();
             }
             return self;
         }
-
-
+    
+    
     };
-
+    
     bChart.prototype._drawLineSVG = function (options) {
         var self = this;
         var	_datasetTmp = self._options._dataset;
         var	groupConcat = self._options._uniqueGroupArrayAll;
         var chartSVG = d3.select(self._options.selector).select('g.bChart');
-
+    
         var lineSVG, linePathSVG;
         var dataLine = [];
-
-
+    
+    
         if (chartSVG.select('.bChart_lines').empty()) {
             lineSVG = chartSVG.append('g')
                 .attr('class', 'bChart_lines');
         } else {
             lineSVG = chartSVG.select('.bChart_lines');
         }
-
+    
         if (bChart.existy(options)) {
             var drawLineCallBack = function (elem) {
                 var singleLineArray = _datasetTmp.filter(function (el) {
@@ -2471,12 +2471,12 @@
                 dataLine.push(singleLineArray);
             };
             bChart.each(self._options._uniqueGroupArrayAll, drawLineCallBack);
-
+    
             linePathSVG = lineSVG.selectAll('.bChart_groups')
                 .data(dataLine);
-
+    
             linePathSVG.exit().remove();
-
+    
             linePathSVG.enter().append('path');
             var line = d3.svg.line()
                 .x(function (d) {
@@ -2487,7 +2487,7 @@
                 });
             linePathSVG.attr('d', line);
         }
-
+    
         linePathSVG.attr('class', function (d, i) {
                 return 'bChart_groups bChart_groups' + groupConcat.indexOf(d[i].group);
             })
@@ -2505,25 +2505,25 @@
             })
             .style('opacity', 0.1)
             .transition()
-
+    
             .duration(self._options.duration)
             .style('opacity', 1);
-
+    
         return self;
-
+    
     };
-
+    
     bChart.initLineStyle = function (property) {
         return function (group, value) {
             var self = this;
             self._options.line[property][group] = bChart.hasProperty(self._options.line[property], group)?self._options.line[property][group]: value;
         };
     };
-
+    
     bChart.initLineType = bChart.initLineStyle('type');
     bChart.initLineStrokeWidth = bChart.initLineStyle('width');
     bChart.initLineStrokeOpacity = bChart.initLineStyle('opacity');
-
+    
     bChart.removeLineProperty = function (property) {
         return function (group) {
             var self = this;
@@ -2532,7 +2532,7 @@
             }
         };
     };
-
+    
     bChart.removeLineType = bChart.removeLineProperty('type');
     bChart.removeLineStrokeWidth = bChart.removeLineProperty('width');
     bChart.removeLineStrokeOpacity = bChart.removeLineProperty('opacity');
@@ -2557,7 +2557,7 @@
         _uniqueGroupArrayAll: [],
         _uniqueGroupArray2: [],
         _dataset: [
-
+    
         ],
         minDefault: -1,
         maxDefault: -1,
@@ -2626,7 +2626,7 @@
                 "vertical": 0
             }
         },
-
+    
         title: {
             "display": true,
             "text": "Line Chart",
@@ -2656,7 +2656,7 @@
                 "vertical": 0
             }
         },
-
+    
         yLabel: {
             "display": true,
             "text": "y label",
@@ -2763,7 +2763,7 @@
                 "vertical": 0
             }
         },
-
+    
         tooltip: {
             "display": true,
             "text": "tooltip",
@@ -2788,49 +2788,49 @@
             width: {},
             opacity: {}
         }
-
+    
     };
-
+    
     var LineChart = function (options) {
         return bChart._customConstructor(this, options, arguments, 'line');
     };
-
+    
     bChart.LineChart = LineChart;
-
+    
     LineChart.prototype = Object.create(bChart.prototype);
     LineChart.prototype.constructor = LineChart;
-
+    
     LineChart.prototype.draw = function () {
         var self = this;
         if (!bChart.getLength(d3.select(self._options.selector))) {
             console.log("Please make sure the element exists in your template.");
             return void 0;
         }
-
+    
         self.min('refresh').max('refresh').updateMin();
         if (self._options.secondAxis) {
             self.min2('refresh').max2('refresh').updateMin2();
         }
-
+    
         self.colors('refresh')._drawChartSVG();
-
+    
         self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
         if (self._options.secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
-
+    
     };
-
-
+    
+    
     LineChart.prototype._drawLineChart = function () {
         var self = this;
         var xyOptions = self._initXYAxis();
         self._drawLineSVG(xyOptions)._drawNodeSVG(xyOptions).node('refresh');
         return self;
-
-
-
-
+    
+    
+    
+    
     };
     /**
      * Created by CaptainMao on 5/22/15.
@@ -2840,7 +2840,7 @@
         if (!bChart.existy(options)) {
             return self._options.maxDefault2;
         }
-
+    
         if (bChart.typeNumber(options)) {
             self._options.max2 = options;
             self._options.maxDefault2 = options;
@@ -2868,10 +2868,10 @@
                 }
             }
         }
-
+    
         return self;
     };
-
+    
     bChart.prototype.max = function (options) {
         var self = this;
         if (!bChart.existy(options)) {
@@ -2902,7 +2902,7 @@
                 }
             }
         }
-
+    
         return self;
     };
     /**
@@ -2913,7 +2913,7 @@
         if (!bChart.existy(options)) {
             return self._options.minDefault2;
         }
-
+    
         if (bChart.typeNumber(options)) {
             self._options.min2 = options;
             self._options.minDefault2 = options;
@@ -2928,18 +2928,18 @@
                 self._options.minDefault2 = self._options.min2;
             }
         }
-
+    
         return self;
     };
-
-
-
+    
+    
+    
     bChart.prototype.min = function (options) {
         var self = this;
         if (!bChart.existy(options)) {
             return self._options.minDefault;
         }
-
+    
         if (bChart.typeNumber(options)) {
             self._options.min = options;
             self._options.minDefault = options;
@@ -2952,11 +2952,11 @@
                 self._options.minDefault = self._options.min;
             }
         }
-
-
+    
+    
         return self;
     };
-
+    
     bChart.prototype.updateMin2 = function () {
         var self = this;
         if (!bChart.existy(self._options.max2) && !bChart.existy(self._options.min2)) {
@@ -2965,7 +2965,7 @@
         //self._options.minDefault <= 0 ? 0: self._options.minDefault;
         return self;
     };
-
+    
     bChart.prototype.updateMin = function () {
         var self = this;
         if (!bChart.existy(self._options.max) && !bChart.existy(self._options.min)) {
@@ -2994,15 +2994,15 @@
             }
             return self;
         }
-
+    
     };
-
+    
     bChart.prototype._drawNodeSVG = function (options) {
         var self = this;
         var	_datasetTmp = self._options._dataset;
         var	groupConcat = self._options._uniqueGroupArrayAll;
         var chartSVG = d3.select(self._options.selector).select('g.bChart');
-
+    
         var nodeSVG, nodePathSVG;
         if (chartSVG.select('.bChart_nodes').empty()) {
             nodeSVG = chartSVG.append('g')
@@ -3010,23 +3010,23 @@
         } else {
             nodeSVG = chartSVG.select('.bChart_nodes');
         }
-
+    
         var nodeGenerator = d3.svg.symbol()
             .type(function (d) {
                 return self._options.node.type[d.group];
             }).size(function (d) {
                 return bChart.existy(d.size) ? d.size : self._options.node.size[d.group];
             });
-
+    
         if (bChart.existy(options)) {
             nodePathSVG = nodeSVG.selectAll('.bChart_groups')
                 .data(_datasetTmp);
-
-
+    
+    
             nodePathSVG.exit().remove();
-
+    
             nodePathSVG.enter().append('path');
-
+    
             nodePathSVG.attr('class', function(d) {
                     return 'bChart_groups bChart_groups' + groupConcat.indexOf(d.group);
                 })
@@ -3055,24 +3055,24 @@
                 nodePathSVG.style('display', 'none');
             }
         }
-
+    
         return self;
-
+    
     };
-
+    
     bChart.initNodeStyle = function (property) {
         return function (group, value) {
             var self = this;
             self._options.node[property][group] = bChart.hasProperty(self._options.node[property], group)?self._options.node[property][group]: value;
         };
     };
-
+    
     bChart.initNodeType = bChart.initNodeStyle('type');
     bChart.initNodeSize = bChart.initNodeStyle('size');
     bChart.initNodeFillOpacity = bChart.initNodeStyle('fillOpacity');
     bChart.initNodeStrokeWidth = bChart.initNodeStyle('strokeWidth');
     bChart.initNodeStrokeOpacity = bChart.initNodeStyle('strokeOpacity');
-
+    
     bChart.removeNodeProperty = function (property) {
         return function (group) {
             var self = this;
@@ -3081,7 +3081,7 @@
             }
         };
     };
-
+    
     bChart.removeNodeType = bChart.removeNodeProperty('type');
     bChart.removeNodeSize = bChart.removeNodeProperty('size');
     bChart.removeNodeFillOpacity = bChart.removeNodeProperty('fillOpacity');
@@ -3107,9 +3107,9 @@
         _uniqueGroupTmp: [],
         _uniqueGroupArrayAll: [],
         _dataset: [
-
+    
         ],
-
+    
         width: 400,
         height: 400,
         textRadiusDefault: '',
@@ -3120,12 +3120,12 @@
             "displayImage": false,
             "opacity": 1
         },
-
+    
         valueDisplay: {
             display: true
-
+    
         },
-
+    
         // border: {
         // 	"opacity": 1,
         // 	"color": {
@@ -3180,7 +3180,7 @@
                 "vertical": 0
             }
         },
-
+    
         title: {
             "display": true,
             "text": "Pie Chart",
@@ -3195,7 +3195,7 @@
                 "vertical": 0
             }
         },
-
+    
         tooltip: {
             "display": true,
             "text": "tooltip",
@@ -3214,37 +3214,37 @@
         //    strokeOpacity: {},
         //    fillOpacity: {}
         //}
-
+    
     };
-
+    
     var PieChart = function (options) {
         return bChart._customConstructor(this, options, arguments, 'pie');
     };
-
+    
     bChart.PieChart = PieChart;
-
+    
     PieChart.prototype = Object.create(bChart.prototype);
     PieChart.prototype.constructor = PieChart;
-
+    
     PieChart.prototype.draw = function () {
         var self = this;
         if (!bChart.getLength(d3.select(self._options.selector))) {
             console.log("Please make sure the element exists in your template.");
             return void 0;
         }
-
+    
         self.colors('refresh')._drawChartSVG();
-
+    
         self.title('refresh').legend('refresh').tooltip('refresh');
-
-
+    
+    
     };
-
-
+    
+    
     PieChart.prototype._drawPieChart = function () {
         var self = this;
         self._updateChartSize();
-
+    
         var	_datasetTmp = self._options._dataset;
         var	groupConcat = self._options._uniqueGroupArrayAll;
         var chartSVG = d3.select(self._options.selector).select('g.bChart');
@@ -3261,7 +3261,7 @@
         } else {
             self._options.textRadiusDefault = self._options.outerRadiusDefault / 2;
         }
-
+    
         var arc = d3.svg.arc()
             .outerRadius(self._options.outerRadiusDefault)
             .startAngle(function (d) {
@@ -3270,18 +3270,18 @@
             .endAngle(function (d) {
                 return d.endAngle;
             });
-        var arc_init = d3.svg.arc()
-            .outerRadius(1);
-
+        //var arc_init = d3.svg.arc()
+        //    .outerRadius(1);
+    
         var pie = d3.layout.pie()
             .value(function (d) {
                 return d.value;
             })
             .sort(null);
-
+    
         var pieSVG, arcSVG, pieDataset, textSVG;
         pieDataset = pie(_datasetTmp);
-
+    
         if (chartSVG.select('.bChart_pie').empty()) {
             pieSVG = chartSVG.append('g')
                 .attr('class', 'bChart_pie');
@@ -3289,44 +3289,61 @@
             pieSVG = chartSVG.select('.bChart_pie');
         }
         pieSVG.attr('transform', 'translate(' + self._options._chartSVGWidth / 2 + ',' + self._options._chartSVGHeight/ 2 + ')');
-
+        var arcTween = function (a) {
+            var interpolate = d3.interpolate(this._current, a);
+            this._current = interpolate(0);
+            return function(t) {
+                return arc(interpolate(t));
+            };
+        };
         arcSVG = pieSVG.selectAll('.bChart_arc')
             .data(pieDataset);
-
-
-
-
-
-        arcSVG.exit().remove();
-
+    
+        arcSVG.exit()
+            //.transition()
+            //.duration(self._options.duration)
+            .remove();
+    
         arcSVG.enter().append('path')
             .attr('class', function (d) {
                 return 'bChart_arc bChart_groups bChart_groups' + groupConcat.indexOf(d.data.group);
-            });
-
+            })
+            .attr('fill', function (d) {
+                return self._options._colorMap[d.data.group];
+            })
+            .attr('stroke', '#ffffff')
+            .each(function (d, i) {
+                if (i > 0) {
+                    this._current = pieDataset[i-1];
+                } else {
+                    this._current = {startAngle: 0, endAngle: 0};
+    
+                }
+            })
+            .transition()
+            .duration(self._options.duration)
+            .attr('d', arcTween);
+    
         arcSVG
             .attr('fill', function (d) {
                 return self._options._colorMap[d.data.group];
             })
-            .attr('d', arc_init)
-            .style('opacity', 0)
             .transition()
             .duration(self._options.duration)
-            .attr('d', arc)
-            .attr('stroke', '#ffffff')
-            .style('opacity', 1);
-
+            .attrTween("d", arcTween);
+    
+    
         textSVG = pieSVG.selectAll('.bChart_arc_text')
             .data(pieDataset);
         if (self._options.valueDisplay.display) {
             textSVG.style('display', 'block');
-
+    
             textSVG.exit().remove();
             textSVG.enter().append('text')
                 .attr('class', function (d) {
                     return 'bChart_arc_text bChart_groups bChart_groups' + groupConcat.indexOf(d.data.group);
                 });
-
+    
             textSVG
                 .attr('transform', function (d) {
                     return 'translate(' + Math.cos((d.startAngle + d.endAngle - Math.PI) / 2) * self._options.textRadiusDefault + ',' + Math.sin((d.startAngle + d.endAngle - Math.PI) / 2) * self._options.textRadiusDefault + ')';
@@ -3339,12 +3356,12 @@
         } else {
             textSVG.style('display', 'none');
         }
-
-
-
-
+    
+    
+    
+    
         return self;
-
+    
     };
 
     /**
@@ -3368,7 +3385,7 @@
         _uniqueGroupArrayAll: [],
         _uniqueGroupArray2: [],
         _dataset: [
-
+    
         ],
         minDefault: -1,
         maxDefault: -1,
@@ -3437,7 +3454,7 @@
                 "vertical": 0
             }
         },
-
+    
         title: {
             "display": true,
             "text": "Scatter Chart",
@@ -3467,7 +3484,7 @@
                 "vertical": 0
             }
         },
-
+    
         yLabel: {
             "display": true,
             "text": "y label",
@@ -3574,7 +3591,7 @@
                 "vertical": 0
             }
         },
-
+    
         tooltip: {
             "display": true,
             "text": "tooltip",
@@ -3594,48 +3611,48 @@
             fillOpacity: {},
             strokeWidth: {}
         }
-
+    
     };
-
+    
     var ScatterChart = function (options) {
         return bChart._customConstructor(this, options, arguments, 'scatter');
     };
-
+    
     bChart.ScatterChart = ScatterChart;
-
+    
     ScatterChart.prototype = Object.create(bChart.prototype);
     ScatterChart.prototype.constructor = ScatterChart;
-
+    
     ScatterChart.prototype.draw = function () {
         var self = this;
         if (!bChart.getLength(d3.select(self._options.selector))) {
             console.log("Please make sure the element exists in your template.");
             return void 0;
         }
-
+    
         self.min('refresh').max('refresh').updateMin();
         if (self._options.secondAxis) {
             self.min2('refresh').max2('refresh').updateMin2();
         }
-
+    
         self.colors('refresh')._drawChartSVG();
-
+    
         self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
         if (self._options.secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
-
+    
     };
-
-
+    
+    
     ScatterChart.prototype._drawScatterChart = function () {
         var self = this;
         var xyOptions = self._initXYAxis();
         self._drawNodeSVG(xyOptions).node('refresh');
-
+    
         return self;
-
-
+    
+    
     };
     /**
      * Created by CaptainMao on 5/22/15.
@@ -3651,11 +3668,11 @@
                 self.setOptions(arguments, 'title');
                 drawTitle();
             }
-
+    
             return self;
         }
-
-
+    
+    
         function drawTitle () {
             var chartSVG = d3.select(self._options.selector).select('g.bChart');
             var titleSVG;
@@ -3692,10 +3709,10 @@
      */
     bChart.prototype.tooltip = function (options) {
         var self = this;
-
+    
         if (!bChart.existy(options)) {
             return self._options.tooltip;
-
+    
         } else {
             if (bChart.typeString(options) && options === 'refresh') {
                 drawTooltip();
@@ -3703,10 +3720,10 @@
                 self.setOptions(arguments, 'tooltip');
                 drawTooltip();
             }
-
+    
             return self;
         }
-
+    
         function drawTooltip () {
             var tooltipDIV;
             var parentSVG = d3.select(self._options.selector);
@@ -3719,7 +3736,7 @@
                     tooltipDIV = parentSVG.select('.bChart_tooltip')
                         .style('opacity', 0);
                 }
-
+    
                 var groupSVG = parentSVG.selectAll('.bChart_groups');
                 groupSVG.on('mouseover', function (d) {
                         d3.select(this).style('opacity', 0.7);
@@ -3735,7 +3752,7 @@
                             tooltip_html = d.data.group + " : " + d.value;
                         } else {
                             tooltip_html = d.group + '(' + d.x + ') :' + d.value;
-
+    
                         }
                         var selectedColor = d3.select(this).style('fill');
                         var offx = d3.event.hasOwnProperty('offsetX') ? d3.event.offsetX : d3.event.layerX;
@@ -3756,7 +3773,7 @@
                             .style('font-size', self._options.tooltip.fontSize)
                             .style('color', self._options.tooltip.fontColor)
                             .html(tooltip_html);
-
+    
                     })
                     .on('mouseout', function (d) {
                         d3.select(this).style('opacity', 1);
@@ -3771,14 +3788,21 @@
                         .on('mousemove', null)
                         .on('mouseout', null);
                 }
-
+    
                 if (!parentSVG.select('.bChart_areas').empty()) {
                     var groupAreaSVG = parentSVG.select('.bChart_areas').selectAll('.bChart_groups');
                     groupAreaSVG.on('mouseover', null)
                         .on('mousemove', null)
                         .on('mouseout', null);
                 }
-
+    
+                if (!parentSVG.select('.bChart_pie').empty()) {
+                    var groupPieTextSVG = parentSVG.select('.bChart_pie').selectAll('.bChart_arc_text');
+                    groupPieTextSVG.on('mouseover', null)
+                        .on('mousemove', null)
+                        .on('mouseout', null);
+                }
+    
             } else {
                 tooltipDIV.remove();
             }
@@ -3791,31 +3815,31 @@
         var self = this;
         if (!bChart.existy(options)) {
             return self._options.xAxis;
-
+    
         } else {
             if (bChart.typeString(options) && options === 'refresh') {
                 drawXAxis();
-
+    
             } else {
                 self.setOptions(arguments, 'xAxis');
                 drawXAxis();
             }
-
+    
             return self;
         }
-
+    
         function drawXAxis () {
             var chartSVG = d3.select(self._options.selector).select('g.bChart');
             var xAxisSVGAPath = chartSVG.select('.bChart_x_axis').selectAll('path');
             var xAxisSVGLine = chartSVG.select('.bChart_x_axis').selectAll('line');
             var xAxisSVGText = chartSVG.select('.bChart_x_axis').selectAll('text');
             if (self._options.xAxis.display) {
-
+    
                 xAxisSVGAPath.style('stroke-width', self._options.xAxis.axisWidth)
                     .style('stroke', self._options.xAxis.axisColor)
                     .style('display', 'block');
                 xAxisSVGText.style('display', 'block');
-
+    
                 var rotateDxXAxis, rotateDyXAxis, textAnchor;
                 switch(self._options.xAxis.rotation) {
                     case -45:
@@ -3844,7 +3868,7 @@
                         textAnchor = 'middle';
                         break;
                 }
-
+    
                 xAxisSVGText.style('text-anchor', textAnchor)
                     .attr('dx', rotateDxXAxis)
                     .attr('dy', rotateDyXAxis)
@@ -3863,12 +3887,12 @@
                         return self._options.xAxis.fontItalic ? 'italic' : 'normal';
                     })
                     .style('font-family', self._options.xAxis.fontType);
-
+    
             } else {
                 xAxisSVGAPath.style('display', 'none');
                 xAxisSVGText.style('display', 'none');
             }
-
+    
             if (self._options.xAxis.displayLine) {
                 xAxisSVGLine.style('stroke-width', self._options.xAxis.tickLineWidth)
                     .style('stroke', self._options.xAxis.tickLineColor)
@@ -3876,8 +3900,8 @@
             } else {
                 xAxisSVGLine.style('display', 'none');
             }
-
-
+    
+    
         }
     };
     /**
@@ -3887,19 +3911,19 @@
         var self = this;
         if (!bChart.existy(options)) {
             return self._options.xLabel;
-
+    
         } else {
             if (bChart.typeString(options) && options === 'refresh') {
                 drawXLabel();
-
+    
             } else {
                 self.setOptions(arguments, 'xLabel');
                 drawXLabel();
             }
-
+    
             return self;
         }
-
+    
         function drawXLabel () {
             var chartSVG = d3.select(self._options.selector).select('g.bChart');
             var xLabelSVG, xPos, yPos;
@@ -3949,21 +3973,21 @@
         }
         if (!bChart.existy(options)) {
             return self._options.yAxis2;
-
+    
         } else {
             if (bChart.typeString(options) && options === 'refresh') {
                 self.yAxis('yAxis2');
-
+    
             } else {
                 self.setOptions(arguments,'yAxis2');
                 self.yAxis('yAxis2');
             }
-
-
+    
+    
             return self;
         }
     };
-
+    
     bChart.prototype.yAxis = function (options) {
         var self = this;
         if (!bChart.existy(options)) {
@@ -3971,7 +3995,7 @@
         } else {
             if (bChart.typeString(options) && options === 'refresh') {
                 drawYAxis();
-
+    
             } else if (options === 'yAxis2') {
                 drawYAxis(true);
             } else {
@@ -3979,9 +4003,9 @@
                 drawYAxis();
             }
             return self;
-
+    
         }
-
+    
         function drawYAxis (drawSecAxis) {
             var chartSVG = d3.select(self._options.selector).select('g.bChart');
             var axisType, yAxisSVG, yAxisSVGAPath, yAxisSVGLine, yAxisSVGText, minY, maxY;
@@ -3996,41 +4020,41 @@
             } else {
                 axisType = 'yAxis';
                 yAxisSVG = chartSVG.select('.bChart_y_axis');
-
+    
                 yAxisSVGAPath = chartSVG.select('.bChart_y_axis').selectAll('path');
                 yAxisSVGLine = chartSVG.select('.bChart_y_axis').selectAll('line');
                 yAxisSVGText = chartSVG.select('.bChart_y_axis').selectAll('text');
                 minY = self._options.minDefault;
                 maxY = self._options.maxDefault;
             }
-
+    
             if (self._options[axisType].display) {
-
+    
                 var	y = d3.scale.linear()
                     .range([self._options._chartSVGHeight, 0])
                     .domain([minY, maxY]);
-
+    
                 var	yAxis = d3.svg.axis()
                     .scale(y)
                     .orient(self._options[axisType].orientation)
                     .tickFormat(self._options[axisType].tickFormat)
                     .ticks(self._options[axisType].tickNumber)
                     .tickSize(self._options[axisType].tickSize, 0, 0);
-
-
+    
+    
                 yAxisSVG
                     .transition()
                     .duration(self._options.duration)
                     .ease("sin-in-out")
                     .call(yAxis);
-
+    
                 yAxisSVG.style('display', 'block');
-
+    
                 yAxisSVGAPath.style('stroke-width', self._options[axisType].axisWidth)
                     .style('stroke', self._options[axisType].axisColor)
                     .style('display', 'block');
                 yAxisSVGText.style('display', 'block');
-
+    
                 var rotateDxyAxis, rotateDyyAxis, textAnchor;
                 switch(self._options[axisType].rotation) {
                     case -45:
@@ -4043,7 +4067,7 @@
                             rotateDyyAxis = '-1em';
                             textAnchor = 'end';
                         }
-
+    
                         break;
                     case -90:
                         if (drawSecAxis) {
@@ -4055,7 +4079,7 @@
                             rotateDyyAxis = '-.5em';
                             textAnchor = 'middle';
                         }
-
+    
                         break;
                     case 45:
                         if (drawSecAxis) {
@@ -4067,8 +4091,8 @@
                             rotateDyyAxis = '1em';
                             textAnchor = 'end';
                         }
-
-
+    
+    
                         break;
                     case 90:
                         if (drawSecAxis) {
@@ -4080,7 +4104,7 @@
                             rotateDyyAxis = '1em';
                             textAnchor = 'middle';
                         }
-
+    
                         break;
                     case 0:
                         if (drawSecAxis) {
@@ -4092,10 +4116,10 @@
                             rotateDyyAxis = '0.3em';
                             textAnchor = 'end';
                         }
-
+    
                         break;
                 }
-
+    
                 yAxisSVGText.style('text-anchor', textAnchor)
                     .attr('dx', rotateDxyAxis)
                     .attr('dy', rotateDyyAxis)
@@ -4114,12 +4138,12 @@
                         return self._options[axisType].fontItalic ? 'italic' : 'normal';
                     })
                     .style('font-family', self._options[axisType].fontType);
-
+    
             } else {
                 yAxisSVGAPath.style('display', 'none');
                 yAxisSVGText.style('display', 'none');
             }
-
+    
             if (self._options[axisType].displayLine) {
                 yAxisSVGLine.style('stroke-width', self._options[axisType].tickLineWidth)
                     .style('stroke', self._options[axisType].tickLineColor)
@@ -4127,8 +4151,8 @@
             } else {
                 yAxisSVGLine.style('display', 'none');
             }
-
-
+    
+    
         }
     };
     /**
@@ -4143,20 +4167,20 @@
         }
         if (!bChart.existy(options)) {
             return self._options.yLabel2;
-
+    
         } else {
             if (bChart.typeString(options) && options === 'refresh') {
                 self.yLabel('yLabel2');
-
+    
             } else {
                 self.setOptions(arguments,'yLabel2');
                 self.yLabel('yLabel2');
             }
-
+    
             return self;
         }
     };
-
+    
     bChart.prototype.yLabel = function (options) {
         var self = this;
         if (!bChart.existy(options)) {
@@ -4164,7 +4188,7 @@
         } else {
             if (bChart.typeString(options) && options === 'refresh') {
                 drawYLabel();
-
+    
             } else if (options === 'yLabel2') {
                 drawYLabel(true);
             } else {
@@ -4172,12 +4196,12 @@
                 drawYLabel();
             }
             return self;
-
+    
         }
-
+    
         function drawYLabel (drawSecAxis) {
             var labelType, yPos, xPos, yLabelSVG;
-
+    
             if (bChart.existy(drawSecAxis) && drawSecAxis) {
                 labelType = 'yLabel2';
             } else {
@@ -4202,14 +4226,14 @@
                         yLabelSVG = chartSVG.select('.bChart_ylabel').style('display', 'block');
                     }
                 }
-
+    
                 yPos = self._options._chartSVGHeight/2 - self._options[labelType].offsetAdjust.vertical;
                 if (bChart.existy(drawSecAxis) &&  drawSecAxis) {
                     xPos = self._options.padding.left + self._options._chartSVGWidth + self._options[labelType].offsetAdjust.horizontal;
-
+    
                 } else {
                     xPos = -self._options.padding.left + 25 + self._options[labelType].offsetAdjust.horizontal;
-
+    
                 }
                 yLabelSVG.style('text-anchor', 'middle')
                     .style('fill', self._options[labelType].fontColor)
@@ -4233,13 +4257,13 @@
             } else {
                 if (bChart.existy(drawSecAxis) && drawSecAxis) {
                     chartSVG.select('.bChart_ylabel_2').style('display', 'none');
-
+    
                 } else {
                     chartSVG.select('.bChart_ylabel').style('display', 'none');
-
+    
                 }
             }
-
+    
         }
     };
         return bChart;

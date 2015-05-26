@@ -90,6 +90,13 @@ bChart.prototype.tooltip = function (options) {
                     .on('mouseout', null);
             }
 
+            if (!parentSVG.select('.bChart_pie').empty()) {
+                var groupPieTextSVG = parentSVG.select('.bChart_pie').selectAll('.bChart_arc_text');
+                groupPieTextSVG.on('mouseover', null)
+                    .on('mousemove', null)
+                    .on('mouseout', null);
+            }
+
         } else {
             tooltipDIV.remove();
         }

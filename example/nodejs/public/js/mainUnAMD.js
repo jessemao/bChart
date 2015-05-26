@@ -1,7 +1,7 @@
 /**
  * Created by CaptainMao on 5/18/15.
  */
-$(document).ready(function () {
+//document.onload('ready', function () {
     //bChart
     //bChart('#skills', 'BarChart');
 
@@ -39,6 +39,10 @@ $(document).ready(function () {
         bChart("#skills2").load([['Label 3', '33']]);
     }, 1000);
 
+    setTimeout(function () {
+        bChart("#skills2").unload(['Label 3']);
+    }, 1500);
+
     //var scatter = bChart.AreaChart('#skills2', {
     //    "data": {
     //        dataValue: [['Label 1','45', '32', '15'],
@@ -68,7 +72,7 @@ $(document).ready(function () {
 
     //barchart.load([['data', '45', '32', '15']]);
 
-})
+//})
 
 //if (bChart.isArrayLike(obj.dataValue[0])) {
 //    if (bChart.hasProperty(obj, 'groups') || !bChart.typeNumber(obj.dataValue[0][0])) {
