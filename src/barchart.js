@@ -369,13 +369,13 @@ BarChart.prototype._drawBarChart = function () {
 		var	groupTmp = self._options._uniqueGroupArrayAll;
 
 		var stackBarArray = self.stackDataset(_datasetTmp, groupTmp, self._options._uniqueXArray);
-		var stackBarSVG = chartSVG.selectAll('.bChart_groupBar')
+		var stackBarSVG = chartSVG.selectAll('.bChart_stackBar')
 			.data(stackBarArray);
 
 		stackBarSVG.exit().remove();
 		stackBarSVG.enter().append('g')
 			.attr('class', function (d,i) {
-				return 'bChart_groupBar';
+				return 'bChart_stackBar';
 
 			});
 
@@ -384,7 +384,10 @@ BarChart.prototype._drawBarChart = function () {
 				return d;
 			});
 		barRects.exit().remove();
-		barRects.enter().append('rect');
+		barRects.enter().append('rect')
+			.attr('class', function (d) {
+				return 'bChart_groups bChart_groups' + self._options._uniqueGroupArrayAll.indexOf(d.group);
+			});
 
 		barRects.attr('width', x0.rangeBand() - self._options.barDistance)
 			.attr('x', function (d) {
@@ -411,9 +414,6 @@ BarChart.prototype._drawBarChart = function () {
 					return y(d.y0) - y(d.y + d.y0);
 
 				}
-			})
-			.attr('class', function (d) {
-				return 'bChart_groups bChart_groups' + self._options._uniqueGroupArrayAll.indexOf(d.group);
 			});
 	}
 
@@ -448,7 +448,10 @@ BarChart.prototype._drawBarChart = function () {
 			});
 
 		barRects.exit().transition().attr('height', 0).remove();
-		barRects.enter().append('rect');
+		barRects.enter().append('rect')
+			.attr('class', function (d) {
+				return 'bChart_groups bChart_groups' + groupConcat.indexOf(d.group);
+			});
 
 		barRects.attr('width', x1.rangeBand() - self._options.barDistance)
 			.attr('x', function (d, i) {
@@ -471,9 +474,6 @@ BarChart.prototype._drawBarChart = function () {
 			})
 			.attr('height', function (d) {
 				return d.secondAxis? self._options._chartSVGHeight - y2(d.value) : self._options._chartSVGHeight - y(d.value);
-			})
-			.attr('class', function (d) {
-				return 'bChart_groups bChart_groups' + groupConcat.indexOf(d.group);
 			});
 	}
 };

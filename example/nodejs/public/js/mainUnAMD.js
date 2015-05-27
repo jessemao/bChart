@@ -5,8 +5,8 @@
     //bChart
     //bChart('#skills', 'BarChart');
 
-    var barchart = bChart.AreaChart('#skills', {
-        "isStack": true,
+    var barchart = bChart.BarChart('#skills', {
+        //"isStack": true,
         "data": {
             dataValue: [['Label 1','45', '32', '15'],
                 ['Label 2', '12', '33', '22']
@@ -16,6 +16,8 @@
             x: ['2010', '2011', '2012']
         }
     });
+
+    //barchart.background('color', '#cc0000');
 
     //var barchart1 = bChart('#skills');
     //setTimeout(function () {

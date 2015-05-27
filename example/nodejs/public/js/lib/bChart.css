@@ -56,3 +56,10 @@
   line-break: auto;
   border-radius: 10px;
   padding: 10px; }
+
+/*-- Background --*/
+.bChart_background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1; }

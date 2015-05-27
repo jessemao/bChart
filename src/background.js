@@ -9,7 +9,7 @@ bChart.prototype.background = function (options) {
         if (bChart.typeString(options) && options === 'refresh') {
             drawBackground();
         } else {
-            self.setOptions(arguments, 'bChart_background');
+            self.setOptions(arguments, 'background');
             drawBackground();
         }
         return self;

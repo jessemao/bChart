@@ -9,7 +9,7 @@ bChart.prototype.colors = function (options) {
         if (bChart.typeString(options) && options === 'refresh') {
             updateColors();
         } else {
-            self.setOptions(arguments);
+            self.setOptions(arguments, 'colors');
             updateColors();
         }
         return self;

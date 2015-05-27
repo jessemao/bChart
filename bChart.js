@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-05-25
+/*! bChart - v0.1.0 - 2015-05-26
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -771,7 +771,7 @@
             if (bChart.typeString(options) && options === 'refresh') {
                 drawBackground();
             } else {
-                self.setOptions(arguments, 'bChart_background');
+                self.setOptions(arguments, 'background');
                 drawBackground();
             }
             return self;
@@ -1175,13 +1175,13 @@
     		var	groupTmp = self._options._uniqueGroupArrayAll;
     
     		var stackBarArray = self.stackDataset(_datasetTmp, groupTmp, self._options._uniqueXArray);
-    		var stackBarSVG = chartSVG.selectAll('.bChart_groupBar')
+    		var stackBarSVG = chartSVG.selectAll('.bChart_stackBar')
     			.data(stackBarArray);
     
     		stackBarSVG.exit().remove();
     		stackBarSVG.enter().append('g')
     			.attr('class', function (d,i) {
-    				return 'bChart_groupBar';
+    				return 'bChart_stackBar';
     
     			});
     
@@ -1190,7 +1190,10 @@
     				return d;
     			});
     		barRects.exit().remove();
-    		barRects.enter().append('rect');
+    		barRects.enter().append('rect')
+    			.attr('class', function (d) {
+    				return 'bChart_groups bChart_groups' + self._options._uniqueGroupArrayAll.indexOf(d.group);
+    			});
     
     		barRects.attr('width', x0.rangeBand() - self._options.barDistance)
     			.attr('x', function (d) {
@@ -1217,9 +1220,6 @@
     					return y(d.y0) - y(d.y + d.y0);
     
     				}
-    			})
-    			.attr('class', function (d) {
-    				return 'bChart_groups bChart_groups' + self._options._uniqueGroupArrayAll.indexOf(d.group);
     			});
     	}
     
@@ -1254,7 +1254,10 @@
     			});
     
     		barRects.exit().transition().attr('height', 0).remove();
-    		barRects.enter().append('rect');
+    		barRects.enter().append('rect')
+    			.attr('class', function (d) {
+    				return 'bChart_groups bChart_groups' + groupConcat.indexOf(d.group);
+    			});
     
     		barRects.attr('width', x1.rangeBand() - self._options.barDistance)
     			.attr('x', function (d, i) {
@@ -1277,9 +1280,6 @@
     			})
     			.attr('height', function (d) {
     				return d.secondAxis? self._options._chartSVGHeight - y2(d.value) : self._options._chartSVGHeight - y(d.value);
-    			})
-    			.attr('class', function (d) {
-    				return 'bChart_groups bChart_groups' + groupConcat.indexOf(d.group);
     			});
     	}
     };
@@ -1951,7 +1951,7 @@
             if (bChart.typeString(options) && options === 'refresh') {
                 updateColors();
             } else {
-                self.setOptions(arguments);
+                self.setOptions(arguments, 'colors');
                 updateColors();
             }
             return self;
@@ -3125,42 +3125,6 @@
             display: true
     
         },
-    
-        // border: {
-        // 	"opacity": 1,
-        // 	"color": {
-        // 		"top": "#666",
-        // 		"bottom": "#666",
-        // 		"left": "#666",
-        // 		"right": "#666"
-        // 	},
-        // 	"width": {
-        // 		"top": 1,
-        // 		"bottom": 1,
-        // 		"left": 1,
-        // 		"right": 1
-        // 	},
-        // 	"style": {
-        // 		"top": "solid",
-        // 		"bottom": "solid",
-        // 		"left": "solid",
-        // 		"right": "solid"
-        // 	},
-        // 	"radius": {
-        // 		"topleft": 8,
-        // 		"topright": 8,
-        // 		"bottomleft": 8,
-        // 		"bottomright": 8
-        // 	},
-        // 	"boxShadow": {
-        // 		"display": false,
-        // 		"vShadow": 0,
-        // 		"hShadow": 0,
-        // 		"blur": 0,
-        // 		"spread": 0,
-        // 		"color": "#000"
-        // 	}
-        // },
         legend: {
             "position": "topright",
             "offsetText": 5,
@@ -3300,8 +3264,6 @@
             .data(pieDataset);
     
         arcSVG.exit()
-            //.transition()
-            //.duration(self._options.duration)
             .remove();
     
         arcSVG.enter().append('path')
