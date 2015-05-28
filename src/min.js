@@ -13,7 +13,7 @@ bChart.prototype.min2  = function (options) {
     } else if (bChart.typeString(options) && options === 'refresh') {
         if (!bChart.existy(self._options.min2)) {
             self._options.minDefault2 = d3.min(self._options._dataset, function (d) {
-                if (d.secondAxis) {
+                if (d._secondAxis) {
                     return parseFloat(d.value);
                 }
             });

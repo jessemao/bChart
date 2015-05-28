@@ -83,7 +83,7 @@ bChart.prototype.xAxis = function (options) {
             xAxisSVGText.style('display', 'none');
         }
 
-        if (self._options.xAxis.displayLine) {
+        if (self._options.xAxis.displayTicksLine) {
             xAxisSVGLine.style('stroke-width', self._options.xAxis.tickLineWidth)
                 .style('stroke', self._options.xAxis.tickLineColor)
                 .style('display', 'block');

@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-05-26
+/*! bChart - v0.1.0 - 2015-05-27
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -413,7 +413,7 @@
                     if (self._options.isStack) {
                         return options.y(parseFloat(d.y0) + parseFloat(d.y));
                     } else {
-                        return d.secondAxis? options.y2(d.value) : options.y(d.value);
+                        return d._secondAxis? options.y2(d.value) : options.y(d.value);
     
                     }
                 });
@@ -543,7 +543,7 @@
         // 		"color": "#000"
         // 	}
         // },
-        secondAxis: false,
+        _secondAxis: false,
         legend: {
             "position": "topright",
             "offsetText": 5,
@@ -626,7 +626,7 @@
         },
         yAxis: {
             "display": true,
-            "displayLine": true,
+            "displayTicksLine": true,
             "tickNumber": 8,
             "tickFormat": d3.format(",.0f"),
             "tickPadding": 3,
@@ -651,7 +651,7 @@
         },
         yAxis2: {
             "display": true,
-            "displayLine": false,
+            "displayTicksLine": false,
             "tickNumber": 8,
             "tickFormat": d3.format(",.0f"),
             "tickPadding": 3,
@@ -677,7 +677,7 @@
         xAxis: {
             "display": true,
             "isTimeSeries": false,
-            "displayLine": true,
+            "displayTicksLine": true,
             "tickNumber": 5,
             "tickFormat": "",
             "tickPadding": 3,
@@ -714,7 +714,6 @@
             "height": "auto"
         },
         area: {
-            type: {},
             strokeWidth: {},
             strokeOpacity: {},
             fillOpacity: {}
@@ -739,14 +738,14 @@
         }
     
         self.min('refresh').max('refresh').updateMin();
-        if (self._options.secondAxis) {
+        if (self._options._secondAxis) {
             self.min2('refresh').max2('refresh').updateMin2();
         }
     
         self.colors('refresh')._drawChartSVG();
     
         self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
-        if (self._options.secondAxis) {
+        if (self._options._secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
     
@@ -872,7 +871,7 @@
     	// 		"color": "#000"
     	// 	}
     	// },
-    	secondAxis: false,
+    	_secondAxis: false,
     	isStack: false,
     	legend: {
     		"position": "topright",
@@ -956,7 +955,7 @@
     	},
     	yAxis: {
     		"display": true,
-    		"displayLine": true,
+    		"displayTicksLine": true,
     		"tickNumber": 8,
     		"tickFormat": d3.format(",.0f"),
     		"tickPadding": 3,
@@ -981,7 +980,7 @@
     	},
     	yAxis2: {
     		"display": true,
-    		"displayLine": false,
+    		"displayTicksLine": false,
     		"tickNumber": 8,
     		"tickFormat": d3.format(",.0f"),
     		"tickPadding": 3,
@@ -1006,7 +1005,7 @@
     	},
     	xAxis: {
     		"display": true,
-    		"displayLine": true,
+    		"displayTicksLine": true,
     		"tickNumber": 5,
     		"tickFormat": "",
     		"tickPadding": 3,
@@ -1062,14 +1061,14 @@
     	}
     
     	self.min('refresh').max('refresh').updateMin();
-    	if (self._options.secondAxis) {
+    	if (self._options._secondAxis) {
     		self.min2('refresh').max2('refresh').updateMin2();
     	}
     
     	self.colors('refresh')._drawChartSVG();
     
     	self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
-    	if (self._options.secondAxis) {
+    	if (self._options._secondAxis) {
     		self.yLabel2('refresh').yAxis2('refresh');
     	}
     
@@ -1137,7 +1136,7 @@
     			.call(yAxis);
     	}
     
-    	if (self._options.secondAxis) {
+    	if (self._options._secondAxis) {
     		var	y2 = d3.scale.linear()
     			.range([self._options._chartSVGHeight, 0])
     			.domain([self._options.minDefault2, self._options.maxDefault2]);
@@ -1175,13 +1174,15 @@
     		var	groupTmp = self._options._uniqueGroupArrayAll;
     
     		var stackBarArray = self.stackDataset(_datasetTmp, groupTmp, self._options._uniqueXArray);
-    		var stackBarSVG = chartSVG.selectAll('.bChart_stackBar')
+    		var stackBarSVG = chartSVG.selectAll('.bChart_Bars')
     			.data(stackBarArray);
+    
+    
     
     		stackBarSVG.exit().remove();
     		stackBarSVG.enter().append('g')
     			.attr('class', function (d,i) {
-    				return 'bChart_stackBar';
+    				return 'bChart_Bars';
     
     			});
     
@@ -1189,6 +1190,9 @@
     			.data(function (d) {
     				return d;
     			});
+    
+    		//stackBarSVG.attr('transform', 'null');
+    
     		barRects.exit().remove();
     		barRects.enter().append('rect')
     			.attr('class', function (d) {
@@ -1235,18 +1239,18 @@
     			groupBarArray.push({x: value, data: groupBarValue});
     		});
     
-    		var groupBarSVG = chartSVG.selectAll('.bChart_groupBar')
+    		var groupBarSVG = chartSVG.selectAll('.bChart_Bars')
     			.data(groupBarArray);
     
     		groupBarSVG.exit().remove();
     		groupBarSVG.enter().append('g')
     			.attr('class', function (d, i) {
-    				return 'bChart_groupBar';
+    				return 'bChart_Bars';
     			});
     
-    		groupBarSVG.attr('transform', function (d) {
-    			return 'translate(' + x0(d.x) + ',0)';
-    		});
+    		//groupBarSVG.attr('transform', function (d) {
+    		//	return 'translate(' + x0(d.x) + ',0)';
+    		//});
     
     		var barRects = groupBarSVG.selectAll('rect')
     			.data(function (d) {
@@ -1261,7 +1265,7 @@
     
     		barRects.attr('width', x1.rangeBand() - self._options.barDistance)
     			.attr('x', function (d, i) {
-    				return x1(d.group) + self._options.barDistance/2;
+    				return x0(d.x) + x1(d.group) + self._options.barDistance/2;
     			})
     			.attr('y', self._options._chartSVGHeight)
     			.attr('height', 0)
@@ -1275,11 +1279,11 @@
     			.transition()
     			.duration(self._options.duration)
     			.attr('y', function (d) {
-    				return d.secondAxis? y2(d.value) : y(d.value);
+    				return d._secondAxis? y2(d.value) : y(d.value);
     
     			})
     			.attr('height', function (d) {
-    				return d.secondAxis? self._options._chartSVGHeight - y2(d.value) : self._options._chartSVGHeight - y(d.value);
+    				return d._secondAxis? self._options._chartSVGHeight - y2(d.value) : self._options._chartSVGHeight - y(d.value);
     			});
     	}
     };
@@ -1424,7 +1428,7 @@
     bChart.prototype._updateChartSize = function () {
         var self = this;
         var childSVG, chartSVG;
-        if (self._options.legend.position.indexOf('right')>=0 && self._options.secondAxis) {
+        if (self._options.legend.position.indexOf('right')>=0 && self._options._secondAxis) {
             self._options.padding.right = 150;
         } else {
             self._options.padding.right = 90;
@@ -1535,7 +1539,7 @@
                 .call(yAxis);
         }
     
-        if (self._options.secondAxis) {
+        if (self._options._secondAxis) {
             y2 = d3.scale.linear()
                 .range([self._options._chartSVGHeight, 0])
                 .domain([self._options.minDefault2, self._options.maxDefault2]);
@@ -1720,7 +1724,7 @@
         // 		"color": "#000"
         // 	}
         // },
-        secondAxis: false,
+        _secondAxis: false,
         legend: {
             "position": "topright",
             "offsetText": 5,
@@ -1803,7 +1807,7 @@
         },
         yAxis: {
             "display": true,
-            "displayLine": true,
+            "displayTicksLine": true,
             "tickNumber": 8,
             "tickFormat": d3.format(",.0f"),
             "tickPadding": 3,
@@ -1828,7 +1832,7 @@
         },
         yAxis2: {
             "display": true,
-            "displayLine": false,
+            "displayTicksLine": false,
             "tickNumber": 8,
             "tickFormat": d3.format(",.0f"),
             "tickPadding": 3,
@@ -1854,7 +1858,7 @@
         xAxis: {
             "display": true,
             "isTimeSeries": false,
-            "displayLine": true,
+            "displayTicksLine": true,
             "tickNumber": 5,
             "tickFormat": "",
             "tickPadding": 3,
@@ -1917,14 +1921,14 @@
         }
     
         self.min('refresh').max('refresh').updateMin();
-        if (self._options.secondAxis) {
+        if (self._options._secondAxis) {
             self.min2('refresh').max2('refresh').updateMin2();
         }
     
         self.colors('refresh')._drawChartSVG();
     
         self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
-        if (self._options.secondAxis) {
+        if (self._options._secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
     
@@ -1991,7 +1995,7 @@
                 });
     
                 return stack_array_modified.map(function (d) {
-                    return {x: d.x, value: +parseFloat(d.value), secondAxis: d.secondAxis,  y: +parseFloat(d.value),  group: d.group};
+                    return {x: d.x, value: +parseFloat(d.value), _secondAxis: d._secondAxis,  y: +parseFloat(d.value),  group: d.group};
                 });
     
     
@@ -2020,7 +2024,7 @@
     
                 self.title('refresh').legend('refresh').tooltip('refresh');
             } else {
-                if (self._options.secondAxis) {
+                if (self._options._secondAxis) {
                     self.min2('refresh').max2('refresh').updateMin2();
                 }
                 self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().legend('refresh').tooltip('refresh');
@@ -2043,7 +2047,7 @@
             }
     
             if (bChart.hasProperty(obj, 'groups2') && obj.groups2.length > 0) {
-                self._options.secondAxis = true;
+                self._options._secondAxis = true;
                 self._options._uniqueGroupArray2 = bChart.concatNoDuplicate(self._options._uniqueGroupArray2, obj.groups2);
                 //self._options._uniqueGroupArray = bChart.removeArrayFromArray(self._options._uniqueGroupArrayAll, self._options._uniqueGroupArray2);
             }
@@ -2133,9 +2137,9 @@
                     }
     
                     if (bChart.isElementInArray(groupName, self._options._uniqueGroupArray2)) {
-                        dataItem.secondAxis = true;
+                        dataItem._secondAxis = true;
                     } else {
-                        dataItem.secondAxis = false;
+                        dataItem._secondAxis = false;
                     }
                     self._options._dataset.push(dataItem);
                 }
@@ -2166,7 +2170,7 @@
                 });
                 if (bChart.isElementInArray(elem, self._options._uniqueGroupArray2)) {
                     bChart.removeElementFromArray(elem, self._options._uniqueGroupArray2);
-                        self._options.secondAxis = !!self._options._uniqueGroupArray2.length;
+                        self._options._secondAxis = !!self._options._uniqueGroupArray2.length;
                 }
     
                 if (bChart.hasProperty(self._options, 'node') && bChart.existy(self._options.node.type[elem.group])) {
@@ -2216,7 +2220,7 @@
     
                 self.title('refresh').legend('refresh').tooltip('refresh');
             } else {
-                if (self._options.secondAxis) {
+                if (self._options._secondAxis) {
                     self.min2('refresh').max2('refresh').updateMin2();
                 }
                 self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().yAxis2('refresh').yLabel2('refresh').legend('refresh').tooltip('refresh');
@@ -2373,8 +2377,8 @@
                             return bChart.getIndexOfElement(a, self._options._uniqueGroupTmp) - bChart.getIndexOfElement(b, self._options._uniqueGroupTmp);
                         });
     
-                        if (bChart.existy(self._options.secondAxis)) {
-                            self._options.secondAxis = bChart.isOverlapArray(self._options._uniqueGroupArray2, _checkedLegend) || (!_checkedLegend.length && self._options._uniqueGroupArray2.length);
+                        if (bChart.existy(self._options._secondAxis)) {
+                            self._options._secondAxis = bChart.isOverlapArray(self._options._uniqueGroupArray2, _checkedLegend) || (!_checkedLegend.length && self._options._uniqueGroupArray2.length);
                         }
     
                         if (!_checkedLegend.length || _checkedLegend.length === self._options._uniqueGroupTmp.length) {
@@ -2483,7 +2487,7 @@
                     return options.x0(d.x);
                 })
                 .y(function (d) {
-                    return d.secondAxis? options.y2(d.value): options.y(d.value);
+                    return d._secondAxis? options.y2(d.value): options.y(d.value);
                 });
             linePathSVG.attr('d', line);
         }
@@ -2606,7 +2610,7 @@
         // 		"color": "#000"
         // 	}
         // },
-        secondAxis: false,
+        _secondAxis: false,
         legend: {
             "position": "topright",
             "offsetText": 5,
@@ -2689,7 +2693,7 @@
         },
         yAxis: {
             "display": true,
-            "displayLine": true,
+            "displayTicksLine": true,
             "tickNumber": 8,
             "tickFormat": d3.format(",.0f"),
             "tickPadding": 3,
@@ -2714,7 +2718,7 @@
         },
         yAxis2: {
             "display": true,
-            "displayLine": false,
+            "displayTicksLine": false,
             "tickNumber": 8,
             "tickFormat": d3.format(",.0f"),
             "tickPadding": 3,
@@ -2740,7 +2744,7 @@
         xAxis: {
             "display": true,
             "isTimeSeries": false,
-            "displayLine": true,
+            "displayTicksLine": true,
             "tickNumber": 5,
             "tickFormat": "",
             "tickPadding": 3,
@@ -2808,14 +2812,14 @@
         }
     
         self.min('refresh').max('refresh').updateMin();
-        if (self._options.secondAxis) {
+        if (self._options._secondAxis) {
             self.min2('refresh').max2('refresh').updateMin2();
         }
     
         self.colors('refresh')._drawChartSVG();
     
         self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
-        if (self._options.secondAxis) {
+        if (self._options._secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
     
@@ -2849,7 +2853,7 @@
                 var stackGroupTmp = [];
                 bChart.each(self._options._uniqueXArray, function (value, key, array) {
                     var groupTmp = self._options._dataset.filter(function (el) {
-                        return value === el.x && el.secondAxis;
+                        return value === el.x && el._secondAxis;
                     });
                     stackGroupTmp.push(d3.sum(groupTmp, function (d) {
                         return parseFloat(d.value);
@@ -2859,7 +2863,7 @@
             } else {
                 if (!bChart.existy(self._options.max2)) {
                     self._options.maxDefault2 = d3.max(self._options._dataset, function (d) {
-                        if (d.secondAxis) {
+                        if (d._secondAxis) {
                             return parseFloat(d.value);
                         }
                     });
@@ -2920,7 +2924,7 @@
         } else if (bChart.typeString(options) && options === 'refresh') {
             if (!bChart.existy(self._options.min2)) {
                 self._options.minDefault2 = d3.min(self._options._dataset, function (d) {
-                    if (d.secondAxis) {
+                    if (d._secondAxis) {
                         return parseFloat(d.value);
                     }
                 });
@@ -3032,7 +3036,7 @@
                 })
                 .attr('d', nodeGenerator)
                 .attr('transform', function (d) {
-                    return d.secondAxis? "translate(" + options.x0(d.x) + "," + options.y2(d.value) + ")": "translate(" + options.x0(d.x) + "," + options.y(d.value) + ")";
+                    return d._secondAxis? "translate(" + options.x0(d.x) + "," + options.y2(d.value) + ")": "translate(" + options.x0(d.x) + "," + options.y(d.value) + ")";
                 })
                 .style('opacity', 0)
                 .transition()
@@ -3396,7 +3400,7 @@
         // 		"color": "#000"
         // 	}
         // },
-        secondAxis: false,
+        _secondAxis: false,
         legend: {
             "position": "topright",
             "offsetText": 5,
@@ -3479,7 +3483,7 @@
         },
         yAxis: {
             "display": true,
-            "displayLine": true,
+            "displayTicksLine": true,
             "tickNumber": 8,
             "tickFormat": d3.format(",.0f"),
             "tickPadding": 3,
@@ -3504,7 +3508,7 @@
         },
         yAxis2: {
             "display": true,
-            "displayLine": false,
+            "displayTicksLine": false,
             "tickNumber": 8,
             "tickFormat": d3.format(",.0f"),
             "tickPadding": 3,
@@ -3530,7 +3534,7 @@
         xAxis: {
             "display": true,
             "isTimeSeries": false,
-            "displayLine": true,
+            "displayTicksLine": true,
             "tickNumber": 5,
             "tickFormat": "",
             "tickPadding": 3,
@@ -3593,14 +3597,14 @@
         }
     
         self.min('refresh').max('refresh').updateMin();
-        if (self._options.secondAxis) {
+        if (self._options._secondAxis) {
             self.min2('refresh').max2('refresh').updateMin2();
         }
     
         self.colors('refresh')._drawChartSVG();
     
         self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
-        if (self._options.secondAxis) {
+        if (self._options._secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
     
@@ -3855,7 +3859,7 @@
                 xAxisSVGText.style('display', 'none');
             }
     
-            if (self._options.xAxis.displayLine) {
+            if (self._options.xAxis.displayTicksLine) {
                 xAxisSVGLine.style('stroke-width', self._options.xAxis.tickLineWidth)
                     .style('stroke', self._options.xAxis.tickLineColor)
                     .style('display', 'block');
@@ -3928,7 +3932,7 @@
      */
     bChart.prototype.yAxis2 = function (options) {
         var self = this;
-        if (!self._options.secondAxis) {
+        if (!self._options._secondAxis) {
             var chartSVG = d3.select(self._options.selector).select('g.bChart');
             chartSVG.select('.bChart_y_axis_2').style('display', 'none');
             return self;
@@ -4106,7 +4110,7 @@
                 yAxisSVGText.style('display', 'none');
             }
     
-            if (self._options[axisType].displayLine) {
+            if (self._options[axisType].displayTicksLine) {
                 yAxisSVGLine.style('stroke-width', self._options[axisType].tickLineWidth)
                     .style('stroke', self._options[axisType].tickLineColor)
                     .style('display', 'block');
@@ -4122,7 +4126,7 @@
      */
     bChart.prototype.yLabel2 = function (options) {
         var self = this;
-        if (!self._options.secondAxis) {
+        if (!self._options._secondAxis) {
             var chartSVG = d3.select(self._options.selector).select('g.bChart');
             chartSVG.select('.bChart_ylabel_2').style('display', 'none');
             return self;

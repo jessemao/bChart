@@ -61,7 +61,7 @@ bChart.prototype._drawLineSVG = function (options) {
                 return options.x0(d.x);
             })
             .y(function (d) {
-                return d.secondAxis? options.y2(d.value): options.y(d.value);
+                return d._secondAxis? options.y2(d.value): options.y(d.value);
             });
         linePathSVG.attr('d', line);
     }

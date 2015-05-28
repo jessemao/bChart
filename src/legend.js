@@ -137,8 +137,8 @@ bChart.prototype.legend = function (options) {
                         return bChart.getIndexOfElement(a, self._options._uniqueGroupTmp) - bChart.getIndexOfElement(b, self._options._uniqueGroupTmp);
                     });
 
-                    if (bChart.existy(self._options.secondAxis)) {
-                        self._options.secondAxis = bChart.isOverlapArray(self._options._uniqueGroupArray2, _checkedLegend) || (!_checkedLegend.length && self._options._uniqueGroupArray2.length);
+                    if (bChart.existy(self._options._secondAxis)) {
+                        self._options._secondAxis = bChart.isOverlapArray(self._options._uniqueGroupArray2, _checkedLegend) || (!_checkedLegend.length && self._options._uniqueGroupArray2.length);
                     }
 
                     if (!_checkedLegend.length || _checkedLegend.length === self._options._uniqueGroupTmp.length) {

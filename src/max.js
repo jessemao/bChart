@@ -15,7 +15,7 @@ bChart.prototype.max2 = function (options) {
             var stackGroupTmp = [];
             bChart.each(self._options._uniqueXArray, function (value, key, array) {
                 var groupTmp = self._options._dataset.filter(function (el) {
-                    return value === el.x && el.secondAxis;
+                    return value === el.x && el._secondAxis;
                 });
                 stackGroupTmp.push(d3.sum(groupTmp, function (d) {
                     return parseFloat(d.value);
@@ -25,7 +25,7 @@ bChart.prototype.max2 = function (options) {
         } else {
             if (!bChart.existy(self._options.max2)) {
                 self._options.maxDefault2 = d3.max(self._options._dataset, function (d) {
-                    if (d.secondAxis) {
+                    if (d._secondAxis) {
                         return parseFloat(d.value);
                     }
                 });

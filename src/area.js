@@ -78,7 +78,7 @@ bChart.prototype._drawAreaSVG = function (options) {
                 if (self._options.isStack) {
                     return options.y(parseFloat(d.y0) + parseFloat(d.y));
                 } else {
-                    return d.secondAxis? options.y2(d.value) : options.y(d.value);
+                    return d._secondAxis? options.y2(d.value) : options.y(d.value);
 
                 }
             });

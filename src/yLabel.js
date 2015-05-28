@@ -3,7 +3,7 @@
  */
 bChart.prototype.yLabel2 = function (options) {
     var self = this;
-    if (!self._options.secondAxis) {
+    if (!self._options._secondAxis) {
         var chartSVG = d3.select(self._options.selector).select('g.bChart');
         chartSVG.select('.bChart_ylabel_2').style('display', 'none');
         return self;

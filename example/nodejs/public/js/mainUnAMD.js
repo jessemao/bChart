@@ -17,6 +17,10 @@
         }
     });
 
+    setTimeout(function () {
+        barchart.options("isStack", true);
+    }, 1000);
+
     //barchart.background('color', '#cc0000');
 
     //var barchart1 = bChart('#skills');
@@ -26,7 +30,7 @@
     //    });
     //}, 1000);
     //setTimeout(function () {
-    //    barchart1.unload(['Label 2']);
+    //    barchart.load([['Label 3', '12', '33', '22']]);
     //}, 2000);
 
     var pie = bChart.PieChart('#skills2', {

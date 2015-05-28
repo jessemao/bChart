@@ -57,7 +57,7 @@ bChart.prototype._drawNodeSVG = function (options) {
             })
             .attr('d', nodeGenerator)
             .attr('transform', function (d) {
-                return d.secondAxis? "translate(" + options.x0(d.x) + "," + options.y2(d.value) + ")": "translate(" + options.x0(d.x) + "," + options.y(d.value) + ")";
+                return d._secondAxis? "translate(" + options.x0(d.x) + "," + options.y2(d.value) + ")": "translate(" + options.x0(d.x) + "," + options.y(d.value) + ")";
             })
             .style('opacity', 0)
             .transition()

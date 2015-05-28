@@ -68,7 +68,7 @@ var _defaultsScatter = {
     // 		"color": "#000"
     // 	}
     // },
-    secondAxis: false,
+    _secondAxis: false,
     legend: {
         "position": "topright",
         "offsetText": 5,
@@ -151,7 +151,7 @@ var _defaultsScatter = {
     },
     yAxis: {
         "display": true,
-        "displayLine": true,
+        "displayTicksLine": true,
         "tickNumber": 8,
         "tickFormat": d3.format(",.0f"),
         "tickPadding": 3,
@@ -176,7 +176,7 @@ var _defaultsScatter = {
     },
     yAxis2: {
         "display": true,
-        "displayLine": false,
+        "displayTicksLine": false,
         "tickNumber": 8,
         "tickFormat": d3.format(",.0f"),
         "tickPadding": 3,
@@ -202,7 +202,7 @@ var _defaultsScatter = {
     xAxis: {
         "display": true,
         "isTimeSeries": false,
-        "displayLine": true,
+        "displayTicksLine": true,
         "tickNumber": 5,
         "tickFormat": "",
         "tickPadding": 3,
@@ -265,14 +265,14 @@ ScatterChart.prototype.draw = function () {
     }
 
     self.min('refresh').max('refresh').updateMin();
-    if (self._options.secondAxis) {
+    if (self._options._secondAxis) {
         self.min2('refresh').max2('refresh').updateMin2();
     }
 
     self.colors('refresh')._drawChartSVG();
 
     self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
-    if (self._options.secondAxis) {
+    if (self._options._secondAxis) {
         self.yLabel2('refresh').yAxis2('refresh');
     }
 

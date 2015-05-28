@@ -20,7 +20,7 @@ bChart.prototype.stackDataset = function (_datasetInputs, groupArray, xArray) {
             });
 
             return stack_array_modified.map(function (d) {
-                return {x: d.x, value: +parseFloat(d.value), secondAxis: d.secondAxis,  y: +parseFloat(d.value),  group: d.group};
+                return {x: d.x, value: +parseFloat(d.value), _secondAxis: d._secondAxis,  y: +parseFloat(d.value),  group: d.group};
             });
 
 
@@ -49,7 +49,7 @@ bChart.prototype.load = function (options) {
 
             self.title('refresh').legend('refresh').tooltip('refresh');
         } else {
-            if (self._options.secondAxis) {
+            if (self._options._secondAxis) {
                 self.min2('refresh').max2('refresh').updateMin2();
             }
             self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().legend('refresh').tooltip('refresh');
@@ -72,7 +72,7 @@ bChart.prototype.loadObjectData = function (obj) {
         }
 
         if (bChart.hasProperty(obj, 'groups2') && obj.groups2.length > 0) {
-            self._options.secondAxis = true;
+            self._options._secondAxis = true;
             self._options._uniqueGroupArray2 = bChart.concatNoDuplicate(self._options._uniqueGroupArray2, obj.groups2);
             //self._options._uniqueGroupArray = bChart.removeArrayFromArray(self._options._uniqueGroupArrayAll, self._options._uniqueGroupArray2);
         }
@@ -162,9 +162,9 @@ bChart.prototype.loadArrayData = function (array, obj) {
                 }
 
                 if (bChart.isElementInArray(groupName, self._options._uniqueGroupArray2)) {
-                    dataItem.secondAxis = true;
+                    dataItem._secondAxis = true;
                 } else {
-                    dataItem.secondAxis = false;
+                    dataItem._secondAxis = false;
                 }
                 self._options._dataset.push(dataItem);
             }
@@ -195,7 +195,7 @@ bChart.prototype.unload = function (options) {
             });
             if (bChart.isElementInArray(elem, self._options._uniqueGroupArray2)) {
                 bChart.removeElementFromArray(elem, self._options._uniqueGroupArray2);
-                    self._options.secondAxis = !!self._options._uniqueGroupArray2.length;
+                    self._options._secondAxis = !!self._options._uniqueGroupArray2.length;
             }
 
             if (bChart.hasProperty(self._options, 'node') && bChart.existy(self._options.node.type[elem.group])) {
@@ -245,7 +245,7 @@ bChart.prototype.unload = function (options) {
 
             self.title('refresh').legend('refresh').tooltip('refresh');
         } else {
-            if (self._options.secondAxis) {
+            if (self._options._secondAxis) {
                 self.min2('refresh').max2('refresh').updateMin2();
             }
             self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().yAxis2('refresh').yLabel2('refresh').legend('refresh').tooltip('refresh');

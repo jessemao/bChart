@@ -136,7 +136,7 @@ bChart.prototype.height = function (options) {
 bChart.prototype._updateChartSize = function () {
     var self = this;
     var childSVG, chartSVG;
-    if (self._options.legend.position.indexOf('right')>=0 && self._options.secondAxis) {
+    if (self._options.legend.position.indexOf('right')>=0 && self._options._secondAxis) {
         self._options.padding.right = 150;
     } else {
         self._options.padding.right = 90;
@@ -247,7 +247,7 @@ bChart.prototype._initXYAxis = function () {
             .call(yAxis);
     }
 
-    if (self._options.secondAxis) {
+    if (self._options._secondAxis) {
         y2 = d3.scale.linear()
             .range([self._options._chartSVGHeight, 0])
             .domain([self._options.minDefault2, self._options.maxDefault2]);

@@ -66,7 +66,7 @@ var _defaultsBar = {
 	// 		"color": "#000"
 	// 	}
 	// },
-	secondAxis: false,
+	_secondAxis: false,
 	isStack: false,
 	legend: {
 		"position": "topright",
@@ -150,7 +150,7 @@ var _defaultsBar = {
 	},
 	yAxis: {
 		"display": true,
-		"displayLine": true,
+		"displayTicksLine": true,
 		"tickNumber": 8,
 		"tickFormat": d3.format(",.0f"),
 		"tickPadding": 3,
@@ -175,7 +175,7 @@ var _defaultsBar = {
 	},
 	yAxis2: {
 		"display": true,
-		"displayLine": false,
+		"displayTicksLine": false,
 		"tickNumber": 8,
 		"tickFormat": d3.format(",.0f"),
 		"tickPadding": 3,
@@ -200,7 +200,7 @@ var _defaultsBar = {
 	},
 	xAxis: {
 		"display": true,
-		"displayLine": true,
+		"displayTicksLine": true,
 		"tickNumber": 5,
 		"tickFormat": "",
 		"tickPadding": 3,
@@ -256,14 +256,14 @@ BarChart.prototype.draw = function () {
 	}
 
 	self.min('refresh').max('refresh').updateMin();
-	if (self._options.secondAxis) {
+	if (self._options._secondAxis) {
 		self.min2('refresh').max2('refresh').updateMin2();
 	}
 
 	self.colors('refresh')._drawChartSVG();
 
 	self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
-	if (self._options.secondAxis) {
+	if (self._options._secondAxis) {
 		self.yLabel2('refresh').yAxis2('refresh');
 	}
 
@@ -331,7 +331,7 @@ BarChart.prototype._drawBarChart = function () {
 			.call(yAxis);
 	}
 
-	if (self._options.secondAxis) {
+	if (self._options._secondAxis) {
 		var	y2 = d3.scale.linear()
 			.range([self._options._chartSVGHeight, 0])
 			.domain([self._options.minDefault2, self._options.maxDefault2]);
@@ -369,13 +369,15 @@ BarChart.prototype._drawBarChart = function () {
 		var	groupTmp = self._options._uniqueGroupArrayAll;
 
 		var stackBarArray = self.stackDataset(_datasetTmp, groupTmp, self._options._uniqueXArray);
-		var stackBarSVG = chartSVG.selectAll('.bChart_stackBar')
+		var stackBarSVG = chartSVG.selectAll('.bChart_Bars')
 			.data(stackBarArray);
+
+
 
 		stackBarSVG.exit().remove();
 		stackBarSVG.enter().append('g')
 			.attr('class', function (d,i) {
-				return 'bChart_stackBar';
+				return 'bChart_Bars';
 
 			});
 
@@ -383,6 +385,9 @@ BarChart.prototype._drawBarChart = function () {
 			.data(function (d) {
 				return d;
 			});
+
+		//stackBarSVG.attr('transform', 'null');
+
 		barRects.exit().remove();
 		barRects.enter().append('rect')
 			.attr('class', function (d) {
@@ -429,18 +434,18 @@ BarChart.prototype._drawBarChart = function () {
 			groupBarArray.push({x: value, data: groupBarValue});
 		});
 
-		var groupBarSVG = chartSVG.selectAll('.bChart_groupBar')
+		var groupBarSVG = chartSVG.selectAll('.bChart_Bars')
 			.data(groupBarArray);
 
 		groupBarSVG.exit().remove();
 		groupBarSVG.enter().append('g')
 			.attr('class', function (d, i) {
-				return 'bChart_groupBar';
+				return 'bChart_Bars';
 			});
 
-		groupBarSVG.attr('transform', function (d) {
-			return 'translate(' + x0(d.x) + ',0)';
-		});
+		//groupBarSVG.attr('transform', function (d) {
+		//	return 'translate(' + x0(d.x) + ',0)';
+		//});
 
 		var barRects = groupBarSVG.selectAll('rect')
 			.data(function (d) {
@@ -455,7 +460,7 @@ BarChart.prototype._drawBarChart = function () {
 
 		barRects.attr('width', x1.rangeBand() - self._options.barDistance)
 			.attr('x', function (d, i) {
-				return x1(d.group) + self._options.barDistance/2;
+				return x0(d.x) + x1(d.group) + self._options.barDistance/2;
 			})
 			.attr('y', self._options._chartSVGHeight)
 			.attr('height', 0)
@@ -469,11 +474,11 @@ BarChart.prototype._drawBarChart = function () {
 			.transition()
 			.duration(self._options.duration)
 			.attr('y', function (d) {
-				return d.secondAxis? y2(d.value) : y(d.value);
+				return d._secondAxis? y2(d.value) : y(d.value);
 
 			})
 			.attr('height', function (d) {
-				return d.secondAxis? self._options._chartSVGHeight - y2(d.value) : self._options._chartSVGHeight - y(d.value);
+				return d._secondAxis? self._options._chartSVGHeight - y2(d.value) : self._options._chartSVGHeight - y(d.value);
 			});
 	}
 };

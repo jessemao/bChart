@@ -3,7 +3,7 @@
  */
 bChart.prototype.yAxis2 = function (options) {
     var self = this;
-    if (!self._options.secondAxis) {
+    if (!self._options._secondAxis) {
         var chartSVG = d3.select(self._options.selector).select('g.bChart');
         chartSVG.select('.bChart_y_axis_2').style('display', 'none');
         return self;
@@ -181,7 +181,7 @@ bChart.prototype.yAxis = function (options) {
             yAxisSVGText.style('display', 'none');
         }
 
-        if (self._options[axisType].displayLine) {
+        if (self._options[axisType].displayTicksLine) {
             yAxisSVGLine.style('stroke-width', self._options[axisType].tickLineWidth)
                 .style('stroke', self._options[axisType].tickLineColor)
                 .style('display', 'block');
