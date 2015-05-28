@@ -2,6 +2,8 @@ bChart
 -----
 bChart is a D3-based charting library. bChart provides a simple, clean and easy way to create SVG-style charts and to integrate to daily use web application.
 
+The official documentation is [bChart.org](http://bchart.org)
+
 Why bChart?
 ----
 * D3-based
