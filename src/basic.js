@@ -108,9 +108,9 @@ bChart.prototype.width = function (options) {
         self._options.width = options;
         if (bChart.typeNumber(options)) {
             self._options.width = options;
-            self._updateChartSize()._drawChartSVG().xAxis('refresh').xLabel('refresh');
+            self._updateChartSize()._drawChartSVG().xLabel('refresh').legend('refresh').title('refresh');
         } else if (bChart.typeString(options) && options === 'refresh') {
-            self._updateChartSize()._drawChartSVG().xAxis('refresh').xLabel('refresh');
+            self._updateChartSize()._drawChartSVG().xLabel('refresh').legend('refresh').title('refresh');
         }
         return self;
     } else {
@@ -123,9 +123,9 @@ bChart.prototype.height = function (options) {
     if (bChart.existy(options)) {
         if (bChart.typeNumber(options)) {
             self._options.height = options;
-            self._updateChartSize()._drawChartSVG().yAxis('refresh').yAxis2('refresh').yLabel('refresh').yLabel2('refresh');
+            self._updateChartSize()._drawChartSVG().yLabel('refresh').yLabel2('refresh').legend('refresh').title('refresh');
         } else if (bChart.typeString(options) && options === 'refresh') {
-            self._updateChartSize()._drawChartSVG().yAxis('refresh').yAxis2('refresh').yLabel('refresh').yLabel2('refresh');
+            self._updateChartSize()._drawChartSVG().yLabel('refresh').yLabel2('refresh').legend('refresh').title('refresh');
         }
         return self;
     } else {
@@ -218,6 +218,7 @@ bChart.prototype._initXYAxis = function () {
             .call(xAxis);
     } else {
         chartSVG.select('.bChart_x_axis')
+            .attr('transform', 'translate(0,' + self._options._chartSVGHeight + ')')
             .transition()
             .duration(self._options.duration)
             .ease("sin-in-out")

@@ -29,6 +29,23 @@ bChart.prototype.xAxis = function (options) {
                 .style('stroke', self._options.xAxis.axisColor)
                 .style('display', 'block');
             xAxisSVGText.style('display', 'block');
+            var x0;
+            if (!self._options.xAxis.isTimeSeries) {
+                x0 = d3.scale.ordinal()
+                    .rangePoints([0, self._options._chartSVGWidth],0.1)
+                    .domain(self._options._uniqueXArray);
+            }
+            var xAxis = d3.svg.axis()
+                .scale(x0)
+                .orient(self._options.xAxis.orientation)
+                .ticks(self._options.xAxis.tickNumber)
+                .tickSize(self._options.xAxis.tickSize, 0, 0);
+            chartSVG.select('.bChart_x_axis')
+                .attr('transform', 'translate(0,' + self._options._chartSVGHeight + ')')
+                .transition()
+                .duration(self._options.duration)
+                .ease("sin-in-out")
+                .call(xAxis);
 
             var rotateDxXAxis, rotateDyXAxis, textAnchor;
             switch(self._options.xAxis.rotation) {

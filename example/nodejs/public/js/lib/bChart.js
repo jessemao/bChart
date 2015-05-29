@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-05-27
+/*! bChart - v0.1.0 - 2015-05-28
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -1400,9 +1400,9 @@
             self._options.width = options;
             if (bChart.typeNumber(options)) {
                 self._options.width = options;
-                self._updateChartSize()._drawChartSVG().xAxis('refresh').xLabel('refresh');
+                self._updateChartSize()._drawChartSVG().xLabel('refresh').legend('refresh').title('refresh');
             } else if (bChart.typeString(options) && options === 'refresh') {
-                self._updateChartSize()._drawChartSVG().xAxis('refresh').xLabel('refresh');
+                self._updateChartSize()._drawChartSVG().xLabel('refresh').legend('refresh').title('refresh');
             }
             return self;
         } else {
@@ -1415,9 +1415,9 @@
         if (bChart.existy(options)) {
             if (bChart.typeNumber(options)) {
                 self._options.height = options;
-                self._updateChartSize()._drawChartSVG().yAxis('refresh').yAxis2('refresh').yLabel('refresh').yLabel2('refresh');
+                self._updateChartSize()._drawChartSVG().xAxis('refresh').yAxis('refresh').yAxis2('refresh').yLabel('refresh').yLabel2('refresh').legend('refresh').title('refresh');
             } else if (bChart.typeString(options) && options === 'refresh') {
-                self._updateChartSize()._drawChartSVG().yAxis('refresh').yAxis2('refresh').yLabel('refresh').yLabel2('refresh');
+                self._updateChartSize()._drawChartSVG().xAxis('refresh').yAxis('refresh').yAxis2('refresh').yLabel('refresh').yLabel2('refresh').legend('refresh').title('refresh');
             }
             return self;
         } else {
@@ -3805,6 +3805,23 @@
                     .style('stroke', self._options.xAxis.axisColor)
                     .style('display', 'block');
                 xAxisSVGText.style('display', 'block');
+                var x0;
+                if (!self._options.xAxis.isTimeSeries) {
+                    x0 = d3.scale.ordinal()
+                        .rangePoints([0, self._options._chartSVGWidth],0.1)
+                        .domain(self._options._uniqueXArray);
+                }
+                var xAxis = d3.svg.axis()
+                    .scale(x0)
+                    .orient(self._options.xAxis.orientation)
+                    .ticks(self._options.xAxis.tickNumber)
+                    .tickSize(self._options.xAxis.tickSize, 0, 0);
+                chartSVG.select('.bChart_x_axis')
+                    .attr('transform', 'translate(0,' + self._options._chartSVGHeight + ')')
+                    .transition()
+                    .duration(self._options.duration)
+                    .ease("sin-in-out")
+                    .call(xAxis);
     
                 var rotateDxXAxis, rotateDyXAxis, textAnchor;
                 switch(self._options.xAxis.rotation) {
