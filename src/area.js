@@ -27,7 +27,7 @@ bChart.prototype.area = function (options) {
 bChart.prototype._drawAreaSVG = function (options) {
     var self = this;
     var	_datasetTmp = self._options._dataset;
-    var	groupConcat = self._options._uniqueGroupArrayAll;
+    var	groupConcat = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
     var chartSVG = d3.select(self._options.selector).select('g.bChart');
 
     var areaSVG, areaPathSVG;
@@ -42,7 +42,7 @@ bChart.prototype._drawAreaSVG = function (options) {
 
     if (bChart.existy(options)) {
         if (self._options.isStack) {
-            _datasetTmp = self.stackDataset(_datasetTmp, groupConcat, self._options._uniqueXArray);
+            _datasetTmp = self.stackDataset(_datasetTmp, self._options._uniqueGroupArrayAll, self._options._uniqueXArray);
 
         }
         var drawLineCallBack = function (elem) {
@@ -60,9 +60,10 @@ bChart.prototype._drawAreaSVG = function (options) {
         areaPathSVG = areaSVG.selectAll('.bChart_groups')
             .data(dataArea);
 
+        areaPathSVG.enter().append('path');
+
         areaPathSVG.exit().remove();
 
-        areaPathSVG.enter().append('path');
         var area = d3.svg.area()
             .x(function (d) {
                 return options.x0(d.x);
@@ -86,8 +87,8 @@ bChart.prototype._drawAreaSVG = function (options) {
     }
 
     areaPathSVG.attr('class', function (d, i) {
-        return 'bChart_groups bChart_groups' + groupConcat.indexOf(d[i].group);
-    })
+            return 'bChart_groups bChart_groups' + groupConcat.indexOf(d[i].group);
+        })
         .attr('fill', function (d, i) {
             return self._options._colorMap[d[i].group];
         })

@@ -85,24 +85,24 @@ bChart.prototype.legend = function (options) {
                 .attr('y', legendRectY)
                 .attr('width', self._options.legend.symbolSize)
                 .attr('height', self._options.legend.symbolSize)
-                .style('fill', function (d, i) {
+                .style('fill', function (d) {
                     return self._options._colorMap[d];
                 });
 
             legendSVG.on('mouseover', function(d) {
-                chartSVG.selectAll('.bChart_legend').classed('unhover',true);
-                chartSVG.selectAll('.bChart_groups').classed('unhover',true);
-                d3.select(this).classed('unhover',false);
+                    chartSVG.selectAll('.bChart_legend').classed('unhover',true);
+                    chartSVG.selectAll('.bChart_groups').classed('unhover',true);
+                    d3.select(this).classed('unhover',false);
 
-                var groupConcat = self._options._uniqueGroupArrayAll;
+                    var groupConcat = self._options._uniqueGroupTmp.length? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
 
-                var matchingBarIndex = groupConcat.indexOf(d);
-                var matchingClass = '.bChart_groups' + matchingBarIndex;
-                chartSVG.selectAll(matchingClass)
-                    .classed('unhover', false);
+                    var matchingBarIndex = groupConcat.indexOf(d);
+                    var matchingClass = '.bChart_groups' + matchingBarIndex;
+                    chartSVG.selectAll(matchingClass)
+                        .classed('unhover', false);
 
 
-            })
+                })
                 .on('mouseout', function (d) {
                     chartSVG.selectAll('.bChart_legend').classed('unhover',false);
                     chartSVG.selectAll('.bChart_groups').classed('unhover',false);
@@ -176,11 +176,9 @@ bChart.prototype._updateDatasetBySelection = function (selections) {
         });
     }
     if (self.constructor === PieChart) {
-        self.setOptions([displayDataset], '_dataset')._drawChartSVG();
-
-        self.title('refresh').tooltip('refresh');
+        self.setOptions([displayDataset], '_dataset')._drawChartSVG().title('refresh').tooltip('refresh');
     } else {
-        self.setOptions([displayDataset], '_dataset').min('refresh').max('refresh').updateMin()._drawChartSVG().yLabel2('refresh').yAxis2('refresh').tooltip('refresh');
+        self.setOptions([displayDataset], '_dataset').min('refresh').max('refresh').updateMin()._drawChartSVG().xAxis('refresh').yAxis('refresh').yLabel('refresh').yLabel2('refresh').yAxis2('refresh').tooltip('refresh');
     }
 
 };

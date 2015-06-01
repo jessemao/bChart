@@ -25,7 +25,7 @@ bChart.prototype.node = function (options) {
 bChart.prototype._drawNodeSVG = function (options) {
     var self = this;
     var	_datasetTmp = self._options._dataset;
-    var	groupConcat = self._options._uniqueGroupArrayAll;
+    var	groupConcat = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
     var chartSVG = d3.select(self._options.selector).select('g.bChart');
 
     var nodeSVG, nodePathSVG;
@@ -47,10 +47,9 @@ bChart.prototype._drawNodeSVG = function (options) {
         nodePathSVG = nodeSVG.selectAll('.bChart_groups')
             .data(_datasetTmp);
 
+        nodePathSVG.enter().append('path');
 
         nodePathSVG.exit().remove();
-
-        nodePathSVG.enter().append('path');
 
         nodePathSVG.attr('class', function(d) {
                 return 'bChart_groups bChart_groups' + groupConcat.indexOf(d.group);

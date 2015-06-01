@@ -192,89 +192,39 @@ bChart.prototype._initXYAxis = function () {
     var self = this;
     self._updateChartSize();
 
-    var chartSVG = d3.select(self._options.selector).select('g.bChart');
-    var x0, y, y2, yAxis, yAxis2, xAxis;
-    if (!self._options.xAxis.isTimeSeries) {
-        x0 = d3.scale.ordinal()
-            .rangePoints([0, self._options._chartSVGWidth],0.1)
-            .domain(self._options._uniqueXArray);
-    }
-
-    // set default tickSize;
     self._options.xAxis.tickSize = -self._options._chartSVGHeight;
     self._options.yAxis.tickSize = -self._options._chartSVGWidth;
 
-    xAxis = d3.svg.axis()
-        .scale(x0)
-        .orient(self._options.xAxis.orientation)
-        .ticks(self._options.xAxis.tickNumber)
-        .tickSize(self._options.xAxis.tickSize, 0, 0);
-
-
-    if (chartSVG.select('.bChart_x_axis').empty()) {
-        chartSVG.append('g')
-            .attr('class', 'bChart_x_axis bChart_grid')
-            .attr('transform', 'translate(0,' + self._options._chartSVGHeight + ')')
-            .call(xAxis);
-    } else {
-        chartSVG.select('.bChart_x_axis')
-            .attr('transform', 'translate(0,' + self._options._chartSVGHeight + ')')
-            .transition()
-            .duration(self._options.duration)
-            .ease("sin-in-out")
-            .call(xAxis);
+    var x0, x1, y, y2, yAxis, yAxis2, xAxis;
+    var x = self._getComputedX();
+    x0 = x.x0;
+    if (bChart.existy(x.x1)) {
+        x1 = x.x1;
     }
 
-    y = d3.scale.linear()
-        .range([self._options._chartSVGHeight, 0])
-        .domain([self._options.minDefault, self._options.maxDefault]);
+    xAxis = self._getXAxis(x0);
 
-    yAxis = d3.svg.axis()
-        .scale(y)
-        .orient(self._options.yAxis.orientation)
-        .tickFormat(self._options.yAxis.tickFormat)
-        .ticks(self._options.yAxis.tickNumber)
-        .tickSize(self._options.yAxis.tickSize, 0, 0);
+    self._renderXAxis(xAxis);
 
-    if (chartSVG.select('.bChart_y_axis').empty()) {
-        chartSVG.append('g')
-            .attr('class', 'bChart_y_axis bChart_grid')
-            .call(yAxis);
-    } else {
-        chartSVG.select('.bChart_y_axis')
-            .transition()
-            .duration(self._options.duration)
-            .ease("sin-in-out")
-            .call(yAxis);
-    }
+
+    var yTmp = self._getComputedY();
+    y = yTmp.y1;
+
+    yAxis = self._getYAxis(y, false);
+
+    self._renderYAxis(yAxis, false);
 
     if (self._options._secondAxis) {
-        y2 = d3.scale.linear()
-            .range([self._options._chartSVGHeight, 0])
-            .domain([self._options.minDefault2, self._options.maxDefault2]);
-        yAxis2 = d3.svg.axis()
-            .scale(y2)
-            .orient(self._options.yAxis2.orientation)
-            .tickFormat(self._options.yAxis2.tickFormat)
-            .ticks(self._options.yAxis2.tickNumber)
-            .tickSize(self._options.yAxis2.tickSize, 0, 0);
-        if (chartSVG.select('.bChart_y_axis_2').empty()) {
-            chartSVG.append('g')
-                .attr('class', 'bChart_y_axis_2 bChart_grid')
-                .attr('transform', 'translate(' + self._options._chartSVGWidth + ',0)')
-                .call(yAxis2);
-        } else {
-            chartSVG.select('.bChart_y_axis_2')
-                .attr('transform', 'translate(' + self._options._chartSVGWidth + ',0)')
-                .transition()
-                .duration(self._options.duration)
-                .ease("sin-in-out")
-                .call(yAxis2);
-        }
+        y2 = yTmp.y2;
+
+        yAxis2 = self._getYAxis(y2, true);
+
+        self._renderYAxis(yAxis2, true);
     }
 
     return {
         x0: x0,
+        x1: x1,
         y: y,
         y2: y2
     };

@@ -121,7 +121,7 @@ PieChart.prototype._drawPieChart = function () {
     self._updateChartSize();
 
     var	_datasetTmp = self._options._dataset;
-    var	groupConcat = self._options._uniqueGroupArrayAll;
+    var	groupConcat = self._options._uniqueGroupTmp.length? self._options._uniqueGroupTmp: self._options._uniqueGroupArrayAll;
     var chartSVG = d3.select(self._options.selector).select('g.bChart');
     var pieSUM = d3.sum(_datasetTmp, function (d) {
         return parseFloat(d.value);
@@ -198,6 +198,9 @@ PieChart.prototype._drawPieChart = function () {
         .attr('d', arcTween);
 
     arcSVG
+        .attr('class', function (d) {
+            return 'bChart_arc bChart_groups bChart_groups' + groupConcat.indexOf(d.data.group);
+        })
         .attr('fill', function (d) {
             return self._options._colorMap[d.data.group];
         })
@@ -218,6 +221,9 @@ PieChart.prototype._drawPieChart = function () {
             });
 
         textSVG
+            .attr('class', function (d) {
+                return 'bChart_arc_text bChart_groups bChart_groups' + groupConcat.indexOf(d.data.group);
+            })
             .attr('transform', function (d) {
                 return 'translate(' + Math.cos((d.startAngle + d.endAngle - Math.PI) / 2) * self._options.textRadiusDefault + ',' + Math.sin((d.startAngle + d.endAngle - Math.PI) / 2) * self._options.textRadiusDefault + ')';
             })

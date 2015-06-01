@@ -1,6 +1,56 @@
 /**
  * Created by CaptainMao on 5/22/15.
  */
+bChart.prototype._getComputedX = function () {
+    var self = this;
+    var x0, x1;
+    if (!self._options.xAxis.isTimeSeries) {
+        if (self.constructor === BarChart) {
+            x0 = d3.scale.ordinal()
+                .rangeRoundBands([0, self._options._chartSVGWidth],0.1)
+                .domain(self._options._uniqueXArray);
+            x1 = d3.scale.ordinal()
+                .rangeRoundBands([0, x0.rangeBand()])
+                .domain(self._options._uniqueGroupArrayAll);
+        } else {
+            x0 = d3.scale.ordinal()
+                .rangePoints([0, self._options._chartSVGWidth],0.1)
+                .domain(self._options._uniqueXArray);
+        }
+    }
+    return {
+        x0: x0,
+        x1: x1
+    };
+};
+
+bChart.prototype._getXAxis = function (x) {
+    var self = this;
+    return d3.svg.axis()
+        .scale(x)
+        .orient(self._options.xAxis.orientation)
+        .ticks(self._options.xAxis.tickNumber)
+        .tickSize(self._options.xAxis.tickSize, 0, 0);
+};
+
+bChart.prototype._renderXAxis = function (xAxis) {
+    var self = this;
+    var chartSVG = d3.select(self._options.selector).select('g.bChart');
+    if (chartSVG.select('.bChart_x_axis').empty()) {
+        chartSVG.append('g')
+            .attr('class', 'bChart_x_axis bChart_grid')
+            .attr('transform', 'translate(0,' + self._options._chartSVGHeight + ')')
+            .call(xAxis);
+    } else {
+        chartSVG.select('.bChart_x_axis')
+            .attr('transform', 'translate(0,' + self._options._chartSVGHeight + ')')
+            .transition()
+            .duration(self._options.duration)
+            .ease("sin-in-out")
+            .call(xAxis);
+    }
+};
+
 bChart.prototype.xAxis = function (options) {
     var self = this;
     if (!bChart.existy(options)) {
@@ -29,23 +79,9 @@ bChart.prototype.xAxis = function (options) {
                 .style('stroke', self._options.xAxis.axisColor)
                 .style('display', 'block');
             xAxisSVGText.style('display', 'block');
-            var x0;
-            if (!self._options.xAxis.isTimeSeries) {
-                x0 = d3.scale.ordinal()
-                    .rangePoints([0, self._options._chartSVGWidth],0.1)
-                    .domain(self._options._uniqueXArray);
-            }
-            var xAxis = d3.svg.axis()
-                .scale(x0)
-                .orient(self._options.xAxis.orientation)
-                .ticks(self._options.xAxis.tickNumber)
-                .tickSize(self._options.xAxis.tickSize, 0, 0);
-            chartSVG.select('.bChart_x_axis')
-                .attr('transform', 'translate(0,' + self._options._chartSVGHeight + ')')
-                .transition()
-                .duration(self._options.duration)
-                .ease("sin-in-out")
-                .call(xAxis);
+            var x0 = self._getComputedX().x0;
+            var xAxis = self._getXAxis(x0);
+            self._renderXAxis(xAxis);
 
             var rotateDxXAxis, rotateDyXAxis, textAnchor;
             switch(self._options.xAxis.rotation) {

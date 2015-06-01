@@ -40,7 +40,6 @@ bChart.prototype.tooltip = function (options) {
                         .style('display', 'block');
                 })
                 .on('mousemove', function (d) {
-                    var selectedBar = this;
                     var tooltip_html;
                     if (self.constructor === PieChart) {
                         tooltip_html = d.data.group + " : " + d.value;
