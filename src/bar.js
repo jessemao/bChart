@@ -34,10 +34,18 @@ bChart.prototype._drawStackBarSVG = function (options) {
         })
         .attr('width', options.x0.rangeBand() - self._options.barDistance)
         .attr('x', function (d) {
-            return options.x0(d.x) + self._options.barDistance/2;
+            if (!bChart.existy(this._current)) {
+                this._current = {};
+            }
+            this._current.x = bChart.existy(this._current.x)? this._current.x : options.x0(d.x) + self._options.barDistance/2;
+            return this._current.x;
         })
-        .attr('y', self._options._chartSVGHeight)
-        .attr('height', 0)
+        .attr('y', function (d) {
+            return bChart.existy(this._current.y) ? this._current.y : self._options._chartSVGHeight;
+        })
+        .attr('height', function (d) {
+            return bChart.existy(this._current.height) ? this._current.height : 0;
+        })
         .style('fill', function (d) {
             return self._options._colorMap[d.group];
         })
@@ -47,16 +55,24 @@ bChart.prototype._drawStackBarSVG = function (options) {
         .style('stroke-width', 0)
         .transition()
         .duration(self._options.duration)
+        .attr('x', function (d) {
+            this._current.x = options.x0(d.x) + self._options.barDistance/2;
+            return this._current.x;
+        })
         .attr('y', function (d) {
-            return options.y(d.y0 + d.y);
+            this._current.y = options.y(d.y0 + d.y);
+            return this._current.y;
         })
         .attr('height', function (d, i) {
+            var heightTmp;
             if(d.group === self._options._uniqueGroupArrayAll[0]) {
-                return self._options._chartSVGHeight - options.y(d.y + d.y0);
+                heightTmp = self._options._chartSVGHeight - options.y(d.y + d.y0);
             } else {
-                return options.y(d.y0) - options.y(d.y + d.y0);
+                heightTmp = options.y(d.y0) - options.y(d.y + d.y0);
 
             }
+            this._current.height = heightTmp;
+            return heightTmp;
         });
 
     barRects.exit().remove();
@@ -106,24 +122,41 @@ bChart.prototype._drawGroupBarSVG = function (options) {
         })
         .attr('width', options.x1.rangeBand() - self._options.barDistance)
         .attr('x', function (d, i) {
-            return options.x0(d.x) + options.x1(d.group) + self._options.barDistance/2;
+            if (!bChart.existy(this._current)) {
+                this._current = {};
+            }
+            this._current.group = bChart.existy(this._current.group)? this._current.group: d.group;
+            this._current.value = bChart.existy(this._current.value)? this._current.value: d.value;
+            this._current._secondAxis = bChart.existy(this._current._secondAxis) ? this._current._secondAxis : d._secondAxis;
+            this._current.x = bChart.existy(this._current.x) ? this._current.x : options.x0(d.x) + options.x1(d.group) + self._options.barDistance/2;
+            return this._current.x;
         })
-        .attr('y', self._options._chartSVGHeight)
-        .attr('height', 0)
+        .attr('y', function () {
+            return bChart.existy(this._current.y) ? this._current.y : self._options._chartSVGHeight;
+        })
+        .attr('height', function () {
+            return bChart.existy(this._current.height) ? this._current.height : 0;
+        })
         .style('fill', function (d, i) {
-            return self._options._colorMap[d.group];
+            return self._options._colorMap[this._current.group];
         })
         .style('stroke', function(d, i) {
-            return self._options._colorMap[d.group];
+            return self._options._colorMap[this._current.group];
         })
         .style('stroke-width', 0)
         .transition()
         .duration(self._options.duration)
+        .attr('x', function (d) {
+            this._current.x = options.x0(d.x) + options.x1(this._current.group) + self._options.barDistance/2;
+            return this._current.x;
+        })
         .attr('y', function (d) {
-            return d._secondAxis? options.y2(d.value) : options.y(d.value);
+            this._current.y = this._current._secondAxis? options.y2(this._current.value) : options.y(this._current.value);
+            return this._current.y;
 
         })
         .attr('height', function (d) {
-            return d._secondAxis? self._options._chartSVGHeight - options.y2(d.value) : self._options._chartSVGHeight - options.y(d.value);
+            this._current.height = this._current._secondAxis? self._options._chartSVGHeight - options.y2(this._current.value) : self._options._chartSVGHeight - options.y(this._current.value);
+            return this._current.height;
         });
 };

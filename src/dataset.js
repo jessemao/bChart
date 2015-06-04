@@ -33,6 +33,25 @@ bChart.prototype.stackDataset = function (_datasetInputs, groupArray, xArray) {
 bChart.prototype.load = function (options) {
     var self = this;
     if (bChart.existy(options)) {
+        var groups = [];
+        if (bChart.isArrayLike(options)) {
+            for (var i = 0; i < options.length; i++) {
+                var groupName = bChart.typeNumber(options[i][0]) ? 'data' : options[i][0];
+                groups.push(groupName);
+            }
+        } else if (bChart.typeObject(options)) {
+            if (bChart.hasProperty(options, 'groups')) {
+                groups = options.groups;
+            }
+        }
+        self.unloadData(groups);
+        self.loadColumn(options);
+    }
+};
+
+bChart.prototype.loadColumn = function (options) {
+    var self = this;
+    if (bChart.existy(options)) {
         if (bChart.isArrayLike(options)) {
             self.loadArrayData(options);
         }
@@ -40,8 +59,6 @@ bChart.prototype.load = function (options) {
             self.loadObjectData(options);
         }
     }
-
-
 
     if (!d3.select(self._options.selector).select('svg').empty()) {
         if (self.constructor === PieChart) {
@@ -52,7 +69,7 @@ bChart.prototype.load = function (options) {
             if (self._options._secondAxis) {
                 self.min2('refresh').max2('refresh').updateMin2();
             }
-            self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().legend('refresh').tooltip('refresh');
+            self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().xAxis('refresh').yAxis('refresh').yAxis2('refresh').legend('refresh').tooltip('refresh');
         }
 
     }
@@ -80,10 +97,7 @@ bChart.prototype.loadObjectData = function (obj) {
         if (bChart.isArrayLike(obj.dataValue)) {
             self.loadArrayData(obj.dataValue, obj);
         }
-
-
     }
-
 };
 
 bChart.prototype.loadArrayData = function (array, obj) {
@@ -101,6 +115,7 @@ bChart.prototype.loadArrayData = function (array, obj) {
                 if (!bChart.isElementInArray(groupName, self._options._uniqueGroupArrayAll)) {
                     self._options._uniqueGroupArrayAll.push(groupName);
                 }
+
                 if (bChart.hasProperty(self._options, 'node')) {
                     if (bChart.existy(obj) && bChart.hasProperty(obj, 'nodeType')) {
                         bChart.initNodeType.call(self, groupName, obj.nodeType[i]);
@@ -129,13 +144,14 @@ bChart.prototype.loadArrayData = function (array, obj) {
                     bChart.initAreaStrokeOpacity.call(self, groupName, '1');
                     bChart.initAreaStrokeWidth.call(self, groupName, '1');
                 }
+                loopDataValue(array, obj, i);
 
-                loopDataValue(array, obj);
             }
+
         }
     }
 
-    function loopDataValue (array, obj) {
+    function loopDataValue (array, obj, i) {
         bChart.each(array[i], function (elem, idx) {
             if (bChart.typeNumber(array[i][idx])) {
 
@@ -145,7 +161,7 @@ bChart.prototype.loadArrayData = function (array, obj) {
                 } else {
                     dataItem = setDataXValue(dataItem, obj, idx-1);
                 }
-                
+
                 if (bChart.existy(obj) && bChart.hasProperty(obj, 'bubbleValue')) {
                     var bubbleArray = obj.bubbleValue.filter(function (el) {
                         return el[0] === groupName;
@@ -169,6 +185,8 @@ bChart.prototype.loadArrayData = function (array, obj) {
                 self._options._dataset.push(dataItem);
             }
         });
+
+
     }
 
     function setDataXValue(dataItem, obj, idx) {
@@ -187,43 +205,61 @@ bChart.prototype.loadArrayData = function (array, obj) {
 
 bChart.prototype.unload = function (options) {
     var self = this;
-    var unloadGroup = function (collection) {
-        bChart.each(collection, function (elem) {
-            bChart.removeElementFromArray(elem, self._options._uniqueGroupArrayAll);
-            self._options._dataset = self._options._dataset.filter(function (el) {
-                return elem !== el.group;
-            });
-            if (bChart.isElementInArray(elem, self._options._uniqueGroupArray2)) {
-                bChart.removeElementFromArray(elem, self._options._uniqueGroupArray2);
-                    self._options._secondAxis = !!self._options._uniqueGroupArray2.length;
-            }
+    self.unloadColumn(options);
 
-            if (bChart.hasProperty(self._options, 'node') && bChart.existy(self._options.node.type[elem.group])) {
-                bChart.removeNodeType.call(self, elem.group);
-                bChart.removeNodeSize.call(self, elem.group);
-                bChart.removeNodeStrokeWidth.call(self, elem.group);
-                bChart.removeNodeStrokeOpacity.call(self, elem.group);
-                bChart.removeNodeFillOpacity.call(self, elem.group);
-            }
+};
 
-            if (bChart.hasProperty(self._options, 'line') && bChart.existy(self._options.line.type[elem.group])) {
-                bChart.removeLineType.call(self, elem.group);
-                bChart.removeLineStrokeWidth.call(self, elem.group);
-                bChart.removeLineStrokeOpacity.call(self, elem.group);
-            }
+bChart.prototype.unloadGroup = function (collection) {
+    var self = this;
+    bChart.each(collection, function (elem) {
+        bChart.removeElementFromArray(elem, self._options._uniqueGroupArrayAll);
 
-            if (bChart.hasProperty(self._options, 'area') && bChart.existy(self._options.area.fillOpacity[elem.group])) {
-                bChart.removeAreaFillOpacity.call(self, elem.group);
-                bChart.removeAreaStrokeOpacity.call(self, elem.group);
-                bChart.removeAreaStrokeWidth.call(self, elem.group);
-            }
+    });
+};
+
+bChart.prototype.unloadData = function (options) {
+    var self = this;
+    bChart.each(options, function (elem) {
+        self._options._dataset = self._options._dataset.filter(function (el) {
+            return elem !== el.group;
         });
-    };
+        if (bChart.isElementInArray(elem, self._options._uniqueGroupArray2)) {
+            bChart.removeElementFromArray(elem, self._options._uniqueGroupArray2);
+            self._options._secondAxis = !!self._options._uniqueGroupArray2.length;
+        }
+
+        if (bChart.hasProperty(self._options, 'node') && bChart.existy(self._options.node.type[elem.group])) {
+            bChart.removeNodeType.call(self, elem.group);
+            bChart.removeNodeSize.call(self, elem.group);
+            bChart.removeNodeStrokeWidth.call(self, elem.group);
+            bChart.removeNodeStrokeOpacity.call(self, elem.group);
+            bChart.removeNodeFillOpacity.call(self, elem.group);
+        }
+
+        if (bChart.hasProperty(self._options, 'line') && bChart.existy(self._options.line.type[elem.group])) {
+            bChart.removeLineType.call(self, elem.group);
+            bChart.removeLineStrokeWidth.call(self, elem.group);
+            bChart.removeLineStrokeOpacity.call(self, elem.group);
+        }
+
+        if (bChart.hasProperty(self._options, 'area') && bChart.existy(self._options.area.fillOpacity[elem.group])) {
+            bChart.removeAreaFillOpacity.call(self, elem.group);
+            bChart.removeAreaStrokeOpacity.call(self, elem.group);
+            bChart.removeAreaStrokeWidth.call(self, elem.group);
+        }
+    });
+};
+
+
+bChart.prototype.unloadColumn = function (options) {
+    var self = this;
+
     if (bChart.existy(options)) {
         if (bChart.isArrayLike(options)) { // only allow groups array.
-            unloadGroup(options);
+            self.unloadGroup(options);
+            self.unloadData(options);
         } else  {
-            if(bChart.hasProperty(options, 'x') && bChart.isArrayLike(options.x)) {
+            if(bChart.hasProperty(options, 'x') && bChart.isArrayLike(options.x)) { // unload by x;
                 bChart.each(options.x, function (elem) {
                     bChart.removeElementFromArray(elem, self._options._uniqueXArray);
                     self._options._dataset = self._options._dataset.filter(function (el) {
@@ -233,7 +269,8 @@ bChart.prototype.unload = function (options) {
             }
             
             if (bChart.hasProperty(options, 'groups') && bChart.isArrayLike(options.groups)) {
-                unloadGroup(options.groups);
+                self.unloadGroup(options.groups);
+                self.unloadData(options.groups);
             }
         }
 

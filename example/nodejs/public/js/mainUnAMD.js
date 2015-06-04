@@ -6,7 +6,7 @@
     //bChart('#skills', 'BarChart');
 
     var barchart = bChart.BarChart('#skills', {
-        //"isStack": true,
+        "isStack": true,
         "data": {
             dataValue: [['Label 1','45', '32', '15'],
                 ['Label 2', '12', '33', '22']
@@ -18,7 +18,7 @@
     });
 
     setTimeout(function () {
-        barchart.options("isStack", true);
+        barchart.options("isStack", false);
     }, 1000);
 
     //barchart.background('color', '#cc0000');
@@ -29,9 +29,9 @@
     //        x: ['2010']
     //    });
     //}, 1000);
-    //setTimeout(function () {
-    //    barchart.load([['Label 3', '12', '33', '22']]);
-    //}, 2000);
+    setTimeout(function () {
+        barchart.load([['Label 4', '42', '53', '32']]);
+    }, 2000);
 
     var pie = bChart.PieChart('#skills2', {
         "data": {

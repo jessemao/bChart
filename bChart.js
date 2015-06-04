@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-05-31
+/*! bChart - v0.1.0 - 2015-06-01
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -840,10 +840,18 @@
             })
             .attr('width', options.x0.rangeBand() - self._options.barDistance)
             .attr('x', function (d) {
-                return options.x0(d.x) + self._options.barDistance/2;
+                if (!bChart.existy(this._current)) {
+                    this._current = {};
+                }
+                this._current.x = bChart.existy(this._current.x)? this._current.x : options.x0(d.x) + self._options.barDistance/2;
+                return this._current.x;
             })
-            .attr('y', self._options._chartSVGHeight)
-            .attr('height', 0)
+            .attr('y', function (d) {
+                return bChart.existy(this._current.y) ? this._current.y : self._options._chartSVGHeight;
+            })
+            .attr('height', function (d) {
+                return bChart.existy(this._current.height) ? this._current.height : 0;
+            })
             .style('fill', function (d) {
                 return self._options._colorMap[d.group];
             })
@@ -853,16 +861,24 @@
             .style('stroke-width', 0)
             .transition()
             .duration(self._options.duration)
+            .attr('x', function (d) {
+                this._current.x = options.x0(d.x) + self._options.barDistance/2;
+                return this._current.x;
+            })
             .attr('y', function (d) {
-                return options.y(d.y0 + d.y);
+                this._current.y = options.y(d.y0 + d.y);
+                return this._current.y;
             })
             .attr('height', function (d, i) {
+                var heightTmp;
                 if(d.group === self._options._uniqueGroupArrayAll[0]) {
-                    return self._options._chartSVGHeight - options.y(d.y + d.y0);
+                    heightTmp = self._options._chartSVGHeight - options.y(d.y + d.y0);
                 } else {
-                    return options.y(d.y0) - options.y(d.y + d.y0);
+                    heightTmp = options.y(d.y0) - options.y(d.y + d.y0);
 
                 }
+                this._current.height = heightTmp;
+                return heightTmp;
             });
 
         barRects.exit().remove();
@@ -912,25 +928,42 @@
             })
             .attr('width', options.x1.rangeBand() - self._options.barDistance)
             .attr('x', function (d, i) {
-                return options.x0(d.x) + options.x1(d.group) + self._options.barDistance/2;
+                if (!bChart.existy(this._current)) {
+                    this._current = {};
+                }
+                this._current.group = bChart.existy(this._current.group)? this._current.group: d.group;
+                this._current.value = bChart.existy(this._current.value)? this._current.value: d.value;
+                this._current._secondAxis = bChart.existy(this._current._secondAxis) ? this._current._secondAxis : d._secondAxis;
+                this._current.x = bChart.existy(this._current.x) ? this._current.x : options.x0(d.x) + options.x1(d.group) + self._options.barDistance/2;
+                return this._current.x;
             })
-            .attr('y', self._options._chartSVGHeight)
-            .attr('height', 0)
+            .attr('y', function () {
+                return bChart.existy(this._current.y) ? this._current.y : self._options._chartSVGHeight;
+            })
+            .attr('height', function () {
+                return bChart.existy(this._current.height) ? this._current.height : 0;
+            })
             .style('fill', function (d, i) {
-                return self._options._colorMap[d.group];
+                return self._options._colorMap[this._current.group];
             })
             .style('stroke', function(d, i) {
-                return self._options._colorMap[d.group];
+                return self._options._colorMap[this._current.group];
             })
             .style('stroke-width', 0)
             .transition()
             .duration(self._options.duration)
+            .attr('x', function (d) {
+                this._current.x = options.x0(d.x) + options.x1(this._current.group) + self._options.barDistance/2;
+                return this._current.x;
+            })
             .attr('y', function (d) {
-                return d._secondAxis? options.y2(d.value) : options.y(d.value);
+                this._current.y = this._current._secondAxis? options.y2(this._current.value) : options.y(this._current.value);
+                return this._current.y;
 
             })
             .attr('height', function (d) {
-                return d._secondAxis? self._options._chartSVGHeight - options.y2(d.value) : self._options._chartSVGHeight - options.y(d.value);
+                this._current.height = this._current._secondAxis? self._options._chartSVGHeight - options.y2(this._current.value) : self._options._chartSVGHeight - options.y(this._current.value);
+                return this._current.height;
             });
     };
     var _defaultsBar = {
@@ -1272,7 +1305,7 @@
                     } else {
                         bChart.each(newOption, function (value, key) {
                             if (key === "data") {
-                                self.load(value);
+                                self.loadColumn(value);
                             } else {
                                 bChart.setProperty(self._options, key, value);
                             }
@@ -1886,6 +1919,25 @@
     bChart.prototype.load = function (options) {
         var self = this;
         if (bChart.existy(options)) {
+            var groups = [];
+            if (bChart.isArrayLike(options)) {
+                for (var i = 0; i < options.length; i++) {
+                    var groupName = bChart.typeNumber(options[i][0]) ? 'data' : options[i][0];
+                    groups.push(groupName);
+                }
+            } else if (bChart.typeObject(options)) {
+                if (bChart.hasProperty(options, 'groups')) {
+                    groups = options.groups;
+                }
+            }
+            self.unloadData(groups);
+            self.loadColumn(options);
+        }
+    };
+
+    bChart.prototype.loadColumn = function (options) {
+        var self = this;
+        if (bChart.existy(options)) {
             if (bChart.isArrayLike(options)) {
                 self.loadArrayData(options);
             }
@@ -1893,8 +1945,6 @@
                 self.loadObjectData(options);
             }
         }
-
-
 
         if (!d3.select(self._options.selector).select('svg').empty()) {
             if (self.constructor === PieChart) {
@@ -1905,7 +1955,7 @@
                 if (self._options._secondAxis) {
                     self.min2('refresh').max2('refresh').updateMin2();
                 }
-                self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().legend('refresh').tooltip('refresh');
+                self.min('refresh').max('refresh').updateMin().colors('refresh')._drawChartSVG().xAxis('refresh').yAxis('refresh').yAxis2('refresh').legend('refresh').tooltip('refresh');
             }
 
         }
@@ -1933,10 +1983,7 @@
             if (bChart.isArrayLike(obj.dataValue)) {
                 self.loadArrayData(obj.dataValue, obj);
             }
-
-
         }
-
     };
 
     bChart.prototype.loadArrayData = function (array, obj) {
@@ -1954,6 +2001,7 @@
                     if (!bChart.isElementInArray(groupName, self._options._uniqueGroupArrayAll)) {
                         self._options._uniqueGroupArrayAll.push(groupName);
                     }
+
                     if (bChart.hasProperty(self._options, 'node')) {
                         if (bChart.existy(obj) && bChart.hasProperty(obj, 'nodeType')) {
                             bChart.initNodeType.call(self, groupName, obj.nodeType[i]);
@@ -1982,13 +2030,14 @@
                         bChart.initAreaStrokeOpacity.call(self, groupName, '1');
                         bChart.initAreaStrokeWidth.call(self, groupName, '1');
                     }
+                    loopDataValue(array, obj, i);
 
-                    loopDataValue(array, obj);
                 }
+
             }
         }
 
-        function loopDataValue (array, obj) {
+        function loopDataValue (array, obj, i) {
             bChart.each(array[i], function (elem, idx) {
                 if (bChart.typeNumber(array[i][idx])) {
 
@@ -1998,7 +2047,7 @@
                     } else {
                         dataItem = setDataXValue(dataItem, obj, idx-1);
                     }
-                    
+
                     if (bChart.existy(obj) && bChart.hasProperty(obj, 'bubbleValue')) {
                         var bubbleArray = obj.bubbleValue.filter(function (el) {
                             return el[0] === groupName;
@@ -2022,6 +2071,8 @@
                     self._options._dataset.push(dataItem);
                 }
             });
+
+
         }
 
         function setDataXValue(dataItem, obj, idx) {
@@ -2040,43 +2091,61 @@
 
     bChart.prototype.unload = function (options) {
         var self = this;
-        var unloadGroup = function (collection) {
-            bChart.each(collection, function (elem) {
-                bChart.removeElementFromArray(elem, self._options._uniqueGroupArrayAll);
-                self._options._dataset = self._options._dataset.filter(function (el) {
-                    return elem !== el.group;
-                });
-                if (bChart.isElementInArray(elem, self._options._uniqueGroupArray2)) {
-                    bChart.removeElementFromArray(elem, self._options._uniqueGroupArray2);
-                        self._options._secondAxis = !!self._options._uniqueGroupArray2.length;
-                }
+        self.unloadColumn(options);
 
-                if (bChart.hasProperty(self._options, 'node') && bChart.existy(self._options.node.type[elem.group])) {
-                    bChart.removeNodeType.call(self, elem.group);
-                    bChart.removeNodeSize.call(self, elem.group);
-                    bChart.removeNodeStrokeWidth.call(self, elem.group);
-                    bChart.removeNodeStrokeOpacity.call(self, elem.group);
-                    bChart.removeNodeFillOpacity.call(self, elem.group);
-                }
+    };
 
-                if (bChart.hasProperty(self._options, 'line') && bChart.existy(self._options.line.type[elem.group])) {
-                    bChart.removeLineType.call(self, elem.group);
-                    bChart.removeLineStrokeWidth.call(self, elem.group);
-                    bChart.removeLineStrokeOpacity.call(self, elem.group);
-                }
+    bChart.prototype.unloadGroup = function (collection) {
+        var self = this;
+        bChart.each(collection, function (elem) {
+            bChart.removeElementFromArray(elem, self._options._uniqueGroupArrayAll);
 
-                if (bChart.hasProperty(self._options, 'area') && bChart.existy(self._options.area.fillOpacity[elem.group])) {
-                    bChart.removeAreaFillOpacity.call(self, elem.group);
-                    bChart.removeAreaStrokeOpacity.call(self, elem.group);
-                    bChart.removeAreaStrokeWidth.call(self, elem.group);
-                }
+        });
+    };
+
+    bChart.prototype.unloadData = function (options) {
+        var self = this;
+        bChart.each(options, function (elem) {
+            self._options._dataset = self._options._dataset.filter(function (el) {
+                return elem !== el.group;
             });
-        };
+            if (bChart.isElementInArray(elem, self._options._uniqueGroupArray2)) {
+                bChart.removeElementFromArray(elem, self._options._uniqueGroupArray2);
+                self._options._secondAxis = !!self._options._uniqueGroupArray2.length;
+            }
+
+            if (bChart.hasProperty(self._options, 'node') && bChart.existy(self._options.node.type[elem.group])) {
+                bChart.removeNodeType.call(self, elem.group);
+                bChart.removeNodeSize.call(self, elem.group);
+                bChart.removeNodeStrokeWidth.call(self, elem.group);
+                bChart.removeNodeStrokeOpacity.call(self, elem.group);
+                bChart.removeNodeFillOpacity.call(self, elem.group);
+            }
+
+            if (bChart.hasProperty(self._options, 'line') && bChart.existy(self._options.line.type[elem.group])) {
+                bChart.removeLineType.call(self, elem.group);
+                bChart.removeLineStrokeWidth.call(self, elem.group);
+                bChart.removeLineStrokeOpacity.call(self, elem.group);
+            }
+
+            if (bChart.hasProperty(self._options, 'area') && bChart.existy(self._options.area.fillOpacity[elem.group])) {
+                bChart.removeAreaFillOpacity.call(self, elem.group);
+                bChart.removeAreaStrokeOpacity.call(self, elem.group);
+                bChart.removeAreaStrokeWidth.call(self, elem.group);
+            }
+        });
+    };
+
+
+    bChart.prototype.unloadColumn = function (options) {
+        var self = this;
+
         if (bChart.existy(options)) {
             if (bChart.isArrayLike(options)) { // only allow groups array.
-                unloadGroup(options);
+                self.unloadGroup(options);
+                self.unloadData(options);
             } else  {
-                if(bChart.hasProperty(options, 'x') && bChart.isArrayLike(options.x)) {
+                if(bChart.hasProperty(options, 'x') && bChart.isArrayLike(options.x)) { // unload by x;
                     bChart.each(options.x, function (elem) {
                         bChart.removeElementFromArray(elem, self._options._uniqueXArray);
                         self._options._dataset = self._options._dataset.filter(function (el) {
@@ -2086,7 +2155,8 @@
                 }
                 
                 if (bChart.hasProperty(options, 'groups') && bChart.isArrayLike(options.groups)) {
-                    unloadGroup(options.groups);
+                    self.unloadGroup(options.groups);
+                    self.unloadData(options.groups);
                 }
             }
 

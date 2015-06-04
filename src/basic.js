@@ -53,7 +53,7 @@ bChart.prototype.setOptions = function (options, type) {
                 } else {
                     bChart.each(newOption, function (value, key) {
                         if (key === "data") {
-                            self.load(value);
+                            self.loadColumn(value);
                         } else {
                             bChart.setProperty(self._options, key, value);
                         }
