@@ -53,9 +53,14 @@ bChart.prototype.setOptions = function (options, type) {
                 } else {
                     bChart.each(newOption, function (value, key) {
                         if (key === "data") {
-                            self.loadColumn(value);
+                            setTimeout(function () {
+                                self.loadColumn(value);
+
+                            }, 1);
                         } else {
-                            bChart.setProperty(self._options, key, value);
+                            if (key[0] !== '_') {
+                                bChart.setProperty(self._options, key, value);
+                            }
                         }
                     });
                 }

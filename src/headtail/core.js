@@ -65,7 +65,14 @@ bChart._init = function (options, chartType) {
 		_options.selector = options;
 	} else if (bChart.typeObject(options)) {
 		bChart.each(options, function (value, key) {
-			_options[key] = value;
+			if (typeof value === 'object') {
+				for (var valueKey in value) {
+					_options[key][valueKey] = value[valueKey];
+				}
+			} else {
+				_options[key] = value;
+
+			}
 		});
 	}
 	switch (chartType) {
@@ -83,6 +90,7 @@ bChart._init = function (options, chartType) {
 			return new PieChart(_options.selector, _options);
 	}
 };
+
 
 bChart._customConstructor = function (self, options, args, chartType) {
 	var newOptions = {};

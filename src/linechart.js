@@ -12,6 +12,12 @@ var _defaultsLine = {
         "bottom": 50,
         "left": 60
     },
+    data: {
+        "dataValue": [],
+        "groups": [],
+        "groups2": [],
+        "x": []
+    },
     _colorMap: {},
     _datasetTmp: [],
     _uniqueGroupTmp: [],

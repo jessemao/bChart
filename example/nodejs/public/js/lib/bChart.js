@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-06-01
+/*! bChart - v0.1.0 - 2015-06-08
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -78,7 +78,14 @@
     		_options.selector = options;
     	} else if (bChart.typeObject(options)) {
     		bChart.each(options, function (value, key) {
-    			_options[key] = value;
+    			if (typeof value === 'object') {
+    				for (var valueKey in value) {
+    					_options[key][valueKey] = value[valueKey];
+    				}
+    			} else {
+    				_options[key] = value;
+
+    			}
     		});
     	}
     	switch (chartType) {
@@ -96,6 +103,7 @@
     			return new PieChart(_options.selector, _options);
     	}
     };
+
 
     bChart._customConstructor = function (self, options, args, chartType) {
     	var newOptions = {};
@@ -486,6 +494,12 @@
             "right": 90,
             "bottom": 50,
             "left": 60
+        },
+        data: {
+            "dataValue": [],
+            "groups": [],
+            "groups2": [],
+            "x": []
         },
         _colorMap: {},
         _datasetTmp: [],
@@ -978,6 +992,12 @@
     		"bottom": 50,
     		"left": 60
     	},
+    	data: {
+    		"dataValue": [],
+    		"groups": [],
+    		"groups2": [],
+    		"x": []
+    	},
     	_colorMap: {},
     	_datasetTmp: [],
     	_uniqueGroupTmp: [],
@@ -1305,9 +1325,14 @@
                     } else {
                         bChart.each(newOption, function (value, key) {
                             if (key === "data") {
-                                self.loadColumn(value);
+                                setTimeout(function () {
+                                    self.loadColumn(value);
+
+                                }, 1);
                             } else {
-                                bChart.setProperty(self._options, key, value);
+                                if (key[0] !== '_') {
+                                    bChart.setProperty(self._options, key, value);
+                                }
                             }
                         });
                     }
@@ -1575,6 +1600,12 @@
             "right": 90,
             "bottom": 50,
             "left": 60
+        },
+        data: {
+            "dataValue": [],
+            "groups": [],
+            "groups2": [],
+            "x": []
         },
         _colorMap: {},
         _datasetTmp: [],
@@ -2500,6 +2531,12 @@
             "bottom": 50,
             "left": 60
         },
+        data: {
+            "dataValue": [],
+            "groups": [],
+            "groups2": [],
+            "x": []
+        },
         _colorMap: {},
         _datasetTmp: [],
         _uniqueGroupTmp: [],
@@ -3050,6 +3087,12 @@
             "bottom": 50,
             "left": 60
         },
+        data: {
+            "dataValue": [],
+            "groups": [],
+            "groups2": [],
+            "x": []
+        },
         _colorMap: {},
         _datasetTmp: [],
         _uniqueXArray: [],
@@ -3294,6 +3337,12 @@
             "right": 90,
             "bottom": 50,
             "left": 60
+        },
+        data: {
+            "dataValue": [],
+            "groups": [],
+            "groups2": [],
+            "x": []
         },
         _colorMap: {},
         _datasetTmp: [],
