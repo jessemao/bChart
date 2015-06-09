@@ -277,7 +277,7 @@ ScatterChart.prototype.draw = function () {
 
     self.colors('refresh')._drawChartSVG();
 
-    self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
+    self.background('refresh').title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
     if (self._options._secondAxis) {
         self.yLabel2('refresh').yAxis2('refresh');
     }

@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-06-08
+/*! bChart - v0.1.0 - 2015-06-09
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -717,6 +717,12 @@
         },
 
         tooltip: {
+            "type": 1,
+            'background': 'rgba(255,255,255, 0.6)',
+            "xLine": {
+                "stroke": "#666",
+                "strokeWidth": 2
+            },
             "display": true,
             "text": "tooltip",
             "fontType": "helvetica",
@@ -759,7 +765,7 @@
 
         self.colors('refresh')._drawChartSVG();
 
-        self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
+        self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').legend('refresh').tooltip('refresh');
         if (self._options._secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
@@ -1250,7 +1256,7 @@
 
     	self.colors('refresh')._drawChartSVG();
 
-    	self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
+    	self.background('refresh').title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
     	if (self._options._secondAxis) {
     		self.yLabel2('refresh').yAxis2('refresh');
     	}
@@ -1869,7 +1875,7 @@
 
         self.colors('refresh')._drawChartSVG();
 
-        self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
+        self.background('refresh').title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
         if (self._options._secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
@@ -2801,7 +2807,7 @@
 
         self.colors('refresh')._drawChartSVG();
 
-        self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
+        self.background('refresh').title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
         if (self._options._secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
@@ -3191,7 +3197,7 @@
 
         self.colors('refresh')._drawChartSVG();
 
-        self.title('refresh').legend('refresh').tooltip('refresh');
+        self.background('refresh').title('refresh').legend('refresh').tooltip('refresh');
 
 
     };
@@ -3603,7 +3609,7 @@
 
         self.colors('refresh')._drawChartSVG();
 
-        self.title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
+        self.background('refresh').title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
         if (self._options._secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
         }
@@ -3685,10 +3691,12 @@
             } else {
                 self.setOptions(arguments, 'tooltip');
                 drawTooltip();
+
             }
 
             return self;
         }
+
 
         function drawTooltip () {
             var tooltipDIV;
@@ -3703,14 +3711,160 @@
                         .style('opacity', 0);
                 }
 
-                var groupSVG = parentSVG.selectAll('.bChart_groups');
-                groupSVG.on('mouseover', function (d) {
-                        d3.select(this).style('opacity', 0.7);
+                if (self._options.tooltip.type === 1) {
+                    drawGroupTooltip(parentSVG);
+                } else {
+                    drawSingleTooltip(parentSVG);
+                }
+
+            } else {
+                tooltipDIV.remove();
+            }
+
+            function drawGroupTooltip(parentSVG) {
+                var bisectData = d3.bisector(function (d) {
+                    return d.x;
+                }).left;
+
+                var dataByX = [];
+                bChart.each(self._options._uniqueXArray, function (obj) {
+                    var dataTmp = {};
+                    bChart.each(self._options._dataset, function (data) {
+                        if (data.x === obj) {
+                            dataTmp.x = obj;
+                            dataTmp[data.group] = data.value;
+                        }
+                    });
+                    dataByX.push(dataTmp);
+                });
+
+                var focus_x;
+                if (parentSVG.selectAll('.bchart-focus-x-line').empty()) {
+                    focus_x = parentSVG.select('.bChart').append('line')
+                        .attr('class', 'bchart-focus-x-line');
+                } else {
+                    focus_x = parentSVG.select('.bchart-focus-x-line');
+                }
+
+                focus_x.style('stroke', self._options.tooltip.xLine.stroke)
+                    .style('stroke-width', self._options.tooltip.xLine.strokeWidth)
+                    .style('opacity', 0)
+                    .attr('y1', 0)
+                    .attr('y2', self._options._chartSVGHeight);
+
+
+                var focus_rect;
+                if (parentSVG.selectAll('.bchart-focus-rect').empty()) {
+                    focus_rect = parentSVG.select('.bChart').append('rect')
+                        .attr('class', 'bchart-focus-rect');
+                } else {
+                    focus_rect = parentSVG.select('.bchart-focus-rect');
+                }
+
+                focus_rect.attr('width', self._options._chartSVGWidth)
+                    .attr('height', self._options._chartSVGHeight)
+                    .style('fill', 'none')
+                    .attr('pointer-events', 'all')
+                    .on('mouseover', function () {
                         tooltipDIV.transition()
                             .duration(self._options.duration)
                             .style('opacity', 1)
                             .style('display', 'block');
+                        focus_x.transition()
+                            .duration(self._options.duration)
+                            .style('opacity', 1);
                     })
+                    .on('mousemove', mousemove)
+                    .on('mouseout', function () {
+                        tooltipDIV.transition()
+                            .duration(self._options.duration)
+                            .style('opacity', 0)
+                            .style('display', 'none');
+                        focus_x.transition()
+                            .duration(self._options.duration)
+                            .style('opacity', 0);
+                    });
+
+                function mousemove() {
+                    var xOptions = self._getComputedX();
+                    var d = {};
+                    if (bChart.existy(xOptions.x0.invert)) {
+                        var x0 = xOptions.x0.invert(d3.mouse(this)[0]),
+                            i = bisectData(dataByX, x0, 1),
+                            d0 = dataByX[i - 1],
+                            d1 = dataByX[i];
+                        if (!bChart.existy(d1)) {
+                            d = d0;
+                        } else {
+                            if (bChart.existy(d0.x) && bChart.existy(d1.x)) {
+                                d = x0 - d0.x > d1.x - x0 ? d1: d0;
+                            }
+                        }
+                    } else {
+                        var xPos = d3.mouse(this)[0];
+                        var leftEdge = xOptions.x0.range();
+                        var rangeWidth = xOptions.x0.rangeBand() === 0 ? leftEdge[1] - leftEdge[0] : xOptions.x0.rangeBand();
+                        var j;
+                        for (j = 0; xPos > (leftEdge[j] + rangeWidth / 2); j++) {
+                        }
+
+                        if (j >= leftEdge.length) {
+                            j = leftEdge.length - 1;
+                        }
+                        d = dataByX[j];
+                    }
+                    var tooltip_html = "";
+                    tooltip_html += "<div class='bchart-tooltip-header'>"+ d.x +"</div>";
+                    for (var k = 0; k < self._options._uniqueGroupArrayAll.length; k++) {
+                        var obj = self._options._uniqueGroupArrayAll[k];
+                        tooltip_html += "<div class='bchart-tooltip-row'><div class='bchart-tooltip-group'>"+obj+"</div><div class='bchart-tooltip-value'>"+d[obj]+"</div></div>";
+                    }
+                    var offy = d3.event.hasOwnProperty('offsetY') ? d3.event.offsetY : d3.event.layerY;
+
+                    focus_x.attr('x2', 0)
+                        .attr('transform', 'translate(' + leftEdge[j] + ',0)');
+
+                    tooltipDIV
+                        .style('background', self._options.tooltip.background)
+                        .style('top', (offy+10) + 'px')
+                        .style('left', (leftEdge[j] + 80) + 'px')
+                        .style('font-family', self._options.tooltip.fontType)
+                        .style('text-decoration', function () {
+                            return self._options.tooltip.fontUnderline ? 'underline' : 'none';
+                        })
+                        .style('font-weight', function () {
+                            return self._options.tooltip.fontBold? 'bold': 'normal';
+                        })
+                        .style('font-style', function () {
+                            return self._options.tooltip.fontItalic ? 'italic' : 'normal';
+                        })
+                        .style('font-size', self._options.tooltip.fontSize)
+                        .style('color', self._options.tooltip.fontColor)
+                        .html(tooltip_html);
+
+                    tooltipDIV.selectAll('.bchart-tooltip-group')
+                        .style('background', function (d, i) {
+                            return self._options._colorMap[self._options._uniqueGroupArrayAll[i]];
+                        });
+                    tooltipDIV.selectAll('.bchart-tooltip-value')
+                        .style('background', function (d, i) {
+                            return self._options._colorMap[self._options._uniqueGroupArrayAll[i]];
+                        });
+
+                }
+            }
+
+            function drawSingleTooltip(parentSVG) {
+                var groupSVG = parentSVG.selectAll('.bChart_groups');
+                parentSVG.select('.bchart-focus-rect').remove();
+                parentSVG.select('.bchart-focus-x-line').remove()
+                groupSVG.on('mouseover', function (d) {
+                    d3.select(this).style('opacity', 0.7);
+                    tooltipDIV.transition()
+                        .duration(self._options.duration)
+                        .style('opacity', 1)
+                        .style('display', 'block');
+                })
                     .on('mousemove', function (d) {
                         var tooltip_html;
                         if (self.constructor === PieChart) {
@@ -3767,9 +3921,6 @@
                         .on('mousemove', null)
                         .on('mouseout', null);
                 }
-
-            } else {
-                tooltipDIV.remove();
             }
         }
     };

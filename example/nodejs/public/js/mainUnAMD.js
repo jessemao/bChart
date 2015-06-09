@@ -5,7 +5,7 @@
     //bChart
     //bChart('#skills', 'BarChart');
 
-    var barchart = bChart.BarChart('#skills', {
+    var barchart = bChart.AreaChart('#skills', {
         "isStack": true,
         "data": {
             dataValue: [['Label 1','45', '32', '15'],
@@ -17,9 +17,9 @@
         }
     });
 
-    setTimeout(function () {
-        barchart.options("isStack", false);
-    }, 1000);
+    //setTimeout(function () {
+    //    barchart.options("isStack", false);
+    //}, 1000);
 
     //barchart.background('color', '#cc0000');
 

@@ -116,7 +116,7 @@ PieChart.prototype.draw = function () {
 
     self.colors('refresh')._drawChartSVG();
 
-    self.title('refresh').legend('refresh').tooltip('refresh');
+    self.background('refresh').title('refresh').legend('refresh').tooltip('refresh');
 
 
 };

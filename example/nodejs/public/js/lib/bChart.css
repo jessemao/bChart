@@ -57,6 +57,23 @@
   border-radius: 10px;
   padding: 10px; }
 
+.bchart-tooltip-value {
+  float: left;
+  padding-left: 5px; }
+
+.bchart-tooltip-group {
+  float: left;
+  padding-right: 5px;
+  border-right: 1px solid; }
+
+.bchart-tooltip-header {
+  border-bottom: 1px solid;
+  background-color: #ccc; }
+
+.bchart-focus-x-line {
+  stroke: #000;
+  stroke-width: 2px; }
+
 /*-- Background --*/
 .bChart_background {
   position: absolute;
