@@ -231,6 +231,12 @@ var _defaultsBar = {
 	},
 
 	tooltip: {
+		"type": 1,
+		'background': 'rgba(255,255,255, 0.6)',
+		"xLine": {
+			"stroke": "#666",
+			"strokeWidth": 2
+		},
 		"display": true,
 		"text": "tooltip",
 		"fontType": "helvetica",
@@ -268,7 +274,7 @@ BarChart.prototype.draw = function () {
 
 	self.colors('refresh')._drawChartSVG();
 
-	self.background('refresh').title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
+	self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').legend('refresh').tooltip('refresh');
 	if (self._options._secondAxis) {
 		self.yLabel2('refresh').yAxis2('refresh');
 	}

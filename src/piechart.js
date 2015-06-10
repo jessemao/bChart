@@ -78,6 +78,7 @@ var _defaultsPie = {
     },
 
     tooltip: {
+        "type": 0,
         "display": true,
         "text": "tooltip",
         "fontType": "helvetica",

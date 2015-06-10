@@ -234,3 +234,4 @@ bChart.prototype._initXYAxis = function () {
         y2: y2
     };
 };
+

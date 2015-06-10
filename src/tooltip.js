@@ -45,7 +45,7 @@ bChart.prototype.tooltip = function (options) {
 
         function drawGroupTooltip(parentSVG) {
             var bisectData = d3.bisector(function (d) {
-                return d.x;
+                return self._options.xAxis.isTimeSeries ? new Date(d.x) : d.x;
             }).left;
 
             var dataByX = [];
@@ -109,7 +109,7 @@ bChart.prototype.tooltip = function (options) {
 
             function mousemove() {
                 var xOptions = self._getComputedX();
-                var d = {};
+                var d = {}, offx;
                 if (bChart.existy(xOptions.x0.invert)) {
                     var x0 = xOptions.x0.invert(d3.mouse(this)[0]),
                         i = bisectData(dataByX, x0, 1),
@@ -119,21 +119,30 @@ bChart.prototype.tooltip = function (options) {
                         d = d0;
                     } else {
                         if (bChart.existy(d0.x) && bChart.existy(d1.x)) {
-                            d = x0 - d0.x > d1.x - x0 ? d1: d0;
+                            if (self._options.xAxis.isTimeSeries) {
+                                d = x0.getTime() - (new Date(d0.x)).getTime() > (new Date(d1.x)).getTime() - x0.getTime() ? d1: d0;
+
+                            } else {
+                                d = x0 - d0.x > d1.x - x0 ? d1: d0;
+
+                            }
                         }
                     }
+                    offx = self._options.xAxis.isTimeSeries? xOptions.x0(new Date(d.x)):xOptions.x0(d.x);
+                    offx += 80;
                 } else {
                     var xPos = d3.mouse(this)[0];
                     var leftEdge = xOptions.x0.range();
-                    var rangeWidth = xOptions.x0.rangeBand() === 0 ? leftEdge[1] - leftEdge[0] : xOptions.x0.rangeBand();
+                    var rangeWidth = xOptions.x0.rangeBand() === 0 ? ( leftEdge[1] - leftEdge[0] ) / 2 : xOptions.x0.rangeBand();
                     var j;
-                    for (j = 0; xPos > (leftEdge[j] + rangeWidth / 2); j++) {
+                    for (j = 0; xPos > (leftEdge[j] + rangeWidth); j++) {
                     }
 
                     if (j >= leftEdge.length) {
                         j = leftEdge.length - 1;
                     }
                     d = dataByX[j];
+                    offx = xOptions.x0.rangeBand() === 0 ? leftEdge[j] + 80 : leftEdge[j] + rangeWidth / 2 + 80;
                 }
                 var tooltip_html = "";
                 tooltip_html += "<div class='bchart-tooltip-header'>"+ d.x +"</div>";
@@ -142,14 +151,13 @@ bChart.prototype.tooltip = function (options) {
                     tooltip_html += "<div class='bchart-tooltip-row'><div class='bchart-tooltip-group'>"+obj+"</div><div class='bchart-tooltip-value'>"+d[obj]+"</div></div>";
                 }
                 var offy = d3.event.hasOwnProperty('offsetY') ? d3.event.offsetY : d3.event.layerY;
-
                 focus_x.attr('x2', 0)
-                    .attr('transform', 'translate(' + leftEdge[j] + ',0)');
+                    .attr('transform', 'translate(' + (offx - 80) + ',0)');
 
                 tooltipDIV
                     .style('background', self._options.tooltip.background)
                     .style('top', (offy+10) + 'px')
-                    .style('left', (leftEdge[j] + 80) + 'px')
+                    .style('left', (offx) + 'px')
                     .style('font-family', self._options.tooltip.fontType)
                     .style('text-decoration', function () {
                         return self._options.tooltip.fontUnderline ? 'underline' : 'none';
@@ -179,7 +187,7 @@ bChart.prototype.tooltip = function (options) {
         function drawSingleTooltip(parentSVG) {
             var groupSVG = parentSVG.selectAll('.bChart_groups');
             parentSVG.select('.bchart-focus-rect').remove();
-            parentSVG.select('.bchart-focus-x-line').remove()
+            parentSVG.select('.bchart-focus-x-line').remove();
             groupSVG.on('mouseover', function (d) {
                 d3.select(this).style('opacity', 0.7);
                 tooltipDIV.transition()

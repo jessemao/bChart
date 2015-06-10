@@ -17,6 +17,26 @@ bChart.prototype._getComputedX = function () {
                 .rangePoints([0, self._options._chartSVGWidth],0.1)
                 .domain(self._options._uniqueXArray);
         }
+    } else {
+        var lastDate, newLastDate, firstDate;
+        if (self._options._uniqueXArray.length > 0) {
+            bChart.sortByDate(self._options._uniqueXArray);
+            lastDate = self._options._uniqueXArray[self._options._uniqueXArray.length - 1];
+            newLastDate = new Date(lastDate);
+            firstDate = new Date(self._options._uniqueXArray[0]);
+            if (self._options._uniqueXArray.length === 1) {
+                firstDate.setHours(newLastDate.getHours() - 1);
+                newLastDate.setHours(newLastDate.getHours() + 1);
+            } else {
+                newLastDate.setDate(newLastDate.getDate() + 1);
+            }
+        } else {
+            newLastDate = new Date();
+            firstDate = new Date();
+        }
+
+        x0 = d3.time.scale().range([0, self._options._chartSVGWidth])
+            .domain([firstDate, newLastDate]);
     }
     return {
         x0: x0,
@@ -26,11 +46,37 @@ bChart.prototype._getComputedX = function () {
 
 bChart.prototype._getXAxis = function (x) {
     var self = this;
-    return d3.svg.axis()
+    var axis = d3.svg.axis()
         .scale(x)
         .orient(self._options.xAxis.orientation)
-        .ticks(self._options.xAxis.tickNumber)
         .tickSize(self._options.xAxis.tickSize, 0, 0);
+    if (!self._options.xAxis.isTimeSeries) {
+        axis.ticks(self._options.xAxis.tickNumber);
+
+    } else {
+        var tickNumber, tickFormat;
+        if (self._options.timeTick) {
+            tickNumber = self._options.timeTick;
+        } else {
+            if (self._options._uniqueXArray.length > 0) {
+                var timeRange = new Date(self._options._uniqueXArray[self._options._uniqueXArray.length - 1]).getTime() - new Date(self._options._uniqueXArray[0]).getTime();
+                tickNumber = bChart.computeTimeTick(timeRange);
+            } else {
+                tickNumber = d3.time.days;
+            }
+        }
+
+        if (self._options.timeFormat) {
+            tickFormat = bChart.generateDateFormatter(self._options.timeFormat);
+        } else {
+            tickFormat = bChart.generateDateFormatter();
+        }
+
+        axis.ticks(tickNumber)
+            .tickFormat(tickFormat);
+    }
+    return axis;
+
 };
 
 bChart.prototype._renderXAxis = function (xAxis) {

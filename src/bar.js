@@ -7,14 +7,21 @@ bChart.prototype._drawStackBarSVG = function (options) {
     var	groupTmp = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
     var chartSVG = d3.select(self._options.selector).select('g.bChart');
 
+    var barParentSVG;
+    if (chartSVG.select('.bChart_bar_parent').empty()) {
+        barParentSVG = chartSVG.append('g')
+            .attr('class', 'bChart_bar_parent');
+    } else {
+        barParentSVG = chartSVG.select('.bChart_bar_parent');
+    }
+
     var stackBarArray = self.stackDataset(_datasetTmp, self._options._uniqueGroupArrayAll, self._options._uniqueXArray);
-    var stackBarSVG = chartSVG.selectAll('.bChart_Bars')
+    var stackBarSVG = barParentSVG.selectAll('.bChart_Bars')
         .data(stackBarArray);
 
     stackBarSVG.enter().append('g')
         .attr('class', function (d,i) {
             return 'bChart_Bars';
-
         });
     stackBarSVG.exit().remove();
 
@@ -77,6 +84,8 @@ bChart.prototype._drawStackBarSVG = function (options) {
 
     barRects.exit().remove();
 
+
+
 };
 
 bChart.prototype._drawGroupBarSVG = function (options) {
@@ -94,7 +103,15 @@ bChart.prototype._drawGroupBarSVG = function (options) {
         groupBarArray.push({x: value, data: groupBarValue});
     });
 
-    var groupBarSVG = chartSVG.selectAll('.bChart_Bars')
+    var barParentSVG;
+    if (chartSVG.select('.bChart_bar_parent').empty()) {
+        barParentSVG = chartSVG.append('g')
+            .attr('class', 'bChart_bar_parent');
+    } else {
+        barParentSVG = chartSVG.select('.bChart_bar_parent');
+    }
+
+    var groupBarSVG = barParentSVG.selectAll('.bChart_Bars')
         .data(groupBarArray);
 
     groupBarSVG.enter().append('g')

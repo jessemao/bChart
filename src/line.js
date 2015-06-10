@@ -58,7 +58,7 @@ bChart.prototype._drawLineSVG = function (options) {
 
         var line = d3.svg.line()
             .x(function (d) {
-                return options.x0(d.x);
+                return self._options.xAxis.isTimeSeries ? options.x0(new Date(d.x)): options.x0(d.x);
             })
             .y(function (d) {
                 return d._secondAxis? options.y2(d.value): options.y(d.value);

@@ -233,6 +233,12 @@ var _defaultsScatter = {
     },
 
     tooltip: {
+        "type": 0,
+        'background': 'rgba(255,255,255, 0.6)',
+        "xLine": {
+            "stroke": "#666",
+            "strokeWidth": 2
+        },
         "display": true,
         "text": "tooltip",
         "fontType": "helvetica",

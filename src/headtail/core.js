@@ -1,7 +1,35 @@
 var _selectorToChartObject = {};
 var _options = {};
+var _defaultTimeFormat = d3.time.format.multi([
+	[".%L", function (d) {
+		return d.getMilliseconds();
+	}],
+	[":%S", function (d) {
+		return d.getSeconds();
+	}],
+	["%I:%M", function (d) {
+		return d.getMinutes();
+	}],
+	["%I %p", function (d) {
+		return d.getHours();
+	}],
+	["%a %d", function (d) {
+		return d.getDay() && d.getDate() != 1;
+	}],
+	["%b %d", function (d) {
+		return d.getUTCDate() != 1;
+	}],
+	["%B", function (d) {
+		return d.getUTCMonth();
+	}],
+	["%Y", function () {
+		return true;
+	}]
+]);
 
 var bChart = function (options) {
+
+
 	if (bChart.existy(options) && bChart.typeString(options)) {
 		if (arguments.length >= 2) {
 			var chartType = "";
@@ -172,15 +200,28 @@ bChart.getUniqueValueArray = function (key) {
 	};
 };
 
-bChart.sorted = function (collection, sortFunc) {
-	return collection.sort(sortFunc);
+bChart.sorted = function (sortFunc) {
+	return function (collection) {
+		return 	collection.sort(sortFunc);
+	};
 };
+
+bChart.sortByDate = bChart.sorted(function (a, b) {
+	if (bChart.existy(a.getTime)) {
+		return a.getTime() - b.getTime();
+
+	} else {
+		a = new Date(a);
+		b = new Date(b);
+		return a.getTime() - b.getTime();
+	}
+});
 
 bChart.typeDate = function(obj) {
 	return isNaN(new Date(obj).getTime());
 };
 
-bChart.each = function (obj, iteratee, context) {
+bChart.each = function (obj, iteratee) {
 	if (bChart.isArrayLike(obj)) {
 		var length = bChart.getLength(obj);
 		for (var i = 0; i < length; i++) {
@@ -325,5 +366,95 @@ bChart.getSubArray = function (parentArray, childArray) {
 		return childArray.filter(function (elem, idx) {
 			return bChart.isElementInArray(elem, parentArray);
 		});
+	}
+};
+
+
+bChart.generateDateFormatter = function (dateString) {
+	if (!bChart.existy(dateString)) {
+		console.log('Please input a date format string');
+		return _defaultTimeFormat;
+	}
+
+
+	var formatMonth = function (mmString) {
+		switch(mmString) {
+			case 'MM':
+				return '%m';
+			case 'mm':
+				return '%B';
+			case 'Mm':
+				return '%B';
+			default:
+				return '';
+		}
+	};
+
+	var formatDay = function (dayString) {
+		switch(dayString){
+			case 'DD':
+				return '%d';
+			case 'dd':
+				return '%e';
+			default:
+				return '';
+		}
+	};
+
+	var formatYear = function (yearString) {
+		switch (yearString) {
+			case 'YYYY':
+				return '%Y';
+			case 'YY':
+			case 'yy':
+				return '%y';
+			default:
+				return '';
+		}
+	};
+
+	var parseDateString = function (type) {
+		return function (obj) {
+			var splits = obj.split(type);
+			var stringFormat = "";
+			bChart.each(splits, function (item) {
+				stringFormat += formatDay(item) + formatMonth(item) + formatYear(item);
+				stringFormat += type;
+			});
+			stringFormat.pop();
+			return d3.time.format(stringFormat);
+		};
+	};
+
+	var parseSlashFormat = parseDateString('/');
+
+	var parseDashFormat = parseDateString('-');
+
+	var parseCommaFormat = parseDateString(',');
+
+	if (dateString.indexOf('/')>=0) {
+		return parseSlashFormat(dateString);
+	} else if (dateString.indexOf('-')>=0) {
+		return parseDashFormat(dateString);
+	} else if (dateString.indexOf(',')>=0) {
+		return parseCommaFormat(dateString);
+	} else {
+		console.log('Please input a date format string');
+		return _defaultTimeFormat;
+	}
+
+};
+
+bChart.computeTimeTick = function (timeRange) {
+	if (timeRange > 3.15569e10) {
+	    return d3.time.years;
+	} else if (timeRange > 2.62974e9){
+		return d3.time.months;
+	} else if (timeRange > 604800000) {
+		return d3.time.weeks;
+	} else if (timeRange > 86400000) {
+		return d3.time.days;
+	} else {
+		return d3.time.hours;
 	}
 };

@@ -5,7 +5,7 @@
     //bChart
     //bChart('#skills', 'BarChart');
 
-    var barchart = bChart.AreaChart('#skills', {
+    var barchart = bChart.LineChart('#skills', {
         "isStack": true,
         "data": {
             dataValue: [['Label 1','45', '32', '15'],
@@ -16,6 +16,8 @@
             x: ['2010', '2011', '2012']
         }
     });
+
+    barchart.tooltip('type', 1).xAxis("isTimeSeries", true);
 
     //setTimeout(function () {
     //    barchart.options("isStack", false);

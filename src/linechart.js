@@ -208,6 +208,8 @@ var _defaultsLine = {
     xAxis: {
         "display": true,
         "isTimeSeries": false,
+        "timeTick": "",
+        "timeFormat": "",
         "displayTicksLine": true,
         "tickNumber": 5,
         "tickFormat": "",
@@ -233,6 +235,12 @@ var _defaultsLine = {
     },
 
     tooltip: {
+        "type": 1,
+        'background': 'rgba(255,255,255, 0.6)',
+        "xLine": {
+            "stroke": "#666",
+            "strokeWidth": 2
+        },
         "display": true,
         "text": "tooltip",
         "fontType": "helvetica",

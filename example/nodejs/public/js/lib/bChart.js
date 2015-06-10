@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-06-09
+/*! bChart - v0.1.0 - 2015-06-10
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -13,8 +13,36 @@
 
     var _selectorToChartObject = {};
     var _options = {};
+    var _defaultTimeFormat = d3.time.format.multi([
+    	[".%L", function (d) {
+    		return d.getMilliseconds();
+    	}],
+    	[":%S", function (d) {
+    		return d.getSeconds();
+    	}],
+    	["%I:%M", function (d) {
+    		return d.getMinutes();
+    	}],
+    	["%I %p", function (d) {
+    		return d.getHours();
+    	}],
+    	["%a %d", function (d) {
+    		return d.getDay() && d.getDate() != 1;
+    	}],
+    	["%b %d", function (d) {
+    		return d.getUTCDate() != 1;
+    	}],
+    	["%B", function (d) {
+    		return d.getUTCMonth();
+    	}],
+    	["%Y", function () {
+    		return true;
+    	}]
+    ]);
 
     var bChart = function (options) {
+
+
     	if (bChart.existy(options) && bChart.typeString(options)) {
     		if (arguments.length >= 2) {
     			var chartType = "";
@@ -185,15 +213,28 @@
     	};
     };
 
-    bChart.sorted = function (collection, sortFunc) {
-    	return collection.sort(sortFunc);
+    bChart.sorted = function (sortFunc) {
+    	return function (collection) {
+    		return 	collection.sort(sortFunc);
+    	};
     };
+
+    bChart.sortByDate = bChart.sorted(function (a, b) {
+    	if (bChart.existy(a.getTime)) {
+    		return a.getTime() - b.getTime();
+
+    	} else {
+    		a = new Date(a);
+    		b = new Date(b);
+    		return a.getTime() - b.getTime();
+    	}
+    });
 
     bChart.typeDate = function(obj) {
     	return isNaN(new Date(obj).getTime());
     };
 
-    bChart.each = function (obj, iteratee, context) {
+    bChart.each = function (obj, iteratee) {
     	if (bChart.isArrayLike(obj)) {
     		var length = bChart.getLength(obj);
     		for (var i = 0; i < length; i++) {
@@ -341,6 +382,95 @@
     	}
     };
 
+
+    bChart.generateDateFormatter = function (dateString) {
+    	if (!bChart.existy(dateString)) {
+    		console.log('Please input a date format string');
+    		return _defaultTimeFormat;
+    	}
+
+
+    	var formatMonth = function (mmString) {
+    		switch(mmString) {
+    			case 'MM':
+    				return '%m';
+    			case 'mm':
+    				return '%B';
+    			case 'Mm':
+    				return '%B';
+    			default:
+    				return '';
+    		}
+    	};
+
+    	var formatDay = function (dayString) {
+    		switch(dayString){
+    			case 'DD':
+    				return '%d';
+    			case 'dd':
+    				return '%e';
+    			default:
+    				return '';
+    		}
+    	};
+
+    	var formatYear = function (yearString) {
+    		switch (yearString) {
+    			case 'YYYY':
+    				return '%Y';
+    			case 'YY':
+    			case 'yy':
+    				return '%y';
+    			default:
+    				return '';
+    		}
+    	};
+
+    	var parseDateString = function (type) {
+    		return function (obj) {
+    			var splits = obj.split(type);
+    			var stringFormat = "";
+    			bChart.each(splits, function (item) {
+    				stringFormat += formatDay(item) + formatMonth(item) + formatYear(item);
+    				stringFormat += type;
+    			});
+    			stringFormat.pop();
+    			return d3.time.format(stringFormat);
+    		};
+    	};
+
+    	var parseSlashFormat = parseDateString('/');
+
+    	var parseDashFormat = parseDateString('-');
+
+    	var parseCommaFormat = parseDateString(',');
+
+    	if (dateString.indexOf('/')>=0) {
+    		return parseSlashFormat(dateString);
+    	} else if (dateString.indexOf('-')>=0) {
+    		return parseDashFormat(dateString);
+    	} else if (dateString.indexOf(',')>=0) {
+    		return parseCommaFormat(dateString);
+    	} else {
+    		console.log('Please input a date format string');
+    		return _defaultTimeFormat;
+    	}
+
+    };
+
+    bChart.computeTimeTick = function (timeRange) {
+    	if (timeRange > 3.15569e10) {
+    	    return d3.time.years;
+    	} else if (timeRange > 2.62974e9){
+    		return d3.time.months;
+    	} else if (timeRange > 604800000) {
+    		return d3.time.weeks;
+    	} else if (timeRange > 86400000) {
+    		return d3.time.days;
+    	} else {
+    		return d3.time.hours;
+    	}
+    };
     /**
      * Created by CaptainMao on 5/23/15.
      */
@@ -833,14 +963,21 @@
         var	groupTmp = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
         var chartSVG = d3.select(self._options.selector).select('g.bChart');
 
+        var barParentSVG;
+        if (chartSVG.select('.bChart_bar_parent').empty()) {
+            barParentSVG = chartSVG.append('g')
+                .attr('class', 'bChart_bar_parent');
+        } else {
+            barParentSVG = chartSVG.select('.bChart_bar_parent');
+        }
+
         var stackBarArray = self.stackDataset(_datasetTmp, self._options._uniqueGroupArrayAll, self._options._uniqueXArray);
-        var stackBarSVG = chartSVG.selectAll('.bChart_Bars')
+        var stackBarSVG = barParentSVG.selectAll('.bChart_Bars')
             .data(stackBarArray);
 
         stackBarSVG.enter().append('g')
             .attr('class', function (d,i) {
                 return 'bChart_Bars';
-
             });
         stackBarSVG.exit().remove();
 
@@ -903,6 +1040,8 @@
 
         barRects.exit().remove();
 
+
+
     };
 
     bChart.prototype._drawGroupBarSVG = function (options) {
@@ -920,7 +1059,15 @@
             groupBarArray.push({x: value, data: groupBarValue});
         });
 
-        var groupBarSVG = chartSVG.selectAll('.bChart_Bars')
+        var barParentSVG;
+        if (chartSVG.select('.bChart_bar_parent').empty()) {
+            barParentSVG = chartSVG.append('g')
+                .attr('class', 'bChart_bar_parent');
+        } else {
+            barParentSVG = chartSVG.select('.bChart_bar_parent');
+        }
+
+        var groupBarSVG = barParentSVG.selectAll('.bChart_Bars')
             .data(groupBarArray);
 
         groupBarSVG.enter().append('g')
@@ -1219,6 +1366,12 @@
     	},
 
     	tooltip: {
+    		"type": 1,
+    		'background': 'rgba(255,255,255, 0.6)',
+    		"xLine": {
+    			"stroke": "#666",
+    			"strokeWidth": 2
+    		},
     		"display": true,
     		"text": "tooltip",
     		"fontType": "helvetica",
@@ -1256,7 +1409,7 @@
 
     	self.colors('refresh')._drawChartSVG();
 
-    	self.background('refresh').title('refresh').legend('refresh').tooltip('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh');
+    	self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').legend('refresh').tooltip('refresh');
     	if (self._options._secondAxis) {
     		self.yLabel2('refresh').yAxis2('refresh');
     	}
@@ -1512,6 +1665,8 @@
             y2: y2
         };
     };
+
+
     /**
      * Created by CaptainMao on 5/23/15.
      */
@@ -1831,6 +1986,12 @@
         },
 
         tooltip: {
+            "type": 0,
+            'background': 'rgba(255,255,255, 0.6)',
+            "xLine": {
+                "stroke": "#666",
+                "strokeWidth": 2
+            },
             "display": true,
             "text": "tooltip",
             "fontType": "helvetica",
@@ -2467,7 +2628,7 @@
 
             var line = d3.svg.line()
                 .x(function (d) {
-                    return options.x0(d.x);
+                    return self._options.xAxis.isTimeSeries ? options.x0(new Date(d.x)): options.x0(d.x);
                 })
                 .y(function (d) {
                     return d._secondAxis? options.y2(d.value): options.y(d.value);
@@ -2733,6 +2894,8 @@
         xAxis: {
             "display": true,
             "isTimeSeries": false,
+            "timeTick": "",
+            "timeFormat": "",
             "displayTicksLine": true,
             "tickNumber": 5,
             "tickFormat": "",
@@ -2758,6 +2921,12 @@
         },
 
         tooltip: {
+            "type": 1,
+            'background': 'rgba(255,255,255, 0.6)',
+            "xLine": {
+                "stroke": "#666",
+                "strokeWidth": 2
+            },
             "display": true,
             "text": "tooltip",
             "fontType": "helvetica",
@@ -3159,6 +3328,7 @@
         },
 
         tooltip: {
+            "type": 0,
             "display": true,
             "text": "tooltip",
             "fontType": "helvetica",
@@ -3565,6 +3735,12 @@
         },
 
         tooltip: {
+            "type": 0,
+            'background': 'rgba(255,255,255, 0.6)',
+            "xLine": {
+                "stroke": "#666",
+                "strokeWidth": 2
+            },
             "display": true,
             "text": "tooltip",
             "fontType": "helvetica",
@@ -3723,7 +3899,7 @@
 
             function drawGroupTooltip(parentSVG) {
                 var bisectData = d3.bisector(function (d) {
-                    return d.x;
+                    return self._options.xAxis.isTimeSeries ? new Date(d.x) : d.x;
                 }).left;
 
                 var dataByX = [];
@@ -3787,7 +3963,7 @@
 
                 function mousemove() {
                     var xOptions = self._getComputedX();
-                    var d = {};
+                    var d = {}, offx;
                     if (bChart.existy(xOptions.x0.invert)) {
                         var x0 = xOptions.x0.invert(d3.mouse(this)[0]),
                             i = bisectData(dataByX, x0, 1),
@@ -3797,21 +3973,30 @@
                             d = d0;
                         } else {
                             if (bChart.existy(d0.x) && bChart.existy(d1.x)) {
-                                d = x0 - d0.x > d1.x - x0 ? d1: d0;
+                                if (self._options.xAxis.isTimeSeries) {
+                                    d = x0.getTime() - (new Date(d0.x)).getTime() > (new Date(d1.x)).getTime() - x0.getTime() ? d1: d0;
+
+                                } else {
+                                    d = x0 - d0.x > d1.x - x0 ? d1: d0;
+
+                                }
                             }
                         }
+                        offx = self._options.xAxis.isTimeSeries? xOptions.x0(new Date(d.x)):xOptions.x0(d.x);
+                        offx += 80;
                     } else {
                         var xPos = d3.mouse(this)[0];
                         var leftEdge = xOptions.x0.range();
-                        var rangeWidth = xOptions.x0.rangeBand() === 0 ? leftEdge[1] - leftEdge[0] : xOptions.x0.rangeBand();
+                        var rangeWidth = xOptions.x0.rangeBand() === 0 ? ( leftEdge[1] - leftEdge[0] ) / 2 : xOptions.x0.rangeBand();
                         var j;
-                        for (j = 0; xPos > (leftEdge[j] + rangeWidth / 2); j++) {
+                        for (j = 0; xPos > (leftEdge[j] + rangeWidth); j++) {
                         }
 
                         if (j >= leftEdge.length) {
                             j = leftEdge.length - 1;
                         }
                         d = dataByX[j];
+                        offx = xOptions.x0.rangeBand() === 0 ? leftEdge[j] + 80 : leftEdge[j] + rangeWidth / 2 + 80;
                     }
                     var tooltip_html = "";
                     tooltip_html += "<div class='bchart-tooltip-header'>"+ d.x +"</div>";
@@ -3820,14 +4005,13 @@
                         tooltip_html += "<div class='bchart-tooltip-row'><div class='bchart-tooltip-group'>"+obj+"</div><div class='bchart-tooltip-value'>"+d[obj]+"</div></div>";
                     }
                     var offy = d3.event.hasOwnProperty('offsetY') ? d3.event.offsetY : d3.event.layerY;
-
                     focus_x.attr('x2', 0)
-                        .attr('transform', 'translate(' + leftEdge[j] + ',0)');
+                        .attr('transform', 'translate(' + (offx - 80) + ',0)');
 
                     tooltipDIV
                         .style('background', self._options.tooltip.background)
                         .style('top', (offy+10) + 'px')
-                        .style('left', (leftEdge[j] + 80) + 'px')
+                        .style('left', (offx) + 'px')
                         .style('font-family', self._options.tooltip.fontType)
                         .style('text-decoration', function () {
                             return self._options.tooltip.fontUnderline ? 'underline' : 'none';
@@ -3857,7 +4041,7 @@
             function drawSingleTooltip(parentSVG) {
                 var groupSVG = parentSVG.selectAll('.bChart_groups');
                 parentSVG.select('.bchart-focus-rect').remove();
-                parentSVG.select('.bchart-focus-x-line').remove()
+                parentSVG.select('.bchart-focus-x-line').remove();
                 groupSVG.on('mouseover', function (d) {
                     d3.select(this).style('opacity', 0.7);
                     tooltipDIV.transition()
@@ -3943,6 +4127,26 @@
                     .rangePoints([0, self._options._chartSVGWidth],0.1)
                     .domain(self._options._uniqueXArray);
             }
+        } else {
+            var lastDate, newLastDate, firstDate;
+            if (self._options._uniqueXArray.length > 0) {
+                bChart.sortByDate(self._options._uniqueXArray);
+                lastDate = self._options._uniqueXArray[self._options._uniqueXArray.length - 1];
+                newLastDate = new Date(lastDate);
+                firstDate = new Date(self._options._uniqueXArray[0]);
+                if (self._options._uniqueXArray.length === 1) {
+                    firstDate.setHours(newLastDate.getHours() - 1);
+                    newLastDate.setHours(newLastDate.getHours() + 1);
+                } else {
+                    newLastDate.setDate(newLastDate.getDate() + 1);
+                }
+            } else {
+                newLastDate = new Date();
+                firstDate = new Date();
+            }
+
+            x0 = d3.time.scale().range([0, self._options._chartSVGWidth])
+                .domain([firstDate, newLastDate]);
         }
         return {
             x0: x0,
@@ -3952,11 +4156,37 @@
 
     bChart.prototype._getXAxis = function (x) {
         var self = this;
-        return d3.svg.axis()
+        var axis = d3.svg.axis()
             .scale(x)
             .orient(self._options.xAxis.orientation)
-            .ticks(self._options.xAxis.tickNumber)
             .tickSize(self._options.xAxis.tickSize, 0, 0);
+        if (!self._options.xAxis.isTimeSeries) {
+            axis.ticks(self._options.xAxis.tickNumber);
+
+        } else {
+            var tickNumber, tickFormat;
+            if (self._options.timeTick) {
+                tickNumber = self._options.timeTick;
+            } else {
+                if (self._options._uniqueXArray.length > 0) {
+                    var timeRange = new Date(self._options._uniqueXArray[self._options._uniqueXArray.length - 1]).getTime() - new Date(self._options._uniqueXArray[0]).getTime();
+                    tickNumber = bChart.computeTimeTick(timeRange);
+                } else {
+                    tickNumber = d3.time.days;
+                }
+            }
+
+            if (self._options.timeFormat) {
+                tickFormat = bChart.generateDateFormatter(self._options.timeFormat);
+            } else {
+                tickFormat = bChart.generateDateFormatter();
+            }
+
+            axis.ticks(tickNumber)
+                .tickFormat(tickFormat);
+        }
+        return axis;
+
     };
 
     bChart.prototype._renderXAxis = function (xAxis) {
