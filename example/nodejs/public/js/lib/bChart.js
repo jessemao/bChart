@@ -539,7 +539,8 @@
 
             var area = d3.svg.area()
                 .x(function (d) {
-                    return options.x0(d.x);
+
+                    return self._options.xAxis.isTimeSeries ? options.x0(new Date(d.x)): options.x0(d.x);
                 })
                 .y0(function (d) {
                     if (self._options.isStack) {
@@ -822,6 +823,8 @@
         xAxis: {
             "display": true,
             "isTimeSeries": false,
+            "timeTick": "",
+            "timeFormat": "",
             "displayTicksLine": true,
             "tickNumber": 5,
             "tickFormat": "",
@@ -1341,6 +1344,9 @@
     	},
     	xAxis: {
     		"display": true,
+    		"isTimeSeries": false,
+    		"timeTick": "",
+    		"timeFormat": "",
     		"displayTicksLine": true,
     		"tickNumber": 5,
     		"tickFormat": "",
@@ -1961,6 +1967,8 @@
         xAxis: {
             "display": true,
             "isTimeSeries": false,
+            "timeTick": "",
+            "timeFormat": "",
             "displayTicksLine": true,
             "tickNumber": 5,
             "tickFormat": "",
@@ -3193,7 +3201,13 @@
                 })
                 .attr('d', nodeGenerator)
                 .attr('transform', function (d) {
-                    return d._secondAxis? "translate(" + options.x0(d.x) + "," + options.y2(d.value) + ")": "translate(" + options.x0(d.x) + "," + options.y(d.value) + ")";
+                    var translateX;
+                    if (self._options.xAxis.isTimeSeries) {
+                        translateX = options.x0(new Date(d.x));
+                    } else {
+                        translateX = options.x0(d.x);
+                    }
+                    return d._secondAxis? "translate(" + translateX + "," + options.y2(d.value) + ")": "translate(" + translateX + "," + options.y(d.value) + ")";
                 })
                 .style('opacity', 0)
                 .transition()
@@ -3659,6 +3673,9 @@
         },
         yAxis: {
             "display": true,
+            "isTimeSeries": false,
+            "timeTick": "",
+            "timeFormat": "",
             "displayTicksLine": true,
             "tickNumber": 8,
             "tickFormat": d3.format(",.0f"),

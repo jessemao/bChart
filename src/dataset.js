@@ -30,6 +30,17 @@ bChart.prototype.stackDataset = function (_datasetInputs, groupArray, xArray) {
 
 };
 
+bChart.prototype.loadCSV = function (filePath) {
+    var self = this;
+    if (!bChart.existy(filePath)) {
+        alert("Please load data with a file path.");
+    }
+
+    d3.csv(filePath, function (data) {
+        
+    });
+};
+
 bChart.prototype.load = function (options) {
     var self = this;
     if (bChart.existy(options)) {

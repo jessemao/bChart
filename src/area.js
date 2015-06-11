@@ -66,7 +66,8 @@ bChart.prototype._drawAreaSVG = function (options) {
 
         var area = d3.svg.area()
             .x(function (d) {
-                return options.x0(d.x);
+
+                return self._options.xAxis.isTimeSeries ? options.x0(new Date(d.x)): options.x0(d.x);
             })
             .y0(function (d) {
                 if (self._options.isStack) {

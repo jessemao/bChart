@@ -56,7 +56,13 @@ bChart.prototype._drawNodeSVG = function (options) {
             })
             .attr('d', nodeGenerator)
             .attr('transform', function (d) {
-                return d._secondAxis? "translate(" + options.x0(d.x) + "," + options.y2(d.value) + ")": "translate(" + options.x0(d.x) + "," + options.y(d.value) + ")";
+                var translateX;
+                if (self._options.xAxis.isTimeSeries) {
+                    translateX = options.x0(new Date(d.x));
+                } else {
+                    translateX = options.x0(d.x);
+                }
+                return d._secondAxis? "translate(" + translateX + "," + options.y2(d.value) + ")": "translate(" + translateX + "," + options.y(d.value) + ")";
             })
             .style('opacity', 0)
             .transition()

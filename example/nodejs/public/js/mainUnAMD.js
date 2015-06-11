@@ -5,7 +5,7 @@
     //bChart
     //bChart('#skills', 'BarChart');
 
-    var barchart = bChart.LineChart('#skills', {
+    var barchart = bChart.AreaChart('#skills', {
         "isStack": true,
         "data": {
             dataValue: [['Label 1','45', '32', '15'],

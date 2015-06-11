@@ -209,6 +209,8 @@ var _defaultsArea = {
     xAxis: {
         "display": true,
         "isTimeSeries": false,
+        "timeTick": "",
+        "timeFormat": "",
         "displayTicksLine": true,
         "tickNumber": 5,
         "tickFormat": "",
