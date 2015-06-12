@@ -55,16 +55,19 @@
   opacity: 0;
   line-break: auto;
   border-radius: 10px;
-  padding: 10px; }
+  padding: 10px;
+  width: 100px; }
 
 .bchart-tooltip-value {
   float: left;
-  padding-left: 5px; }
+  padding-left: 5px;
+  width: 39%; }
 
 .bchart-tooltip-group {
   float: left;
   padding-right: 5px;
-  border-right: 1px solid; }
+  border-right: 1px solid;
+  width: 50%; }
 
 .bchart-tooltip-header {
   border-bottom: 1px solid;
@@ -73,6 +76,10 @@
 .bchart-focus-x-line {
   stroke: #000;
   stroke-width: 2px; }
+
+.bchart-tooltip-row {
+  float: left;
+  width: 100%; }
 
 /*-- Background --*/
 .bChart_background {

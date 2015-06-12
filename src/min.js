@@ -55,7 +55,7 @@ bChart.prototype.updateMin2 = function () {
     if (!bChart.existy(self._options.max2) && !bChart.existy(self._options.min2)) {
         self._options.minDefault2 -= (self._options.maxDefault2 - self._options.minDefault2) / self._options.yAxis2.tickNumber;
     }
-    //self._options.minDefault <= 0 ? 0: self._options.minDefault;
+    self._options.minDefault2 = self._options.minDefault2 <= 0 ? 0: self._options.minDefault2;
     return self;
 };
 
@@ -64,5 +64,7 @@ bChart.prototype.updateMin = function () {
     if (!bChart.existy(self._options.max) && !bChart.existy(self._options.min)) {
         self._options.minDefault -= (self._options.maxDefault - self._options.minDefault) / self._options.yAxis.tickNumber;
     }
+
+    self._options.minDefault = self._options.minDefault < 0 ? 0: self._options.minDefault;
     return self;
 };

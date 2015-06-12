@@ -38,6 +38,9 @@ bChart.prototype._getComputedX = function () {
         x0 = d3.time.scale().range([0, self._options._chartSVGWidth])
             .domain([firstDate, newLastDate]);
     }
+
+    self._options._dataset = bChart.sortedByArray(self._options._dataset, self._options._uniqueXArray);
+
     return {
         x0: x0,
         x1: x1

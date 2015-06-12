@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-06-10
+/*! bChart - v0.1.0 - 2015-06-11
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -217,6 +217,17 @@
     	return function (collection) {
     		return 	collection.sort(sortFunc);
     	};
+    };
+
+    bChart.sortedByArray = function (collection, array) {
+    	var newCollection = [];
+    	for (var i = 0; i < array.length; i++) {
+    		var collectionTmp = collection.filter(function (el) {
+    			return el.x === array[i];
+    		});
+    		newCollection.push(collectionTmp);
+    	}
+    	return d3.merge(newCollection);
     };
 
     bChart.sortByDate = bChart.sorted(function (a, b) {
@@ -471,6 +482,8 @@
     		return d3.time.hours;
     	}
     };
+
+
     /**
      * Created by CaptainMao on 5/23/15.
      */
@@ -2122,6 +2135,125 @@
 
     };
 
+    bChart.prototype.parseGroupIndex = function (titleArray, groups) {
+        var self = this;
+        var groupIndexs = [];
+        var groupValue = [];
+        if (bChart.isArrayLike(groups)) {
+            groups.forEach(function (el) {
+                if (!bChart.typeNumber(el)) {
+                    var groupIndex = titleArray.indexOf(el);
+                    if (groupIndex >= 0) {
+                        groupIndexs.push(groupIndex);
+                        groupValue.push(el);
+                    }
+                } else {
+                    groupIndexs.push(el);
+                    groupValue.push(titleArray[el]);
+                }
+            });
+        } else {
+            if (bChart.typeNumber(groups)) {
+                groupIndexs.push(groups);
+                groupValue.push(titleArray[groups]);
+            } else {
+                var groupIndex = titleArray.indexOf(groups);
+                if (groupIndex >= 0) {
+                    groupIndexs.push(groupIndex);
+                    groupValue.push(groups);
+                }
+            }
+        }
+        return {
+            groupIndex: groupIndexs,
+            groupValue: groupValue
+        };
+    };
+
+    bChart.prototype.loadCSV = function (filePath, options) {
+        var self = this;
+        if (!bChart.existy(filePath)) {
+            console.log("Please load data with a file path.");
+        }
+
+        d3.text(filePath, function (data) {
+            var parsedRows = d3.csv.parseRows(data);
+            var columns = [];
+
+            if (!bChart.existy(options)) {
+                var stringColumn = [];
+                for (var i = 0; i < parsedRows[1].length; i++) {
+                    if (!bChart.typeNumber(parsedRows[1][i])) {
+                        stringColumn.push(i);
+                    }
+                }
+
+
+                for (var j = 0; j < parsedRows[0].length; j++) {
+                    if (stringColumn.indexOf(j) >= 0) {
+                        continue;
+                    }
+                    var columnTmp = [];
+
+                    parsedRows.forEach(function (el) {
+                       columnTmp[j].push(el[j]);
+                    });
+                    columns.push(columnTmp);
+                }
+                self.load(columns);
+            } else {
+                var xIndex = -1, xValueArray = [], groupIndex = [], groupValueArray = [], groupIndex2 = [], groupValueArray2 = [], dataObject = {};
+                if (bChart.hasProperty(options, 'x')) {
+                    if (!bChart.typeNumber(options.x)) {
+                        xIndex = parsedRows[0].indexOf(options.x);
+                    } else {
+                        xIndex = options.x;
+                    }
+                }
+                
+                if (bChart.hasProperty(options, 'groups')) {
+                    var groupObject = self.parseGroupIndex(parsedRows[0], options.groups);
+                    groupIndex = groupObject.groupIndex;
+                    groupValueArray = groupObject.groupValue;
+                }
+
+                if (bChart.hasProperty(options, 'groups2')) {
+                    var groupObject2 = self.parseGroupIndex(parsedRows[0], options.groups2);
+                    groupIndex2 = groupObject2.groupIndex;
+                    groupValueArray2 = groupObject2.groupValue;
+                }
+
+                if (groupIndex.length > 0) {
+                    for (var i = 0; i < parsedRows[0].length; i++) {
+                        if (groupIndex.indexOf(i) >= 0) {
+                            var columnTmp = [];
+                            parsedRows.forEach(function (el, idx) {
+                                columnTmp.push(el[i]);
+
+                                if (idx > 0 && xIndex > -1) {
+                                    xValueArray.push(el[xIndex]);
+                                }
+                            });
+                            columns.push(columnTmp);
+                        }
+                    }
+
+                    dataObject.dataValue = columns;
+                    dataObject.groups = groupValueArray;
+                }
+
+                if (groupIndex2.length > 0) {
+                    dataObject.groups2 = groupValueArray2;
+                }
+
+                if (xValueArray.length > 0) {
+                    dataObject.x = xValueArray;
+                }
+                self.load(dataObject);
+            }
+        });
+    };
+
     bChart.prototype.load = function (options) {
         var self = this;
         if (bChart.existy(options)) {
@@ -2245,39 +2377,41 @@
 
         function loopDataValue (array, obj, i) {
             bChart.each(array[i], function (elem, idx) {
-                if (bChart.typeNumber(array[i][idx])) {
+                if (bChart.typeNumber(array[i][1])) {
 
-                    var dataItem = {x: "", group: groupName, value: array[i][idx]};
-                    if (bChart.typeNumber(array[i][0])) {
-                        dataItem = setDataXValue(dataItem, obj, idx);
-                    } else {
-                        dataItem = setDataXValue(dataItem, obj, idx-1);
-                    }
+                    if (bChart.typeNumber(array[i][idx])) {
 
-                    if (bChart.existy(obj) && bChart.hasProperty(obj, 'bubbleValue')) {
-                        var bubbleArray = obj.bubbleValue.filter(function (el) {
-                            return el[0] === groupName;
-                        });
-                        if (bChart.existy(bubbleArray[0]) && bubbleArray[0].length > 0) {
-                            self._options.bubble[groupName] = bubbleArray[0];
-                            dataItem.size = bubbleArray[0][idx];
+                        var dataItem = {x: "", group: groupName, value: array[i][idx]};
+                        if (bChart.typeNumber(array[i][0])) {
+                            dataItem = setDataXValue(dataItem, obj, idx);
+                        } else {
+                            dataItem = setDataXValue(dataItem, obj, idx-1);
                         }
 
-                    }
+                        if (bChart.existy(obj) && bChart.hasProperty(obj, 'bubbleValue')) {
+                            var bubbleArray = obj.bubbleValue.filter(function (el) {
+                                return el[0] === groupName;
+                            });
+                            if (bChart.existy(bubbleArray[0]) && bubbleArray[0].length > 0) {
+                                self._options.bubble[groupName] = bubbleArray[0];
+                                dataItem.size = bubbleArray[0][idx];
+                            }
 
-                    if (!isUniqueXNotEmpty) {
-                        self._options._uniqueXArray.push(dataItem.x);
-                    }
+                        }
 
-                    if (bChart.isElementInArray(groupName, self._options._uniqueGroupArray2)) {
-                        dataItem._secondAxis = true;
-                    } else {
-                        dataItem._secondAxis = false;
+                        if (!isUniqueXNotEmpty) {
+                            self._options._uniqueXArray.push(dataItem.x);
+                        }
+
+                        if (bChart.isElementInArray(groupName, self._options._uniqueGroupArray2)) {
+                            dataItem._secondAxis = true;
+                        } else {
+                            dataItem._secondAxis = false;
+                        }
+                        self._options._dataset.push(dataItem);
                     }
-                    self._options._dataset.push(dataItem);
                 }
             });
-
 
         }
 
@@ -3132,7 +3266,7 @@
         if (!bChart.existy(self._options.max2) && !bChart.existy(self._options.min2)) {
             self._options.minDefault2 -= (self._options.maxDefault2 - self._options.minDefault2) / self._options.yAxis2.tickNumber;
         }
-        //self._options.minDefault <= 0 ? 0: self._options.minDefault;
+        self._options.minDefault2 = self._options.minDefault2 <= 0 ? 0: self._options.minDefault2;
         return self;
     };
 
@@ -3141,6 +3275,8 @@
         if (!bChart.existy(self._options.max) && !bChart.existy(self._options.min)) {
             self._options.minDefault -= (self._options.maxDefault - self._options.minDefault) / self._options.yAxis.tickNumber;
         }
+
+        self._options.minDefault = self._options.minDefault < 0 ? 0: self._options.minDefault;
         return self;
     };
     /**
@@ -4165,6 +4301,9 @@
             x0 = d3.time.scale().range([0, self._options._chartSVGWidth])
                 .domain([firstDate, newLastDate]);
         }
+
+        self._options._dataset = bChart.sortedByArray(self._options._dataset, self._options._uniqueXArray);
+
         return {
             x0: x0,
             x1: x1

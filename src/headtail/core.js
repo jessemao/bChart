@@ -206,6 +206,17 @@ bChart.sorted = function (sortFunc) {
 	};
 };
 
+bChart.sortedByArray = function (collection, array) {
+	var newCollection = [];
+	for (var i = 0; i < array.length; i++) {
+		var collectionTmp = collection.filter(function (el) {
+			return el.x === array[i];
+		});
+		newCollection.push(collectionTmp);
+	}
+	return d3.merge(newCollection);
+};
+
 bChart.sortByDate = bChart.sorted(function (a, b) {
 	if (bChart.existy(a.getTime)) {
 		return a.getTime() - b.getTime();
@@ -458,3 +469,4 @@ bChart.computeTimeTick = function (timeRange) {
 		return d3.time.hours;
 	}
 };
+
