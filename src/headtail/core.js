@@ -341,6 +341,12 @@ bChart.concatNoDuplicate = function (array1, array2) {
 	});
 };
 
+bChart.removeDuplicateFromArray = function (array) {
+	return array.filter(function (elem, idx) {
+		return bChart.getIndexOfElement(elem, array) === idx;
+	});
+};
+
 bChart.removeElementFromArray = function (elem, array) {
 	if (bChart.isElementInArray(elem, array)) {
 		array.splice(bChart.getIndexOfElement(elem, array), 1);

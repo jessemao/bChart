@@ -354,6 +354,12 @@
     	});
     };
 
+    bChart.removeDuplicateFromArray = function (array) {
+    	return array.filter(function (elem, idx) {
+    		return bChart.getIndexOfElement(elem, array) === idx;
+    	});
+    };
+
     bChart.removeElementFromArray = function (elem, array) {
     	if (bChart.isElementInArray(elem, array)) {
     		array.splice(bChart.getIndexOfElement(elem, array), 1);
@@ -2196,7 +2202,7 @@
                     var columnTmp = [];
 
                     parsedRows.forEach(function (el) {
-                       columnTmp[j].push(el[j]);
+                       columnTmp.push(el[j]);
                     });
                     columns.push(columnTmp);
                 }
@@ -2268,6 +2274,7 @@
                     groups = options.groups;
                 }
             }
+
             self.unloadData(groups);
             self.loadColumn(options);
         }
@@ -2400,7 +2407,9 @@
                         }
 
                         if (!isUniqueXNotEmpty) {
-                            self._options._uniqueXArray.push(dataItem.x);
+                            if (self._options._uniqueXArray.indexOf(dataItem.x) < 0) {
+                                self._options._uniqueXArray.push(dataItem.x);
+                            }
                         }
 
                         if (bChart.isElementInArray(groupName, self._options._uniqueGroupArray2)) {

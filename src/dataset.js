@@ -91,7 +91,7 @@ bChart.prototype.loadCSV = function (filePath, options) {
                 var columnTmp = [];
 
                 parsedRows.forEach(function (el) {
-                   columnTmp[j].push(el[j]);
+                   columnTmp.push(el[j]);
                 });
                 columns.push(columnTmp);
             }
@@ -163,6 +163,7 @@ bChart.prototype.load = function (options) {
                 groups = options.groups;
             }
         }
+
         self.unloadData(groups);
         self.loadColumn(options);
     }
@@ -295,7 +296,9 @@ bChart.prototype.loadArrayData = function (array, obj) {
                     }
 
                     if (!isUniqueXNotEmpty) {
-                        self._options._uniqueXArray.push(dataItem.x);
+                        if (self._options._uniqueXArray.indexOf(dataItem.x) < 0) {
+                            self._options._uniqueXArray.push(dataItem.x);
+                        }
                     }
 
                     if (bChart.isElementInArray(groupName, self._options._uniqueGroupArray2)) {
