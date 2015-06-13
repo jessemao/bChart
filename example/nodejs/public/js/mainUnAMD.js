@@ -22,7 +22,7 @@
         x:'date'
     });
 
-    barchart.tooltip('type', 1).xAxis("isTimeSeries", true);
+    barchart.tooltip('type', 1).xAxis("isTimeSeries", true).xAxis('timeFormat', 'MM/DD/yyyy');
 
     //setTimeout(function () {
     //    barchart.options("isStack", false);

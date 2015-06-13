@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-06-11
+/*! bChart - v0.1.0 - 2015-06-13
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -434,6 +434,7 @@
     	var formatYear = function (yearString) {
     		switch (yearString) {
     			case 'YYYY':
+    			case 'yyyy':
     				return '%Y';
     			case 'YY':
     			case 'yy':
@@ -451,7 +452,7 @@
     				stringFormat += formatDay(item) + formatMonth(item) + formatYear(item);
     				stringFormat += type;
     			});
-    			stringFormat.pop();
+    			stringFormat = stringFormat.slice(0, -1);
     			return d3.time.format(stringFormat);
     		};
     	};
@@ -4330,8 +4331,8 @@
 
         } else {
             var tickNumber, tickFormat;
-            if (self._options.timeTick) {
-                tickNumber = self._options.timeTick;
+            if (self._options.xAxis.timeTick) {
+                tickNumber = d3.time[self._options.xAxis.timeTick];
             } else {
                 if (self._options._uniqueXArray.length > 0) {
                     var timeRange = new Date(self._options._uniqueXArray[self._options._uniqueXArray.length - 1]).getTime() - new Date(self._options._uniqueXArray[0]).getTime();
@@ -4341,8 +4342,8 @@
                 }
             }
 
-            if (self._options.timeFormat) {
-                tickFormat = bChart.generateDateFormatter(self._options.timeFormat);
+            if (self._options.xAxis.timeFormat) {
+                tickFormat = bChart.generateDateFormatter(self._options.xAxis.timeFormat);
             } else {
                 tickFormat = bChart.generateDateFormatter();
             }

@@ -421,6 +421,7 @@ bChart.generateDateFormatter = function (dateString) {
 	var formatYear = function (yearString) {
 		switch (yearString) {
 			case 'YYYY':
+			case 'yyyy':
 				return '%Y';
 			case 'YY':
 			case 'yy':
@@ -438,7 +439,7 @@ bChart.generateDateFormatter = function (dateString) {
 				stringFormat += formatDay(item) + formatMonth(item) + formatYear(item);
 				stringFormat += type;
 			});
-			stringFormat.pop();
+			stringFormat = stringFormat.slice(0, -1);
 			return d3.time.format(stringFormat);
 		};
 	};

@@ -55,11 +55,10 @@ bChart.prototype._getXAxis = function (x) {
         .tickSize(self._options.xAxis.tickSize, 0, 0);
     if (!self._options.xAxis.isTimeSeries) {
         axis.ticks(self._options.xAxis.tickNumber);
-
     } else {
         var tickNumber, tickFormat;
-        if (self._options.timeTick) {
-            tickNumber = self._options.timeTick;
+        if (self._options.xAxis.timeTick) {
+            tickNumber = d3.time[self._options.xAxis.timeTick];
         } else {
             if (self._options._uniqueXArray.length > 0) {
                 var timeRange = new Date(self._options._uniqueXArray[self._options._uniqueXArray.length - 1]).getTime() - new Date(self._options._uniqueXArray[0]).getTime();
@@ -69,8 +68,8 @@ bChart.prototype._getXAxis = function (x) {
             }
         }
 
-        if (self._options.timeFormat) {
-            tickFormat = bChart.generateDateFormatter(self._options.timeFormat);
+        if (self._options.xAxis.timeFormat) {
+            tickFormat = bChart.generateDateFormatter(self._options.xAxis.timeFormat);
         } else {
             tickFormat = bChart.generateDateFormatter();
         }
