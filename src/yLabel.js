@@ -3,11 +3,7 @@
  */
 bChart.prototype.yLabel2 = function (options) {
     var self = this;
-    if (!self._options._secondAxis) {
-        var chartSVG = d3.select(self._options.selector).select('g.bChart');
-        chartSVG.select('.bChart_ylabel_2').style('display', 'none');
-        return self;
-    }
+
     if (!bChart.existy(options)) {
         return self._options.yLabel2;
 
@@ -17,7 +13,13 @@ bChart.prototype.yLabel2 = function (options) {
 
         } else {
             self.setOptions(arguments,'yLabel2');
-            self.yLabel('yLabel2');
+            if (!self._options._secondAxis) {
+                var chartSVG = d3.select(self._options.selector).select('g.bChart');
+                chartSVG.select('.bChart_ylabel_2').style('display', 'none');
+            } else {
+                self.yLabel('yLabel2');
+
+            }
         }
 
         return self;

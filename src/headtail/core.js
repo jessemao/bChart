@@ -201,10 +201,7 @@ var _defaultOptions = {
 		"axisColor": '#000',
 		"axisWidth": 1,
 		"rotation": 0,
-		"offsetAdjust": {
-			"horizontal": 0,
-			"vertical": 0
-		}
+		"offsetAdjust": 0
 	},
 	yAxis2: {
 		"display": true,
@@ -226,10 +223,7 @@ var _defaultOptions = {
 		"axisColor": '#000',
 		"axisWidth": 1,
 		"rotation": 0,
-		"offsetAdjust": {
-			"horizontal": 0,
-			"vertical": 0
-		}
+		"offsetAdjust": 0
 	},
 	xAxis: {
 		"display": true,
@@ -254,10 +248,7 @@ var _defaultOptions = {
 		"axisColor": '#000',
 		"axisWidth": 1,
 		"rotation": 0,
-		"offsetAdjust": {
-			"horizontal": 0,
-			"vertical": 0
-		}
+		"offsetAdjust": 0
 	},
 
 	tooltip: {

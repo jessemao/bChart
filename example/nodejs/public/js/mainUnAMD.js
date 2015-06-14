@@ -22,7 +22,11 @@
         x:'date'
     });
 
-    barchart.tooltip('type', 1).xAxis({"isTimeSeries": true, 'timeFormat': 'Mm-yyyy'})
+    barchart.tooltip('type', 1).xAxis({
+            "isTimeSeries": true,
+            'timeFormat': 'Mm-yyyy',
+            'offsetAdjust': 10
+        })
         .line({
             //"fillOpacity.$0": 1,
             "strokeWidth.$1": 5,
@@ -34,6 +38,18 @@
             'strokeWidth': 4,
             'solidCircle': true,
             'size': 64
+        })
+        .xLabel({
+            'text': 'date',
+            'fontSize': '18'
+        })
+        .yAxis({
+            'rotation': -45,
+            'offsetAdjust': 10
+        })
+        .yAxis2({
+            'rotation': -45
+
         });
 
     //setTimeout(function () {

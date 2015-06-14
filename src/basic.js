@@ -237,7 +237,6 @@ bChart.prototype._initXYAxis = function () {
 
     self._renderXAxis(xAxis);
 
-
     var yTmp = self._getComputedY();
     y = yTmp.y1;
 

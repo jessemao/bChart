@@ -214,10 +214,7 @@
     		"axisColor": '#000',
     		"axisWidth": 1,
     		"rotation": 0,
-    		"offsetAdjust": {
-    			"horizontal": 0,
-    			"vertical": 0
-    		}
+    		"offsetAdjust": 0
     	},
     	yAxis2: {
     		"display": true,
@@ -239,10 +236,7 @@
     		"axisColor": '#000',
     		"axisWidth": 1,
     		"rotation": 0,
-    		"offsetAdjust": {
-    			"horizontal": 0,
-    			"vertical": 0
-    		}
+    		"offsetAdjust": 0
     	},
     	xAxis: {
     		"display": true,
@@ -267,10 +261,7 @@
     		"axisColor": '#000',
     		"axisWidth": 1,
     		"rotation": 0,
-    		"offsetAdjust": {
-    			"horizontal": 0,
-    			"vertical": 0
-    		}
+    		"offsetAdjust": 0
     	},
 
     	tooltip: {
@@ -1462,7 +1453,6 @@
         xAxis = self._getXAxis(x0);
 
         self._renderXAxis(xAxis);
-
 
         var yTmp = self._getComputedY();
         y = yTmp.y1;
@@ -3223,6 +3213,7 @@
         var axis = d3.svg.axis()
             .scale(x)
             .orient(self._options.xAxis.orientation)
+            .tickPadding(self._options.xAxis.offsetAdjust + 3)
             .tickSize(self._options.xAxis.tickSize, 0, 0);
         if (!self._options.xAxis.isTimeSeries) {
             axis.ticks(self._options.xAxis.tickNumber);
@@ -3268,6 +3259,78 @@
                 .ease("sin-in-out")
                 .call(xAxis);
         }
+        if (!chartSVG.select('.bChart_x_axis').select('text').empty()) {
+            self._updateXAxisStyle();
+        }
+        return self;
+    };
+
+    bChart.prototype._updateXAxisStyle = function () {
+        var self = this;
+        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+        var xAxisSVGAPath = chartSVG.select('.bChart_x_axis').selectAll('path');
+        var xAxisSVGLine = chartSVG.select('.bChart_x_axis').selectAll('line');
+        var xAxisSVGText = chartSVG.select('.bChart_x_axis').selectAll('text');
+        if (self._options.xAxis.display) {
+
+            xAxisSVGAPath.style('stroke-width', self._options.xAxis.axisWidth)
+                .style('stroke', self._options.xAxis.axisColor)
+                .style('display', 'block');
+            xAxisSVGText.style('display', 'block');
+
+
+            var textAnchor;
+            switch(self._options.xAxis.rotation) {
+                case -45:
+                    textAnchor = 'end';
+                    break;
+                case -90:
+                    textAnchor = 'end';
+                    break;
+                case 45:
+                    textAnchor = 'start';
+                    break;
+                case 90:
+                    textAnchor = 'start';
+                    break;
+                case 0:
+                    textAnchor = 'middle';
+                    break;
+            }
+
+            var xText = 0,
+                yText = (+xAxisSVGText.attr('y'));
+
+            xAxisSVGText
+                .attr('transform', function (d) {
+                    return 'rotate(' + self._options.xAxis.rotation + ' ' + xText +','+yText+  ')';
+                })
+                .style('text-anchor', textAnchor)
+                .style('font-size', self._options.xAxis.fontSize)
+                .style('fill', self._options.xAxis.fontColor)
+                .style('text-decoration', function () {
+                    return self._options.xAxis.fontUnderline ? 'underline': 'none';
+                })
+                .style('font-weight', function () {
+                    return self._options.xAxis.fontBold ? 'bold' : 'normal';
+                })
+                .style('font-style', function () {
+                    return self._options.xAxis.fontItalic ? 'italic' : 'normal';
+                })
+                .style('font-family', self._options.xAxis.fontType);
+
+        } else {
+            xAxisSVGAPath.style('display', 'none');
+            xAxisSVGText.style('display', 'none');
+        }
+
+        if (self._options.xAxis.displayTicksLine) {
+            xAxisSVGLine.style('stroke-width', self._options.xAxis.tickLineWidth)
+                .style('stroke', self._options.xAxis.tickLineColor)
+                .style('display', 'block');
+        } else {
+            xAxisSVGLine.style('display', 'none');
+        }
     };
 
     bChart.prototype.xAxis = function (options) {
@@ -3288,82 +3351,9 @@
         }
 
         function drawXAxis () {
-            var chartSVG = d3.select(self._options.selector).select('g.bChart');
-            var xAxisSVGAPath = chartSVG.select('.bChart_x_axis').selectAll('path');
-            var xAxisSVGLine = chartSVG.select('.bChart_x_axis').selectAll('line');
-            var xAxisSVGText = chartSVG.select('.bChart_x_axis').selectAll('text');
-            if (self._options.xAxis.display) {
-
-                xAxisSVGAPath.style('stroke-width', self._options.xAxis.axisWidth)
-                    .style('stroke', self._options.xAxis.axisColor)
-                    .style('display', 'block');
-                xAxisSVGText.style('display', 'block');
-                var x0 = self._getComputedX().x0;
-                var xAxis = self._getXAxis(x0);
-                self._renderXAxis(xAxis);
-
-                var rotateDxXAxis, rotateDyXAxis, textAnchor;
-                switch(self._options.xAxis.rotation) {
-                    case -45:
-                        rotateDxXAxis = '0';
-                        rotateDyXAxis = '1em';
-                        textAnchor = 'end';
-                        break;
-                    case -90:
-                        rotateDxXAxis = '-.5em';
-                        rotateDyXAxis = '0';
-                        textAnchor = 'end';
-                        break;
-                    case 45:
-                        rotateDxXAxis = '0em';
-                        rotateDyXAxis = '1em';
-                        textAnchor = 'start';
-                        break;
-                    case 90:
-                        rotateDxXAxis = '.5em';
-                        rotateDyXAxis = '0';
-                        textAnchor = 'start';
-                        break;
-                    case 0:
-                        rotateDxXAxis = '0';
-                        rotateDyXAxis = '1em';
-                        textAnchor = 'middle';
-                        break;
-                }
-
-                xAxisSVGText.style('text-anchor', textAnchor)
-                    .attr('dx', rotateDxXAxis)
-                    .attr('dy', rotateDyXAxis)
-                    .attr('transfrom', function (d) {
-                        return 'rotate(' + self._options.xAxis.rotation + ')';
-                    })
-                    .style('font-size', self._options.xAxis.fontSize)
-                    .style('fill', self._options.xAxis.fontColor)
-                    .style('text-decoration', function () {
-                        return self._options.xAxis.fontUnderline ? 'underline': 'none';
-                    })
-                    .style('font-weight', function () {
-                        return self._options.xAxis.fontBold ? 'bold' : 'normal';
-                    })
-                    .style('font-style', function () {
-                        return self._options.xAxis.fontItalic ? 'italic' : 'normal';
-                    })
-                    .style('font-family', self._options.xAxis.fontType);
-
-            } else {
-                xAxisSVGAPath.style('display', 'none');
-                xAxisSVGText.style('display', 'none');
-            }
-
-            if (self._options.xAxis.displayTicksLine) {
-                xAxisSVGLine.style('stroke-width', self._options.xAxis.tickLineWidth)
-                    .style('stroke', self._options.xAxis.tickLineColor)
-                    .style('display', 'block');
-            } else {
-                xAxisSVGLine.style('display', 'none');
-            }
-
-
+            var x0 = self._getComputedX().x0;
+            var xAxis = self._getXAxis(x0);
+            self._renderXAxis(xAxis);
         }
     };
     /**
@@ -3457,6 +3447,7 @@
             .scale(y)
             .orient(self._options[yAxisType].orientation)
             .tickFormat(self._options[yAxisType].tickFormat)
+            .tickPadding(self._options[yAxisType].offsetAdjust + 3)
             .ticks(self._options[yAxisType].tickNumber)
             .tickSize(self._options[yAxisType].tickSize, 0, 0);
 
@@ -3479,6 +3470,9 @@
                     .ease("sin-in-out")
                     .call(yAxis);
             }
+            if (!chartSVG.select('.bChart_y_axis_2').select('text').empty()) {
+                self._updateYAxisStyle(isSecond);
+            }
         } else {
             if (chartSVG.select('.bChart_y_axis').empty()) {
                 chartSVG.append('g')
@@ -3491,16 +3485,19 @@
                     .ease("sin-in-out")
                     .call(yAxis);
             }
+            if (!chartSVG.select('.bChart_y_axis').select('text').empty()) {
+                self._updateYAxisStyle();
+            }
         }
+        return self;
+
     };
 
     bChart.prototype.yAxis2 = function (options) {
         var self = this;
-        if (!self._options._secondAxis) {
-            var chartSVG = d3.select(self._options.selector).select('g.bChart');
-            chartSVG.select('.bChart_y_axis_2').style('display', 'none');
-            return self;
-        }
+
+
+
         if (!bChart.existy(options)) {
             return self._options.yAxis2;
 
@@ -3510,11 +3507,121 @@
 
             } else {
                 self.setOptions(arguments,'yAxis2');
-                self.yAxis('yAxis2');
+                if (!self._options._secondAxis) {
+                    var chartSVG = d3.select(self._options.selector).select('g.bChart');
+                    chartSVG.select('.bChart_y_axis_2').style('display', 'none');
+                } else {
+                    self.yAxis('yAxis2');
+                }
             }
 
-
             return self;
+        }
+    };
+
+    bChart.prototype._updateYAxisStyle = function (drawSecAxis) {
+        var self = this;
+        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+        var axisType, yAxisSVG, yAxisSVGAPath, yAxisSVGLine, yAxisSVGText;
+        if (bChart.existy(drawSecAxis) && drawSecAxis) {
+            axisType = 'yAxis2';
+            yAxisSVG = chartSVG.select('.bChart_y_axis_2');
+            yAxisSVGAPath = chartSVG.select('.bChart_y_axis_2').selectAll('path');
+            yAxisSVGLine = chartSVG.select('.bChart_y_axis_2').selectAll('line');
+            yAxisSVGText = chartSVG.select('.bChart_y_axis_2').selectAll('text');
+        } else {
+            axisType = 'yAxis';
+            yAxisSVG = chartSVG.select('.bChart_y_axis');
+            yAxisSVGAPath = chartSVG.select('.bChart_y_axis').selectAll('path');
+            yAxisSVGLine = chartSVG.select('.bChart_y_axis').selectAll('line');
+            yAxisSVGText = chartSVG.select('.bChart_y_axis').selectAll('text');
+        }
+
+        if (self._options[axisType].display) {
+
+            yAxisSVG.style('display', 'block');
+
+            yAxisSVGAPath.style('stroke-width', self._options[axisType].axisWidth)
+                .style('stroke', self._options[axisType].axisColor)
+                .style('display', 'block');
+            yAxisSVGText.style('display', 'block');
+
+            var textAnchor;
+            switch(self._options[axisType].rotation) {
+                case -45:
+                    if (drawSecAxis) {
+                        textAnchor = 'start';
+                    } else {
+                        textAnchor = 'end';
+                    }
+
+                    break;
+                case -90:
+                    if (drawSecAxis) {
+                        textAnchor = 'middle';
+                    } else {
+                        textAnchor = 'middle';
+                    }
+
+                    break;
+                case 45:
+                    if (drawSecAxis) {
+                        textAnchor = 'start';
+                    } else {
+                        textAnchor = 'end';
+                    }
+
+
+                    break;
+                case 90:
+                    if (drawSecAxis) {
+                        textAnchor = 'middle';
+                    } else {
+                        textAnchor = 'middle';
+                    }
+
+                    break;
+                case 0:
+                    if (drawSecAxis) {
+                        textAnchor = 'start';
+                    } else {
+                        textAnchor = 'end';
+                    }
+
+                    break;
+            }
+
+            var xText = (+yAxisSVGText.attr('x')),
+                yText = 0;
+
+            yAxisSVGText.style('text-anchor', textAnchor)
+                .attr('transform', function () {
+                    return 'rotate(' + self._options[axisType].rotation + ' ' + xText +','+yText+ ')';
+                })
+                .style('font-size', self._options[axisType].fontSize)
+                .style('fill', self._options[axisType].fontColor)
+                .style('text-decoration', function () {
+                    return self._options[axisType].fontUnderline ? 'underline': 'none';
+                })
+                .style('font-weight', function () {
+                    return self._options[axisType].fontBold ? 'bold' : 'normal';
+                })
+                .style('font-style', function () {
+                    return self._options[axisType].fontItalic ? 'italic' : 'normal';
+                })
+                .style('font-family', self._options[axisType].fontType);
+
+        } else {
+            yAxisSVGAPath.style('display', 'none');
+            yAxisSVGText.style('display', 'none');
+        }
+
+        if (self._options[axisType].displayTicksLine) {
+            yAxisSVGLine.style('stroke-width', self._options[axisType].tickLineWidth)
+                .style('stroke', self._options[axisType].tickLineColor)
+                .style('display', 'block');
+        } else {
+            yAxisSVGLine.style('display', 'none');
         }
     };
 
@@ -3537,137 +3644,17 @@
         }
 
         function drawYAxis (drawSecAxis) {
-            var chartSVG = d3.select(self._options.selector).select('g.bChart');
-            var axisType, yAxisSVG, yAxisSVGAPath, yAxisSVGLine, yAxisSVGText, y, yAxis, yTmp;
-            yTmp = self._getComputedY();
+            var yTmp = self._getComputedY();
+            var y, yAxis;
             if (bChart.existy(drawSecAxis) && drawSecAxis) {
-                axisType = 'yAxis2';
-                yAxisSVG = chartSVG.select('.bChart_y_axis_2');
-                yAxisSVGAPath = chartSVG.select('.bChart_y_axis_2').selectAll('path');
-                yAxisSVGLine = chartSVG.select('.bChart_y_axis_2').selectAll('line');
-                yAxisSVGText = chartSVG.select('.bChart_y_axis_2').selectAll('text');
                 y = yTmp.y2;
                 yAxis = self._getYAxis(y, true);
                 self._renderYAxis(yAxis, true);
             } else {
-                axisType = 'yAxis';
-                yAxisSVG = chartSVG.select('.bChart_y_axis');
-
-                yAxisSVGAPath = chartSVG.select('.bChart_y_axis').selectAll('path');
-                yAxisSVGLine = chartSVG.select('.bChart_y_axis').selectAll('line');
-                yAxisSVGText = chartSVG.select('.bChart_y_axis').selectAll('text');
                 y = yTmp.y1;
                 yAxis = self._getYAxis(y, false);
                 self._renderYAxis(yAxis, false);
             }
-
-            if (self._options[axisType].display) {
-
-                yAxisSVG.style('display', 'block');
-
-                yAxisSVGAPath.style('stroke-width', self._options[axisType].axisWidth)
-                    .style('stroke', self._options[axisType].axisColor)
-                    .style('display', 'block');
-                yAxisSVGText.style('display', 'block');
-
-                var rotateDxyAxis, rotateDyyAxis, textAnchor;
-                switch(self._options[axisType].rotation) {
-                    case -45:
-                        if (drawSecAxis) {
-                            rotateDxyAxis = '.1em';
-                            rotateDyyAxis = '-1em';
-                            textAnchor = 'start';
-                        } else {
-                            rotateDxyAxis = '-.1em';
-                            rotateDyyAxis = '-1em';
-                            textAnchor = 'end';
-                        }
-
-                        break;
-                    case -90:
-                        if (drawSecAxis) {
-                            rotateDxyAxis = '0.5em';
-                            rotateDyyAxis = '-.5em';
-                            textAnchor = 'middle';
-                        } else {
-                            rotateDxyAxis = '0.5em';
-                            rotateDyyAxis = '-.5em';
-                            textAnchor = 'middle';
-                        }
-
-                        break;
-                    case 45:
-                        if (drawSecAxis) {
-                            rotateDxyAxis = '.1em';
-                            rotateDyyAxis = '1em';
-                            textAnchor = 'start';
-                        } else {
-                            rotateDxyAxis = '.1em';
-                            rotateDyyAxis = '1em';
-                            textAnchor = 'end';
-                        }
-
-
-                        break;
-                    case 90:
-                        if (drawSecAxis) {
-                            rotateDxyAxis = '0em';
-                            rotateDyyAxis = '1em';
-                            textAnchor = 'middle';
-                        } else {
-                            rotateDxyAxis = '0em';
-                            rotateDyyAxis = '1em';
-                            textAnchor = 'middle';
-                        }
-
-                        break;
-                    case 0:
-                        if (drawSecAxis) {
-                            rotateDxyAxis = '0em';
-                            rotateDyyAxis = '0.3em';
-                            textAnchor = 'start';
-                        } else {
-                            rotateDxyAxis = '0em';
-                            rotateDyyAxis = '0.3em';
-                            textAnchor = 'end';
-                        }
-
-                        break;
-                }
-
-                yAxisSVGText.style('text-anchor', textAnchor)
-                    .attr('dx', rotateDxyAxis)
-                    .attr('dy', rotateDyyAxis)
-                    .attr('transfrom', function (d) {
-                        return 'rotate(' + self._options[axisType].rotation + ')';
-                    })
-                    .style('font-size', self._options[axisType].fontSize)
-                    .style('fill', self._options[axisType].fontColor)
-                    .style('text-decoration', function () {
-                        return self._options[axisType].fontUnderline ? 'underline': 'none';
-                    })
-                    .style('font-weight', function () {
-                        return self._options[axisType].fontBold ? 'bold' : 'normal';
-                    })
-                    .style('font-style', function () {
-                        return self._options[axisType].fontItalic ? 'italic' : 'normal';
-                    })
-                    .style('font-family', self._options[axisType].fontType);
-
-            } else {
-                yAxisSVGAPath.style('display', 'none');
-                yAxisSVGText.style('display', 'none');
-            }
-
-            if (self._options[axisType].displayTicksLine) {
-                yAxisSVGLine.style('stroke-width', self._options[axisType].tickLineWidth)
-                    .style('stroke', self._options[axisType].tickLineColor)
-                    .style('display', 'block');
-            } else {
-                yAxisSVGLine.style('display', 'none');
-            }
-
-
         }
     };
     /**
@@ -3675,11 +3662,7 @@
      */
     bChart.prototype.yLabel2 = function (options) {
         var self = this;
-        if (!self._options._secondAxis) {
-            var chartSVG = d3.select(self._options.selector).select('g.bChart');
-            chartSVG.select('.bChart_ylabel_2').style('display', 'none');
-            return self;
-        }
+
         if (!bChart.existy(options)) {
             return self._options.yLabel2;
 
@@ -3689,7 +3672,13 @@
 
             } else {
                 self.setOptions(arguments,'yLabel2');
-                self.yLabel('yLabel2');
+                if (!self._options._secondAxis) {
+                    var chartSVG = d3.select(self._options.selector).select('g.bChart');
+                    chartSVG.select('.bChart_ylabel_2').style('display', 'none');
+                } else {
+                    self.yLabel('yLabel2');
+
+                }
             }
 
             return self;
