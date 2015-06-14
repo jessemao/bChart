@@ -52,7 +52,7 @@ bChart.prototype._drawNodeSVG = function (options) {
         nodePathSVG.exit().remove();
 
         nodePathSVG.attr('class', function(d) {
-                return 'bChart_groups bChart_groups' + groupConcat.indexOf(d.group);
+                return 'bChart_groups bChart_groups_' + groupConcat.indexOf(d.group);
             })
             .attr('d', nodeGenerator)
             .attr('transform', function (d) {

@@ -74,6 +74,7 @@ bChart.prototype.setOptions = function (options, type) {
     } else {
         _setOption = composePropertyObject();
     }
+
     if (bChart.isArrayLike(options)) {
         if (options.length == 1) { // passing in _dataset and object.
             if (bChart.typeObject(options[0])) {
@@ -190,7 +191,26 @@ bChart.prototype._drawChartSVG = function () {
             return self._drawPieChart();
 
     }
-        
+};
+
+bChart.prototype.draw = function () {
+    var self = this;
+    if (!bChart.getLength(d3.select(self._options.selector))) {
+        console.log("Please make sure the element exists in your template.");
+        return void 0;
+    }
+
+    self.min('refresh').max('refresh').updateMin();
+    if (self._options._secondAxis) {
+        self.min2('refresh').max2('refresh').updateMin2();
+    }
+
+    self.colors('refresh')._drawChartSVG();
+
+    self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').legend('refresh').tooltip('refresh');
+    if (self._options._secondAxis) {
+        self.yLabel2('refresh').yAxis2('refresh');
+    }
 };
 
 bChart.prototype._initXYAxis = function () {

@@ -32,12 +32,12 @@ bChart.prototype._drawStackBarSVG = function (options) {
 
     barRects.enter().append('rect')
         .attr('class', function (d) {
-            return 'bChart_groups bChart_groups' + groupTmp.indexOf(d.group);
+            return 'bChart_groups bChart_groups_' + groupTmp.indexOf(d.group);
         });
 
     barRects
         .attr('class', function (d) {
-            return 'bChart_groups bChart_groups' + groupTmp.indexOf(d.group);
+            return 'bChart_groups bChart_groups_' + groupTmp.indexOf(d.group);
         })
         .attr('width', options.x0.rangeBand() - self._options.barDistance)
         .attr('x', function (d) {
@@ -130,12 +130,12 @@ bChart.prototype._drawGroupBarSVG = function (options) {
     barRects.exit().transition().attr('height', 0).remove();
     barRects.enter().append('rect')
         .attr('class', function (d) {
-            return 'bChart_groups bChart_groups' + groupConcat.indexOf(d.group);
+            return 'bChart_groups bChart_groups_' + groupConcat.indexOf(d.group);
         });
 
     barRects
         .attr('class', function (d) {
-            return 'bChart_groups bChart_groups' + groupConcat.indexOf(d.group);
+            return 'bChart_groups bChart_groups_' + groupConcat.indexOf(d.group);
         })
         .attr('width', options.x1.rangeBand() - self._options.barDistance)
         .attr('x', function (d, i) {

@@ -97,7 +97,7 @@ bChart.prototype.legend = function (options) {
                     var groupConcat = self._options._uniqueGroupTmp.length? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
 
                     var matchingBarIndex = groupConcat.indexOf(d);
-                    var matchingClass = '.bChart_groups' + matchingBarIndex;
+                    var matchingClass = '.bChart_groups_' + matchingBarIndex;
                     chartSVG.selectAll(matchingClass)
                         .classed('unhover', false);
 

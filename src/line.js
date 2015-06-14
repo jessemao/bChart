@@ -67,7 +67,7 @@ bChart.prototype._drawLineSVG = function (options) {
     }
 
     linePathSVG.attr('class', function (d, i) {
-            return 'bChart_groups bChart_groups' + groupConcat.indexOf(d[i].group);
+            return 'bChart_groups bChart_groups_' + groupConcat.indexOf(d[i].group);
         })
         .attr('fill-opacity', function () {
             return 0;

@@ -2,93 +2,21 @@
  * Created by CaptainMao on 5/22/15.
  */
 var _defaultsPie = {
-    selector: "",
-    colors: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"],
-    colorOpacity: 1,
-    duration: 400,
-    padding: {
-        "top": 80,
-        "right": 90,
-        "bottom": 50,
-        "left": 60
-    },
-    data: {
-        "dataValue": [],
-        "groups": [],
-        "groups2": [],
-        "x": []
-    },
-    _colorMap: {},
-    _datasetTmp: [],
-    _uniqueXArray: [],
-    _uniqueGroupTmp: [],
-    _uniqueGroupArrayAll: [],
-    _dataset: [
-
-    ],
 
     width: 400,
     height: 400,
     textRadiusDefault: '',
     outerRadiusDefault: '',
-    background: {
-        "imageURL": "",
-        "color": "#ffffff",
-        "displayImage": false,
-        "opacity": 1
-    },
-
     valueDisplay: {
         display: true
 
     },
-    legend: {
-        "position": "topright",
-        "offsetText": 5,
-        "offsetSymbol": 15,
-        "symbolSize": 10,
-        "multipleLine": false,
-        "textFirst": true,
-        "display": true,
-        "fontType": "helvetica",
-        "fontSize": 12,
-        "fontBold": false,
-        "fontItalic": false,
-        "fontUnderline": false,
-        "fontColor": "#000000",
-        "offsetAdjust": {
-            "horizontal": 0,
-            "vertical": 0
-        }
-    },
-
     title: {
-        "display": true,
         "text": "Pie Chart",
-        "fontType": "helvetica",
-        "fontSize": 18,
-        "fontBold": false,
-        "fontItalic": false,
-        "fontUnderline": false,
-        "fontColor": "#000000",
-        "offsetAdjust": {
-            "horizontal": 0,
-            "vertical": 0
-        }
     },
 
     tooltip: {
-        "type": 0,
-        "display": true,
-        "text": "tooltip",
-        "fontType": "helvetica",
-        "fontSize": 12,
-        "fontBold": false,
-        "fontItalic": false,
-        "fontUnderline": false,
-        "fontColor": "#fff",
-        "width": "auto",
-        "height": "auto"
+        "type": 0
     }
     //pie: {
     //    type: {},
@@ -186,7 +114,7 @@ PieChart.prototype._drawPieChart = function () {
 
     arcSVG.enter().append('path')
         .attr('class', function (d) {
-            return 'bChart_arc bChart_groups bChart_groups' + groupConcat.indexOf(d.data.group);
+            return 'bChart_arc bChart_groups bChart_groups_' + groupConcat.indexOf(d.data.group);
         })
         .attr('fill', function (d) {
             return self._options._colorMap[d.data.group];
@@ -206,7 +134,7 @@ PieChart.prototype._drawPieChart = function () {
 
     arcSVG
         .attr('class', function (d) {
-            return 'bChart_arc bChart_groups bChart_groups' + groupConcat.indexOf(d.data.group);
+            return 'bChart_arc bChart_groups bChart_groups_' + groupConcat.indexOf(d.data.group);
         })
         .attr('fill', function (d) {
             return self._options._colorMap[d.data.group];
@@ -224,12 +152,12 @@ PieChart.prototype._drawPieChart = function () {
         textSVG.exit().remove();
         textSVG.enter().append('text')
             .attr('class', function (d) {
-                return 'bChart_arc_text bChart_groups bChart_groups' + groupConcat.indexOf(d.data.group);
+                return 'bChart_arc_text bChart_groups bChart_groups_' + groupConcat.indexOf(d.data.group);
             });
 
         textSVG
             .attr('class', function (d) {
-                return 'bChart_arc_text bChart_groups bChart_groups' + groupConcat.indexOf(d.data.group);
+                return 'bChart_arc_text bChart_groups bChart_groups_' + groupConcat.indexOf(d.data.group);
             })
             .attr('transform', function (d) {
                 return 'translate(' + Math.cos((d.startAngle + d.endAngle - Math.PI) / 2) * self._options.textRadiusDefault + ',' + Math.sin((d.startAngle + d.endAngle - Math.PI) / 2) * self._options.textRadiusDefault + ')';
