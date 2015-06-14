@@ -5,20 +5,10 @@ bChart.prototype.node = function (options) {
     var self = this;
     if (!bChart.existy(options)) {
         return self._options.node;
-    } else {
-        if (bChart.typeString(options) && options === "refresh") {
-            self._drawNodeSVG();
-        } else {
-            if (arguments.length === 2 && arguments[0].indexOf('.') >= 0 && arguments[0].indexOf('$') >= 0) {
-                var groupIndex = parseInt(arguments[0].split('.')[1].split('$')[1]);
-                var groupKey = self._options._uniqueGroupArrayAll[groupIndex - 1];
-                arguments[0] = arguments[0].split('.')[0] + '.' + groupKey;
-            }
-            self.setOptions(arguments, 'node');
-            self._drawNodeSVG();
-        }
-        return self;
     }
+
+    self._setSpecificPropertiesByChart(options, 'node');
+    return self;
 
 };
 
@@ -26,7 +16,14 @@ bChart.prototype._drawNodeSVG = function (options) {
     var self = this;
     var	_datasetTmp = self._options._dataset;
     var	groupConcat = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
-    var chartSVG = d3.select(self._options.selector).select('g.bChart');
+    var _parentSVG;
+    if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+        _parentSVG = d3.select(self._options.selector).append('div')
+            .attr('class', 'bChart_wrapper');
+    } else {
+        _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+    }
+    var chartSVG = _parentSVG.select('g.bChart');
 
     var nodeSVG, nodePathSVG;
     if (chartSVG.select('.bChart_nodes').empty()) {
@@ -38,9 +35,13 @@ bChart.prototype._drawNodeSVG = function (options) {
 
     var nodeGenerator = d3.svg.symbol()
         .type(function (d) {
-            return self._options.node.type[d.group];
+            var groupIndex = groupConcat.indexOf(d.group);
+
+            return self._options.node.type[groupIndex];
         }).size(function (d) {
-            return bChart.existy(d.size) ? d.size : self._options.node.size[d.group];
+            var groupIndex = groupConcat.indexOf(d.group);
+
+            return bChart.existy(d.size) ? d.size : self._options.node.size[groupIndex];
         });
 
     if (bChart.existy(options)) {
@@ -70,50 +71,51 @@ bChart.prototype._drawNodeSVG = function (options) {
             .style('opacity', 1);
     } else {
         nodePathSVG = nodeSVG.selectAll('.bChart_groups');
-        if (self._options.node.display) {
-            nodePathSVG.style('display', 'block');
-            nodePathSVG.attr('fill', function (d) {
+    }
+
+    if (!nodePathSVG.empty()) {
+        nodePathSVG.attr('fill', function (d) {
+                var groupIndex = groupConcat.indexOf(d.group);
+
+                if (self._options.node.solidCircle[groupIndex]) {
+                    return self._options.background.color;
+                } else {
                     var nodeFill = self._options._colorMap[d.group];
                     var colorElem = nodeFill.split(',');
-                    return colorElem[0] + ',' + colorElem[1] + ',' + colorElem[2] + ',' + self._options.node.fillOpacity[d.group] + ')';
-                })
-                .attr('stroke-width', function (d) {
-                    return self._options.node.strokeWidth[d.group];
-                })
-                .attr('d', nodeGenerator);
-        } else {
-            nodePathSVG.style('display', 'none');
-        }
+                    return colorElem[0] + ',' + colorElem[1] + ',' + colorElem[2] + ',' + self._options.node.fillOpacity[groupIndex] + ')';
+                }
+            })
+            .attr('stroke', function (d) {
+                return self._options._colorMap[d.group];
+            })
+            .attr('stroke-width', function (d) {
+                var groupIndex = groupConcat.indexOf(d.group);
+
+                return self._options.node.strokeWidth[groupIndex];
+            })
+            .attr('d', nodeGenerator)
+            .style('display', function (d) {
+                var groupIndex = groupConcat.indexOf(d.group);
+                return self._options.node.display[groupIndex] ? 'block': 'none';
+            });
     }
 
     return self;
 
 };
 
-bChart.initNodeStyle = function (property) {
-    return function (group, value) {
-        var self = this;
-        self._options.node[property][group] = bChart.hasProperty(self._options.node[property], group)?self._options.node[property][group]: value;
-    };
-};
+bChart.initNodeDisplay = bChart.initStyleProperty('display', 'node');
+bChart.initNodeType = bChart.initStyleProperty('type', 'node');
+bChart.initNodeSize = bChart.initStyleProperty('size', 'node');
+bChart.initNodeFillOpacity = bChart.initStyleProperty('fillOpacity', 'node');
+bChart.initNodeStrokeWidth = bChart.initStyleProperty('strokeWidth', 'node');
+bChart.initNodeStrokeOpacity = bChart.initStyleProperty('strokeOpacity', 'node');
+bChart.initNodeSolidCircle = bChart.initStyleProperty('solidCircle', 'node');
 
-bChart.initNodeType = bChart.initNodeStyle('type');
-bChart.initNodeSize = bChart.initNodeStyle('size');
-bChart.initNodeFillOpacity = bChart.initNodeStyle('fillOpacity');
-bChart.initNodeStrokeWidth = bChart.initNodeStyle('strokeWidth');
-bChart.initNodeStrokeOpacity = bChart.initNodeStyle('strokeOpacity');
-
-bChart.removeNodeProperty = function (property) {
-    return function (group) {
-        var self = this;
-        if (bChart.hasProperty(self._options.node[property], group)) {
-            delete self._options.node[property][group];
-        }
-    };
-};
-
-bChart.removeNodeType = bChart.removeNodeProperty('type');
-bChart.removeNodeSize = bChart.removeNodeProperty('size');
-bChart.removeNodeFillOpacity = bChart.removeNodeProperty('fillOpacity');
-bChart.removeNodeStrokeWidth = bChart.removeNodeProperty('strokeWidth');
-bChart.removeNodeStrokeOpacity = bChart.removeNodeProperty('strokeOpacity');
+bChart.removeNodeDisplay = bChart.removeStyleProperty('display', 'node');
+bChart.removeNodeType = bChart.removeStyleProperty('type', 'node');
+bChart.removeNodeSize = bChart.removeStyleProperty('size', 'node');
+bChart.removeNodeFillOpacity = bChart.removeStyleProperty('fillOpacity', 'node');
+bChart.removeNodeStrokeWidth = bChart.removeStyleProperty('strokeWidth', 'node');
+bChart.removeNodeStrokeOpacity = bChart.removeStyleProperty('strokeOpacity', 'node');
+bChart.removeNodeSolidCircle = bChart.removeStyleProperty('solidCircle', 'node');

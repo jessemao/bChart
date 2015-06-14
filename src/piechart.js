@@ -57,7 +57,14 @@ PieChart.prototype._drawPieChart = function () {
 
     var	_datasetTmp = self._options._dataset;
     var	groupConcat = self._options._uniqueGroupTmp.length? self._options._uniqueGroupTmp: self._options._uniqueGroupArrayAll;
-    var chartSVG = d3.select(self._options.selector).select('g.bChart');
+    var _parentSVG;
+    if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+        _parentSVG = d3.select(self._options.selector).append('div')
+            .attr('class', 'bChart_wrapper');
+    } else {
+        _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+    }
+    var chartSVG = _parentSVG.select('g.bChart');
     var pieSUM = d3.sum(_datasetTmp, function (d) {
         return parseFloat(d.value);
     });

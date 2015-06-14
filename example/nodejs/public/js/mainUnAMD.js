@@ -5,8 +5,8 @@
     //bChart
     //bChart('#skills', 'BarChart');
 
-    var barchart = bChart.AreaChart('#skills', {
-        "isStack": true
+    var barchart = bChart.LineChart('#skills', {
+        //"isStack": true
         //"data": {
         //    dataValue: [['Label 1','45', '32', '15'],
         //        ['Label 2', '12', '33', '22']
@@ -23,10 +23,17 @@
     });
 
     barchart.tooltip('type', 1).xAxis({"isTimeSeries": true, 'timeFormat': 'Mm-yyyy'})
-        .area({
-            "fillOpacity.$0": 1,
-            "strokeWidth": 2,
+        .line({
+            //"fillOpacity.$0": 1,
+            "strokeWidth.$1": 5,
             "strokeOpacity": 1
+        })
+        .node({
+            'display': true,
+            'fillOpacity': 0,
+            'strokeWidth': 4,
+            'solidCircle': true,
+            'size': 64
         });
 
     //setTimeout(function () {

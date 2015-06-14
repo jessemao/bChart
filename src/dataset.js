@@ -235,7 +235,8 @@ bChart.prototype.loadArrayData = function (array, obj) {
                     bChart.initNodeSize.call(self, groupIndex, 128);
                     bChart.initNodeFillOpacity.call(self, groupIndex, 1);
                     bChart.initNodeStrokeWidth.call(self, groupIndex, 1);
-
+                    bChart.initNodeDisplay.call(self, groupIndex, true);
+                    bChart.initNodeSolidCircle.call(self, groupIndex, false);
                 }
 
                 if (bChart.hasProperty(self._options, 'line')) {
@@ -350,6 +351,8 @@ bChart.prototype.unloadData = function (options) {
             bChart.removeNodeStrokeWidth.call(self, groupIndex);
             bChart.removeNodeStrokeOpacity.call(self, groupIndex);
             bChart.removeNodeFillOpacity.call(self, groupIndex);
+            bChart.removeNodeDisplay.call(self, groupIndex);
+            bChart.removeNodeSolidCircle.call(self, groupIndex);
         }
 
         if (bChart.hasProperty(self._options, 'line') && bChart.existy(self._options.line.type[groupIndex])) {

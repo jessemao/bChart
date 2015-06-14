@@ -150,13 +150,18 @@ bChart.prototype._updateChartSize = function () {
 
     self._options._chartSVGWidth = self._options.width - self._options.padding.left - self._options.padding.right;
     self._options._chartSVGHeight = self._options.height - self._options.padding.top - self._options.padding.bottom;
-
-    var parentSVG = d3.select(self._options.selector);
-
-    if (!parentSVG.select('svg').empty()) {
-        childSVG = parentSVG.select('svg');
+    var _parentSVG;
+    if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+        _parentSVG = d3.select(self._options.selector).append('div')
+            .attr('class', 'bChart_wrapper');
     } else {
-        childSVG = parentSVG.append("svg");
+        _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+    }
+
+    if (!_parentSVG.select('svg').empty()) {
+        childSVG = _parentSVG.select('svg');
+    } else {
+        childSVG = _parentSVG.append("svg");
     }
 
     childSVG.attr('width', self._options.width).attr('height', self._options.height);
@@ -176,6 +181,7 @@ bChart.prototype._updateChartSize = function () {
 
 bChart.prototype._drawChartSVG = function () {
     var self = this;
+
     switch (self.constructor) {
         case BarChart:
             return self._drawBarChart();
@@ -253,5 +259,52 @@ bChart.prototype._initXYAxis = function () {
         y: y,
         y2: y2
     };
+};
+
+bChart.prototype._setSpecificPropertiesByChart = function (options, type) {
+    var self = this;
+    var args;
+
+    var parseArguments = function (args) {
+        if (args.length === 2) {
+            if (args[0].indexOf('.') >= 0 && args[0].indexOf('$') >= 0) {
+                var groupIndex = parseInt(args[0].split('.')[1].split('$')[1]);
+                args[0] = args[0].split('.')[0] + '.' + groupIndex;
+            } else {
+                args[0] = args[0] + '.' + 'all';
+            }
+
+        }
+        return args;
+    };
+
+    if (bChart.typeString(options)) {
+        if (options === "refresh") {
+            self._drawChartSVG();
+
+        } else {
+            args = parseArguments(arguments);
+
+            setTimeout(function () {
+                self.setOptions(args, type);
+                self._drawChartSVG();
+            }, 1);
+        }
+    } else {
+        bChart.each(options, function (value, key, obj) {
+            var newArgs = [key, value];
+            delete obj[key];
+            var newKey = parseArguments(newArgs);
+            obj[newKey[0]] = value;
+
+        });
+        setTimeout(function () {
+            self.setOptions(options, type);
+            self._drawChartSVG();
+
+        }, 1);
+    }
+    return self;
+
 };
 

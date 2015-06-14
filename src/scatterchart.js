@@ -11,11 +11,12 @@ var _defaultsScatter = {
         "type": 0
     },
     node: {
-        display: true,
-        type: {},
-        size: {},
-        fillOpacity: {},
-        strokeWidth: {}
+        display: [],
+        solidCircle: [],
+        type: [],
+        size: [],
+        fillOpacity: [],
+        strokeWidth: []
     }
 
 };
@@ -32,7 +33,7 @@ ScatterChart.prototype.constructor = ScatterChart;
 ScatterChart.prototype._drawScatterChart = function () {
     var self = this;
     var xyOptions = self._initXYAxis();
-    self._drawNodeSVG(xyOptions).node('refresh');
+    self._drawNodeSVG(xyOptions);
 
     return self;
 

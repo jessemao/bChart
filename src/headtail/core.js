@@ -348,6 +348,8 @@ bChart._init = function (options, chartType) {
 		_options = bChart.concatObject(_options, options);
 	}
 
+
+
 	switch (chartType) {
 		case 'bar':
 			return new BarChart(_options.selector, _options);
@@ -385,11 +387,16 @@ bChart._customConstructor = function (self, options, args, chartType) {
 			} else {
 				self._options = bChart.clone(args[1]);
 				bChart.setObjectOfSelector(options, self);
-				self.setOptions(bChart.clone(args[1])).draw();
+				self.setOptions(bChart.clone(args[1]));
+
+				self.draw();
 			}
 
 		}
 	}
+
+
+
 	return self;
 };
 
@@ -748,5 +755,21 @@ bChart.concatObject = function (obj1, obj2) {
 		}
 	});
 	return obj1;
+};
+
+bChart.initStyleProperty = function (property, type) {
+	return function (groupIndex, value) {
+		var self = this;
+		self._options[type][property][groupIndex] = bChart.existy(self._options[type][property][groupIndex])?self._options[type][property][groupIndex]: value;
+	};
+};
+
+bChart.removeStyleProperty = function (property, type) {
+	return function (groupIndex) {
+		var self = this;
+		if (bChart.existy(self._options[type][property][groupIndex])) {
+			delete self._options[type][property][groupIndex];
+		}
+	};
 };
 

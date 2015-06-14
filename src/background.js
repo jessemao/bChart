@@ -16,12 +16,18 @@ bChart.prototype.background = function (options) {
     }
     function drawBackground () {
         var backgroundDIV;
-        var parentSVG = d3.select(self._options.selector);
-        if (parentSVG.select('.bChart_background').empty()) {
-            backgroundDIV = parentSVG.append('div')
+        var _parentSVG;
+        if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+            _parentSVG = d3.select(self._options.selector).append('div')
+                .attr('class', 'bChart_wrapper');
+        } else {
+            _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+        }
+        if (_parentSVG.select('.bChart_background').empty()) {
+            backgroundDIV = _parentSVG.append('div')
                 .attr('class', 'bChart_background');
         } else {
-            backgroundDIV = parentSVG.select('.bChart_background');
+            backgroundDIV = _parentSVG.select('.bChart_background');
         }
         backgroundDIV
             .style('width', self._options.width + 'px')

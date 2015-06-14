@@ -22,28 +22,34 @@ bChart.prototype.tooltip = function (options) {
 
     function drawTooltip () {
         var tooltipDIV;
-        var parentSVG = d3.select(self._options.selector);
         if (self._options.tooltip.display) {
-            if (parentSVG.select('.bChart_tooltip').empty()) {
-                tooltipDIV = parentSVG.append('div')
+            var _parentSVG;
+            if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+                _parentSVG = d3.select(self._options.selector).append('div')
+                    .attr('class', 'bChart_wrapper');
+            } else {
+                _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+            }
+            if (_parentSVG.select('.bChart_tooltip').empty()) {
+                tooltipDIV = _parentSVG.append('div')
                     .attr('class', 'bChart_tooltip')
                     .style('opacity', 0);
             } else {
-                tooltipDIV = parentSVG.select('.bChart_tooltip')
+                tooltipDIV = _parentSVG.select('.bChart_tooltip')
                     .style('opacity', 0);
             }
 
             if (self._options.tooltip.type === 1) {
-                drawGroupTooltip(parentSVG);
+                drawGroupTooltip(_parentSVG);
             } else {
-                drawSingleTooltip(parentSVG);
+                drawSingleTooltip(_parentSVG);
             }
 
         } else {
             tooltipDIV.remove();
         }
 
-        function drawGroupTooltip(parentSVG) {
+        function drawGroupTooltip(_parentSVG) {
             var bisectData = d3.bisector(function (d) {
                 return self._options.xAxis.isTimeSeries ? new Date(d.x) : d.x;
             }).left;
@@ -61,11 +67,11 @@ bChart.prototype.tooltip = function (options) {
             });
 
             var focus_x;
-            if (parentSVG.selectAll('.bchart-focus-x-line').empty()) {
-                focus_x = parentSVG.select('.bChart').append('line')
+            if (_parentSVG.selectAll('.bchart-focus-x-line').empty()) {
+                focus_x = _parentSVG.select('.bChart').append('line')
                     .attr('class', 'bchart-focus-x-line');
             } else {
-                focus_x = parentSVG.select('.bchart-focus-x-line');
+                focus_x = _parentSVG.select('.bchart-focus-x-line');
             }
 
             focus_x.style('stroke', self._options.tooltip.xLine.stroke)
@@ -76,11 +82,11 @@ bChart.prototype.tooltip = function (options) {
 
 
             var focus_rect;
-            if (parentSVG.selectAll('.bchart-focus-rect').empty()) {
-                focus_rect = parentSVG.select('.bChart').append('rect')
+            if (_parentSVG.selectAll('.bchart-focus-rect').empty()) {
+                focus_rect = _parentSVG.select('.bChart').append('rect')
                     .attr('class', 'bchart-focus-rect');
             } else {
-                focus_rect = parentSVG.select('.bchart-focus-rect');
+                focus_rect = _parentSVG.select('.bchart-focus-rect');
             }
 
             focus_rect.attr('width', self._options._chartSVGWidth)
@@ -184,10 +190,10 @@ bChart.prototype.tooltip = function (options) {
             }
         }
 
-        function drawSingleTooltip(parentSVG) {
-            var groupSVG = parentSVG.selectAll('.bChart_groups');
-            parentSVG.select('.bchart-focus-rect').remove();
-            parentSVG.select('.bchart-focus-x-line').remove();
+        function drawSingleTooltip(_parentSVG) {
+            var groupSVG = _parentSVG.selectAll('.bChart_groups');
+            _parentSVG.select('.bchart-focus-rect').remove();
+            _parentSVG.select('.bchart-focus-x-line').remove();
             groupSVG.on('mouseover', function (d) {
                 d3.select(this).style('opacity', 0.7);
                 tooltipDIV.transition()
@@ -231,22 +237,22 @@ bChart.prototype.tooltip = function (options) {
                         .style('opacity', 0)
                         .style('display', 'none');
                 });
-            if (!parentSVG.select('.bChart_lines').empty()) {
-                var groupLineSVG = parentSVG.select('.bChart_lines').selectAll('.bChart_groups');
+            if (!_parentSVG.select('.bChart_lines').empty()) {
+                var groupLineSVG = _parentSVG.select('.bChart_lines').selectAll('.bChart_groups');
                 groupLineSVG.on('mouseover', null)
                     .on('mousemove', null)
                     .on('mouseout', null);
             }
 
-            if (!parentSVG.select('.bChart_areas').empty()) {
-                var groupAreaSVG = parentSVG.select('.bChart_areas').selectAll('.bChart_groups');
+            if (!_parentSVG.select('.bChart_areas').empty()) {
+                var groupAreaSVG = _parentSVG.select('.bChart_areas').selectAll('.bChart_groups');
                 groupAreaSVG.on('mouseover', null)
                     .on('mousemove', null)
                     .on('mouseout', null);
             }
 
-            if (!parentSVG.select('.bChart_pie').empty()) {
-                var groupPieTextSVG = parentSVG.select('.bChart_pie').selectAll('.bChart_arc_text');
+            if (!_parentSVG.select('.bChart_pie').empty()) {
+                var groupPieTextSVG = _parentSVG.select('.bChart_pie').selectAll('.bChart_arc_text');
                 groupPieTextSVG.on('mouseover', null)
                     .on('mousemove', null)
                     .on('mouseout', null);

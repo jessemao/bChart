@@ -2,6 +2,9 @@
 .bCharts {
   border: 1px solid #000; }
 
+.bChart_wrapper {
+  position: relative; }
+
 /*-- Axis --*/
 .bChart_grid path {
   fill: none;

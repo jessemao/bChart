@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-06-13
+/*! bChart - v0.1.0 - 2015-06-14
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -361,6 +361,8 @@
     		_options = bChart.concatObject(_options, options);
     	}
 
+
+
     	switch (chartType) {
     		case 'bar':
     			return new BarChart(_options.selector, _options);
@@ -398,11 +400,16 @@
     			} else {
     				self._options = bChart.clone(args[1]);
     				bChart.setObjectOfSelector(options, self);
-    				self.setOptions(bChart.clone(args[1])).draw();
+    				self.setOptions(bChart.clone(args[1]));
+
+    				self.draw();
     			}
 
     		}
     	}
+
+
+
     	return self;
     };
 
@@ -763,60 +770,35 @@
     	return obj1;
     };
 
+    bChart.initStyleProperty = function (property, type) {
+    	return function (groupIndex, value) {
+    		var self = this;
+    		self._options[type][property][groupIndex] = bChart.existy(self._options[type][property][groupIndex])?self._options[type][property][groupIndex]: value;
+    	};
+    };
+
+    bChart.removeStyleProperty = function (property, type) {
+    	return function (groupIndex) {
+    		var self = this;
+    		if (bChart.existy(self._options[type][property][groupIndex])) {
+    			delete self._options[type][property][groupIndex];
+    		}
+    	};
+    };
+
 
     /**
      * Created by CaptainMao on 5/23/15.
      */
     bChart.prototype.area = function (options) {
         var self = this;
-        var args;
 
-        var parseArguments = function (args) {
-            if (args.length === 2) {
-                if (args[0].indexOf('.') >= 0 && args[0].indexOf('$') >= 0) {
-                    var groupIndex = parseInt(args[0].split('.')[1].split('$')[1]);
-                    args[0] = args[0].split('.')[0] + '.' + groupIndex;
-                } else {
-                    args[0] = args[0] + '.' + 'all';
-                }
-
-            }
-            return args;
-        }
         if (!bChart.existy(options)) {
             return self._options.area;
-        } else {
-            if (bChart.typeString(options)) {
-                if (options === "refresh") {
-                    self._drawAreaSVG();
-
-                } else {
-                    args = parseArguments(arguments);
-
-                    setTimeout(function () {
-                        self.setOptions(args, 'area');
-                        self._drawAreaSVG();
-
-                    }, 1);
-                }
-            } else {
-                bChart.each(options, function (value, key, obj) {
-                    var newArgs = [key, value];
-                    delete obj[key];
-                    var newKey = parseArguments(newArgs);
-                    obj[newKey[0]] = value;
-
-                });
-                setTimeout(function () {
-                    self.setOptions(options, 'area');
-                    self._drawAreaSVG();
-
-                }, 1);
-
-            }
-            return self;
         }
 
+        self._setSpecificPropertiesByChart(options, 'area');
+        return self;
 
     };
 
@@ -824,7 +806,14 @@
         var self = this;
         var	_datasetTmp = self._options._dataset;
         var	groupConcat = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
-        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+        var _parentSVG;
+        if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+            _parentSVG = d3.select(self._options.selector).append('div')
+                .attr('class', 'bChart_wrapper');
+        } else {
+            _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+        }
+        var chartSVG = _parentSVG.select('g.bChart');
         var areaSVG, areaPathSVG;
         var dataArea = [];
 
@@ -886,9 +875,9 @@
 
         if (!areaPathSVG.empty()) {
             areaPathSVG.attr('class', function (d, i) {
-                var groupIndex = groupConcat.indexOf(d[i].group);
-                return 'bChart_groups bChart_groups_' + groupIndex;
-            })
+                    var groupIndex = groupConcat.indexOf(d[i].group);
+                    return 'bChart_groups bChart_groups_' + groupIndex;
+                })
                 .attr('fill', function (d, i) {
                     return self._options._colorMap[d[i].group];
                 })
@@ -921,31 +910,15 @@
 
     };
 
-    bChart.initAreaStyle = function (property) {
-        return function (groupIndex, value) {
-            var self = this;
-            self._options.area[property][groupIndex] = bChart.existy(self._options.area[property][groupIndex])?self._options.area[property][groupIndex]: value;
-        };
-    };
+    bChart.initAreaType = bChart.initStyleProperty('type', 'area');
+    bChart.initAreaFillOpacity = bChart.initStyleProperty('fillOpacity', 'area');
+    bChart.initAreaStrokeWidth = bChart.initStyleProperty('strokeWidth', 'area');
+    bChart.initAreaStrokeOpacity = bChart.initStyleProperty('strokeOpacity', 'area');
 
-    bChart.initAreaType = bChart.initAreaStyle('type');
-    bChart.initAreaFillOpacity = bChart.initAreaStyle('fillOpacity');
-    bChart.initAreaStrokeWidth = bChart.initAreaStyle('strokeWidth');
-    bChart.initAreaStrokeOpacity = bChart.initAreaStyle('strokeOpacity');
-
-    bChart.removeAreaProperty = function (property) {
-        return function (groupIndex) {
-            var self = this;
-            if (bChart.existy(self._options.area[property][groupIndex])) {
-                delete self._options.area[property][groupIndex];
-            }
-        };
-    };
-
-    bChart.removeAreaType = bChart.removeAreaProperty('type');
-    bChart.removeAreaStrokeWidth = bChart.removeAreaProperty('strokeWidth');
-    bChart.removeAreaStrokeOpacity = bChart.removeAreaProperty('strokeOpacity');
-    bChart.removeAreaFillOpacity = bChart.removeAreaProperty('fillOpacity');
+    bChart.removeAreaType = bChart.removeStyleProperty('type', 'area');
+    bChart.removeAreaStrokeWidth = bChart.removeStyleProperty('strokeWidth', 'area');
+    bChart.removeAreaStrokeOpacity = bChart.removeStyleProperty('strokeOpacity', 'area');
+    bChart.removeAreaFillOpacity = bChart.removeStyleProperty('fillOpacity', 'area');
     /**
      * Created by CaptainMao on 5/22/15.
      */
@@ -954,11 +927,6 @@
             "text": "Area Chart",
         },
         area: {
-            strokeWidth: [],
-            strokeOpacity: [],
-            fillOpacity: []
-        },
-        _areaCustom: {
             strokeWidth: [],
             strokeOpacity: [],
             fillOpacity: []
@@ -1000,12 +968,18 @@
         }
         function drawBackground () {
             var backgroundDIV;
-            var parentSVG = d3.select(self._options.selector);
-            if (parentSVG.select('.bChart_background').empty()) {
-                backgroundDIV = parentSVG.append('div')
+            var _parentSVG;
+            if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+                _parentSVG = d3.select(self._options.selector).append('div')
+                    .attr('class', 'bChart_wrapper');
+            } else {
+                _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+            }
+            if (_parentSVG.select('.bChart_background').empty()) {
+                backgroundDIV = _parentSVG.append('div')
                     .attr('class', 'bChart_background');
             } else {
-                backgroundDIV = parentSVG.select('.bChart_background');
+                backgroundDIV = _parentSVG.select('.bChart_background');
             }
             backgroundDIV
                 .style('width', self._options.width + 'px')
@@ -1033,7 +1007,14 @@
         var self = this;
         var	_datasetTmp = self._options._dataset;
         var	groupTmp = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
-        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+        var _parentSVG;
+        if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+            _parentSVG = d3.select(self._options.selector).append('div')
+                .attr('class', 'bChart_wrapper');
+        } else {
+            _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+        }
+        var chartSVG = _parentSVG.select('g.bChart');
 
         var barParentSVG;
         if (chartSVG.select('.bChart_bar_parent').empty()) {
@@ -1120,7 +1101,14 @@
         var self = this;
         var	_datasetTmp = self._options._dataset;
         var	groupConcat = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
-        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+        var _parentSVG;
+        if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+            _parentSVG = d3.select(self._options.selector).append('div')
+                .attr('class', 'bChart_wrapper');
+        } else {
+            _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+        }
+        var chartSVG = _parentSVG.select('g.bChart');
 
         var groupBarArray = [];
         bChart.each(self._options._uniqueXArray, function (value, key) {
@@ -1388,13 +1376,18 @@
 
         self._options._chartSVGWidth = self._options.width - self._options.padding.left - self._options.padding.right;
         self._options._chartSVGHeight = self._options.height - self._options.padding.top - self._options.padding.bottom;
-
-        var parentSVG = d3.select(self._options.selector);
-
-        if (!parentSVG.select('svg').empty()) {
-            childSVG = parentSVG.select('svg');
+        var _parentSVG;
+        if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+            _parentSVG = d3.select(self._options.selector).append('div')
+                .attr('class', 'bChart_wrapper');
         } else {
-            childSVG = parentSVG.append("svg");
+            _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+        }
+
+        if (!_parentSVG.select('svg').empty()) {
+            childSVG = _parentSVG.select('svg');
+        } else {
+            childSVG = _parentSVG.append("svg");
         }
 
         childSVG.attr('width', self._options.width).attr('height', self._options.height);
@@ -1414,6 +1407,7 @@
 
     bChart.prototype._drawChartSVG = function () {
         var self = this;
+
         switch (self.constructor) {
             case BarChart:
                 return self._drawBarChart();
@@ -1493,6 +1487,53 @@
         };
     };
 
+    bChart.prototype._setSpecificPropertiesByChart = function (options, type) {
+        var self = this;
+        var args;
+
+        var parseArguments = function (args) {
+            if (args.length === 2) {
+                if (args[0].indexOf('.') >= 0 && args[0].indexOf('$') >= 0) {
+                    var groupIndex = parseInt(args[0].split('.')[1].split('$')[1]);
+                    args[0] = args[0].split('.')[0] + '.' + groupIndex;
+                } else {
+                    args[0] = args[0] + '.' + 'all';
+                }
+
+            }
+            return args;
+        };
+
+        if (bChart.typeString(options)) {
+            if (options === "refresh") {
+                self._drawChartSVG();
+
+            } else {
+                args = parseArguments(arguments);
+
+                setTimeout(function () {
+                    self.setOptions(args, type);
+                    self._drawChartSVG();
+                }, 1);
+            }
+        } else {
+            bChart.each(options, function (value, key, obj) {
+                var newArgs = [key, value];
+                delete obj[key];
+                var newKey = parseArguments(newArgs);
+                obj[newKey[0]] = value;
+
+            });
+            setTimeout(function () {
+                self.setOptions(options, type);
+                self._drawChartSVG();
+
+            }, 1);
+        }
+        return self;
+
+    };
+
 
     /**
      * Created by CaptainMao on 5/23/15.
@@ -1501,79 +1542,38 @@
         var self = this;
         if (!bChart.existy(options)) {
             return self._options.bubble;
-        } else {
-            if (bChart.typeString(options)) {
-                if (options === 'refresh') {
-                    drawBubble();
-                } else if (options === 'clear') {
-                    self._options.bubble = {};
-                }
-            } else {
-                var objOption;
-                if (bChart.isArrayLike(options)) {
-                    objOption = {};
-                    bChart.each(options, function (elem, idx) {
-                        var groupName, valueArray;
-                        if (bChart.typeNumber(elem[0])) {
-                            if (bChart.existy(self._options._uniqueGroupArrayAll[idx])) {
-                                groupName = self._options._uniqueGroupArrayAll[idx];
-                                valueArray = elem;
-                            }
-                        } else {
-                            groupName = elem[0];
-                            valueArray = elem;
-                            valueArray.shift();
-                        }
-                        objOption[groupName] = valueArray;
-                        var indexOfBubble = 0;
+        }
 
-                        bChart.each(self._options._dataset, function (el) {
-                            if (el.group === groupName) {
-                                el.size = valueArray[indexOfBubble];
-                                indexOfBubble++;
-                            }
-                        });
-                    });
-                } else {
-                    if (arguments.length === 2) {
-                        var indexOfBubble = 0;
-                        var args = arguments;
-                        bChart.each(self._options._dataset, function (el) {
-                            if (el.group === args[0]) {
-                                el.size = args[1][indexOfBubble];
-                                indexOfBubble++;
-                            }
-                        });
-
-                        objOption = args;
-                    } else {
-                        bChart.each(options, function (value, key) {
-                            var indexOfBubble = 0;
-                            bChart.each(self._options._dataset, function (el) {
-                                if (el.group === key) {
-                                    el.size = value[indexOfBubble];
-                                    indexOfBubble++;
-                                }
-                            });
-                        });
-
-                        objOption = options;
+        if (bChart.isArrayLike(options)) {
+            var objOption = {};
+            bChart.each(options, function (elem, idx) {
+                var groupName, valueArray;
+                if (bChart.typeNumber(elem[0])) {
+                    if (bChart.existy(self._options._uniqueGroupArrayAll[idx])) {
+                        groupName = self._options._uniqueGroupArrayAll[idx];
+                        valueArray = elem;
                     }
-
+                } else {
+                    groupName = elem[0];
+                    valueArray = elem;
+                    valueArray.shift();
                 }
-                self.setOptions(objOption, 'bubble');
+                objOption[groupName] = valueArray;
+                var indexOfBubble = 0;
 
-                drawBubble();
-            }
-
-            return self;
+                bChart.each(self._options._dataset, function (el) {
+                    if (el.group === groupName) {
+                        el.size = valueArray[indexOfBubble];
+                        indexOfBubble++;
+                    }
+                });
+            });
+        } else {
+            self._setSpecificPropertiesByChart(options, 'bubble');
         }
 
-        function drawBubble() {
+        return self;
 
-
-            self._drawChartSVG();
-        }
     };
     /**
      * Created by CaptainMao on 5/23/15.
@@ -1587,11 +1587,12 @@
 
         },
         node: {
-            display: true,
-            type: {},
-            size: {},
-            fillOpacity: {},
-            strokeWidth: {}
+            display: [],
+            type: [],
+            size: [],
+            fillOpacity: [],
+            solidCircle: [],
+            strokeWidth: []
         }
 
     };
@@ -1880,7 +1881,8 @@
                         bChart.initNodeSize.call(self, groupIndex, 128);
                         bChart.initNodeFillOpacity.call(self, groupIndex, 1);
                         bChart.initNodeStrokeWidth.call(self, groupIndex, 1);
-
+                        bChart.initNodeDisplay.call(self, groupIndex, true);
+                        bChart.initNodeSolidCircle.call(self, groupIndex, false);
                     }
 
                     if (bChart.hasProperty(self._options, 'line')) {
@@ -1995,6 +1997,8 @@
                 bChart.removeNodeStrokeWidth.call(self, groupIndex);
                 bChart.removeNodeStrokeOpacity.call(self, groupIndex);
                 bChart.removeNodeFillOpacity.call(self, groupIndex);
+                bChart.removeNodeDisplay.call(self, groupIndex);
+                bChart.removeNodeSolidCircle.call(self, groupIndex);
             }
 
             if (bChart.hasProperty(self._options, 'line') && bChart.existy(self._options.line.type[groupIndex])) {
@@ -2230,30 +2234,25 @@
         var self = this;
         if (!bChart.existy(options)) {
             return self._options.line;
-        } else {
-            if (bChart.typeString(options) && options === "refresh") {
-                self._drawLineSVG();
-            } else {
-                if (arguments.length === 2 && arguments[0].indexOf('.') >= 0 && arguments[0].indexOf('$') >= 0) {
-                    var groupIndex = parseInt(arguments[0].split('.')[1].split('$')[1]);
-                    var groupKey = self._options._uniqueGroupArrayAll[groupIndex - 1];
-                    arguments[0] = arguments[0].split('.')[0] + '.' + groupKey;
-                }
-
-                self.setOptions(arguments, 'line');
-                self._drawLineSVG();
-            }
-            return self;
         }
 
+        self._setSpecificPropertiesByChart(options, 'line');
 
+        return self;
     };
 
     bChart.prototype._drawLineSVG = function (options) {
         var self = this;
         var	_datasetTmp = self._options._dataset;
         var	groupConcat = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
-        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+        var _parentSVG;
+        if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+            _parentSVG = d3.select(self._options.selector).append('div')
+                .attr('class', 'bChart_wrapper');
+        } else {
+            _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+        }
+        var chartSVG = _parentSVG.select('g.bChart');
 
         var lineSVG, linePathSVG;
         var dataLine = [];
@@ -2289,56 +2288,44 @@
                     return d._secondAxis? options.y2(d.value): options.y(d.value);
                 });
             linePathSVG.attr('d', line);
+        } else {
+            linePathSVG = lineSVG.selectAll('.bChart_groups');
         }
 
-        linePathSVG.attr('class', function (d, i) {
-                return 'bChart_groups bChart_groups_' + groupConcat.indexOf(d[i].group);
-            })
-            .attr('fill-opacity', function () {
-                return 0;
-            })
-            .attr('stroke', function (d, i) {
-                return self._options._colorMap[d[i].group];
-            })
-            .attr('stroke-width', function (d, i) {
-                return self._options.line.width[d[i].group];
-            })
-            .attr('stroke-opacity', function (d, i) {
-                return self._options.line.opacity[d[i].group];
-            })
-            .style('opacity', 0.1)
-            .transition()
+        if (!linePathSVG.empty()) {
+            linePathSVG.attr('class', function (d, i) {
+                    return 'bChart_groups bChart_groups_' + groupConcat.indexOf(d[i].group);
+                })
+                .attr('fill-opacity', function () {
+                    return 0;
+                })
+                .attr('stroke', function (d, i) {
+                    return self._options._colorMap[d[i].group];
+                })
+                .attr('stroke-width', function (d, i) {
+                    return self._options.line.strokeWidth[groupConcat.indexOf(d[i].group)];
+                })
 
-            .duration(self._options.duration)
-            .style('opacity', 1);
+                .style('opacity', 0.1)
+                .transition()
+
+                .duration(self._options.duration)
+                .style('opacity', function (d, i) {
+                    return self._options.line.strokeOpacity[groupConcat.indexOf(d[i].group)];
+                });
+        }
 
         return self;
 
     };
 
-    bChart.initLineStyle = function (property) {
-        return function (group, value) {
-            var self = this;
-            self._options.line[property][group] = bChart.hasProperty(self._options.line[property], group)?self._options.line[property][group]: value;
-        };
-    };
+    bChart.initLineType = bChart.initStyleProperty('type', 'line');
+    bChart.initLineStrokeWidth = bChart.initStyleProperty('strokeWidth', 'line');
+    bChart.initLineStrokeOpacity = bChart.initStyleProperty('strokeOpacity', 'line');
 
-    bChart.initLineType = bChart.initLineStyle('type');
-    bChart.initLineStrokeWidth = bChart.initLineStyle('width');
-    bChart.initLineStrokeOpacity = bChart.initLineStyle('opacity');
-
-    bChart.removeLineProperty = function (property) {
-        return function (group) {
-            var self = this;
-            if (bChart.hasProperty(self._options.line[property], group)) {
-                delete self._options.line[property][group];
-            }
-        };
-    };
-
-    bChart.removeLineType = bChart.removeLineProperty('type');
-    bChart.removeLineStrokeWidth = bChart.removeLineProperty('width');
-    bChart.removeLineStrokeOpacity = bChart.removeLineProperty('opacity');
+    bChart.removeLineType = bChart.removeStyleProperty('type', 'line');
+    bChart.removeLineStrokeWidth = bChart.removeStyleProperty('strokeWidth', 'line');
+    bChart.removeLineStrokeOpacity = bChart.removeStyleProperty('strokeOpacity', 'line');
     /**
      * Created by CaptainMao on 5/22/15.
      */
@@ -2348,16 +2335,17 @@
 
         },
         node: {
-            display: true,
-            type: {},
-            size: {},
-            fillOpacity: {},
-            strokeWidth: {}
+            display: [],
+            type: [],
+            size: [],
+            fillOpacity: [],
+            solidCircle: [],
+            strokeWidth: []
         },
         line: {
-            type: {},
-            width: {},
-            opacity: {}
+            type: [],
+            strokeWidth: [],
+            strokeOpacity: []
         }
 
     };
@@ -2374,12 +2362,8 @@
     LineChart.prototype._drawLineChart = function () {
         var self = this;
         var xyOptions = self._initXYAxis();
-        self._drawLineSVG(xyOptions)._drawNodeSVG(xyOptions).node('refresh');
+        self._drawLineSVG(xyOptions)._drawNodeSVG(xyOptions);
         return self;
-
-
-
-
     };
     /**
      * Created by CaptainMao on 5/22/15.
@@ -2531,20 +2515,10 @@
         var self = this;
         if (!bChart.existy(options)) {
             return self._options.node;
-        } else {
-            if (bChart.typeString(options) && options === "refresh") {
-                self._drawNodeSVG();
-            } else {
-                if (arguments.length === 2 && arguments[0].indexOf('.') >= 0 && arguments[0].indexOf('$') >= 0) {
-                    var groupIndex = parseInt(arguments[0].split('.')[1].split('$')[1]);
-                    var groupKey = self._options._uniqueGroupArrayAll[groupIndex - 1];
-                    arguments[0] = arguments[0].split('.')[0] + '.' + groupKey;
-                }
-                self.setOptions(arguments, 'node');
-                self._drawNodeSVG();
-            }
-            return self;
         }
+
+        self._setSpecificPropertiesByChart(options, 'node');
+        return self;
 
     };
 
@@ -2552,7 +2526,14 @@
         var self = this;
         var	_datasetTmp = self._options._dataset;
         var	groupConcat = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
-        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+        var _parentSVG;
+        if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+            _parentSVG = d3.select(self._options.selector).append('div')
+                .attr('class', 'bChart_wrapper');
+        } else {
+            _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+        }
+        var chartSVG = _parentSVG.select('g.bChart');
 
         var nodeSVG, nodePathSVG;
         if (chartSVG.select('.bChart_nodes').empty()) {
@@ -2564,9 +2545,13 @@
 
         var nodeGenerator = d3.svg.symbol()
             .type(function (d) {
-                return self._options.node.type[d.group];
+                var groupIndex = groupConcat.indexOf(d.group);
+
+                return self._options.node.type[groupIndex];
             }).size(function (d) {
-                return bChart.existy(d.size) ? d.size : self._options.node.size[d.group];
+                var groupIndex = groupConcat.indexOf(d.group);
+
+                return bChart.existy(d.size) ? d.size : self._options.node.size[groupIndex];
             });
 
         if (bChart.existy(options)) {
@@ -2596,53 +2581,54 @@
                 .style('opacity', 1);
         } else {
             nodePathSVG = nodeSVG.selectAll('.bChart_groups');
-            if (self._options.node.display) {
-                nodePathSVG.style('display', 'block');
-                nodePathSVG.attr('fill', function (d) {
+        }
+
+        if (!nodePathSVG.empty()) {
+            nodePathSVG.attr('fill', function (d) {
+                    var groupIndex = groupConcat.indexOf(d.group);
+
+                    if (self._options.node.solidCircle[groupIndex]) {
+                        return self._options.background.color;
+                    } else {
                         var nodeFill = self._options._colorMap[d.group];
                         var colorElem = nodeFill.split(',');
-                        return colorElem[0] + ',' + colorElem[1] + ',' + colorElem[2] + ',' + self._options.node.fillOpacity[d.group] + ')';
-                    })
-                    .attr('stroke-width', function (d) {
-                        return self._options.node.strokeWidth[d.group];
-                    })
-                    .attr('d', nodeGenerator);
-            } else {
-                nodePathSVG.style('display', 'none');
-            }
+                        return colorElem[0] + ',' + colorElem[1] + ',' + colorElem[2] + ',' + self._options.node.fillOpacity[groupIndex] + ')';
+                    }
+                })
+                .attr('stroke', function (d) {
+                    return self._options._colorMap[d.group];
+                })
+                .attr('stroke-width', function (d) {
+                    var groupIndex = groupConcat.indexOf(d.group);
+
+                    return self._options.node.strokeWidth[groupIndex];
+                })
+                .attr('d', nodeGenerator)
+                .style('display', function (d) {
+                    var groupIndex = groupConcat.indexOf(d.group);
+                    return self._options.node.display[groupIndex] ? 'block': 'none';
+                });
         }
 
         return self;
 
     };
 
-    bChart.initNodeStyle = function (property) {
-        return function (group, value) {
-            var self = this;
-            self._options.node[property][group] = bChart.hasProperty(self._options.node[property], group)?self._options.node[property][group]: value;
-        };
-    };
+    bChart.initNodeDisplay = bChart.initStyleProperty('display', 'node');
+    bChart.initNodeType = bChart.initStyleProperty('type', 'node');
+    bChart.initNodeSize = bChart.initStyleProperty('size', 'node');
+    bChart.initNodeFillOpacity = bChart.initStyleProperty('fillOpacity', 'node');
+    bChart.initNodeStrokeWidth = bChart.initStyleProperty('strokeWidth', 'node');
+    bChart.initNodeStrokeOpacity = bChart.initStyleProperty('strokeOpacity', 'node');
+    bChart.initNodeSolidCircle = bChart.initStyleProperty('solidCircle', 'node');
 
-    bChart.initNodeType = bChart.initNodeStyle('type');
-    bChart.initNodeSize = bChart.initNodeStyle('size');
-    bChart.initNodeFillOpacity = bChart.initNodeStyle('fillOpacity');
-    bChart.initNodeStrokeWidth = bChart.initNodeStyle('strokeWidth');
-    bChart.initNodeStrokeOpacity = bChart.initNodeStyle('strokeOpacity');
-
-    bChart.removeNodeProperty = function (property) {
-        return function (group) {
-            var self = this;
-            if (bChart.hasProperty(self._options.node[property], group)) {
-                delete self._options.node[property][group];
-            }
-        };
-    };
-
-    bChart.removeNodeType = bChart.removeNodeProperty('type');
-    bChart.removeNodeSize = bChart.removeNodeProperty('size');
-    bChart.removeNodeFillOpacity = bChart.removeNodeProperty('fillOpacity');
-    bChart.removeNodeStrokeWidth = bChart.removeNodeProperty('strokeWidth');
-    bChart.removeNodeStrokeOpacity = bChart.removeNodeProperty('strokeOpacity');
+    bChart.removeNodeDisplay = bChart.removeStyleProperty('display', 'node');
+    bChart.removeNodeType = bChart.removeStyleProperty('type', 'node');
+    bChart.removeNodeSize = bChart.removeStyleProperty('size', 'node');
+    bChart.removeNodeFillOpacity = bChart.removeStyleProperty('fillOpacity', 'node');
+    bChart.removeNodeStrokeWidth = bChart.removeStyleProperty('strokeWidth', 'node');
+    bChart.removeNodeStrokeOpacity = bChart.removeStyleProperty('strokeOpacity', 'node');
+    bChart.removeNodeSolidCircle = bChart.removeStyleProperty('solidCircle', 'node');
     /**
      * Created by CaptainMao on 5/22/15.
      */
@@ -2702,7 +2688,14 @@
 
         var	_datasetTmp = self._options._dataset;
         var	groupConcat = self._options._uniqueGroupTmp.length? self._options._uniqueGroupTmp: self._options._uniqueGroupArrayAll;
-        var chartSVG = d3.select(self._options.selector).select('g.bChart');
+        var _parentSVG;
+        if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+            _parentSVG = d3.select(self._options.selector).append('div')
+                .attr('class', 'bChart_wrapper');
+        } else {
+            _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+        }
+        var chartSVG = _parentSVG.select('g.bChart');
         var pieSUM = d3.sum(_datasetTmp, function (d) {
             return parseFloat(d.value);
         });
@@ -2836,11 +2829,12 @@
             "type": 0
         },
         node: {
-            display: true,
-            type: {},
-            size: {},
-            fillOpacity: {},
-            strokeWidth: {}
+            display: [],
+            solidCircle: [],
+            type: [],
+            size: [],
+            fillOpacity: [],
+            strokeWidth: []
         }
 
     };
@@ -2857,7 +2851,7 @@
     ScatterChart.prototype._drawScatterChart = function () {
         var self = this;
         var xyOptions = self._initXYAxis();
-        self._drawNodeSVG(xyOptions).node('refresh');
+        self._drawNodeSVG(xyOptions);
 
         return self;
 
@@ -2937,28 +2931,34 @@
 
         function drawTooltip () {
             var tooltipDIV;
-            var parentSVG = d3.select(self._options.selector);
             if (self._options.tooltip.display) {
-                if (parentSVG.select('.bChart_tooltip').empty()) {
-                    tooltipDIV = parentSVG.append('div')
+                var _parentSVG;
+                if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+                    _parentSVG = d3.select(self._options.selector).append('div')
+                        .attr('class', 'bChart_wrapper');
+                } else {
+                    _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+                }
+                if (_parentSVG.select('.bChart_tooltip').empty()) {
+                    tooltipDIV = _parentSVG.append('div')
                         .attr('class', 'bChart_tooltip')
                         .style('opacity', 0);
                 } else {
-                    tooltipDIV = parentSVG.select('.bChart_tooltip')
+                    tooltipDIV = _parentSVG.select('.bChart_tooltip')
                         .style('opacity', 0);
                 }
 
                 if (self._options.tooltip.type === 1) {
-                    drawGroupTooltip(parentSVG);
+                    drawGroupTooltip(_parentSVG);
                 } else {
-                    drawSingleTooltip(parentSVG);
+                    drawSingleTooltip(_parentSVG);
                 }
 
             } else {
                 tooltipDIV.remove();
             }
 
-            function drawGroupTooltip(parentSVG) {
+            function drawGroupTooltip(_parentSVG) {
                 var bisectData = d3.bisector(function (d) {
                     return self._options.xAxis.isTimeSeries ? new Date(d.x) : d.x;
                 }).left;
@@ -2976,11 +2976,11 @@
                 });
 
                 var focus_x;
-                if (parentSVG.selectAll('.bchart-focus-x-line').empty()) {
-                    focus_x = parentSVG.select('.bChart').append('line')
+                if (_parentSVG.selectAll('.bchart-focus-x-line').empty()) {
+                    focus_x = _parentSVG.select('.bChart').append('line')
                         .attr('class', 'bchart-focus-x-line');
                 } else {
-                    focus_x = parentSVG.select('.bchart-focus-x-line');
+                    focus_x = _parentSVG.select('.bchart-focus-x-line');
                 }
 
                 focus_x.style('stroke', self._options.tooltip.xLine.stroke)
@@ -2991,11 +2991,11 @@
 
 
                 var focus_rect;
-                if (parentSVG.selectAll('.bchart-focus-rect').empty()) {
-                    focus_rect = parentSVG.select('.bChart').append('rect')
+                if (_parentSVG.selectAll('.bchart-focus-rect').empty()) {
+                    focus_rect = _parentSVG.select('.bChart').append('rect')
                         .attr('class', 'bchart-focus-rect');
                 } else {
-                    focus_rect = parentSVG.select('.bchart-focus-rect');
+                    focus_rect = _parentSVG.select('.bchart-focus-rect');
                 }
 
                 focus_rect.attr('width', self._options._chartSVGWidth)
@@ -3099,10 +3099,10 @@
                 }
             }
 
-            function drawSingleTooltip(parentSVG) {
-                var groupSVG = parentSVG.selectAll('.bChart_groups');
-                parentSVG.select('.bchart-focus-rect').remove();
-                parentSVG.select('.bchart-focus-x-line').remove();
+            function drawSingleTooltip(_parentSVG) {
+                var groupSVG = _parentSVG.selectAll('.bChart_groups');
+                _parentSVG.select('.bchart-focus-rect').remove();
+                _parentSVG.select('.bchart-focus-x-line').remove();
                 groupSVG.on('mouseover', function (d) {
                     d3.select(this).style('opacity', 0.7);
                     tooltipDIV.transition()
@@ -3146,22 +3146,22 @@
                             .style('opacity', 0)
                             .style('display', 'none');
                     });
-                if (!parentSVG.select('.bChart_lines').empty()) {
-                    var groupLineSVG = parentSVG.select('.bChart_lines').selectAll('.bChart_groups');
+                if (!_parentSVG.select('.bChart_lines').empty()) {
+                    var groupLineSVG = _parentSVG.select('.bChart_lines').selectAll('.bChart_groups');
                     groupLineSVG.on('mouseover', null)
                         .on('mousemove', null)
                         .on('mouseout', null);
                 }
 
-                if (!parentSVG.select('.bChart_areas').empty()) {
-                    var groupAreaSVG = parentSVG.select('.bChart_areas').selectAll('.bChart_groups');
+                if (!_parentSVG.select('.bChart_areas').empty()) {
+                    var groupAreaSVG = _parentSVG.select('.bChart_areas').selectAll('.bChart_groups');
                     groupAreaSVG.on('mouseover', null)
                         .on('mousemove', null)
                         .on('mouseout', null);
                 }
 
-                if (!parentSVG.select('.bChart_pie').empty()) {
-                    var groupPieTextSVG = parentSVG.select('.bChart_pie').selectAll('.bChart_arc_text');
+                if (!_parentSVG.select('.bChart_pie').empty()) {
+                    var groupPieTextSVG = _parentSVG.select('.bChart_pie').selectAll('.bChart_arc_text');
                     groupPieTextSVG.on('mouseover', null)
                         .on('mousemove', null)
                         .on('mouseout', null);

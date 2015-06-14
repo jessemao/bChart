@@ -7,16 +7,17 @@ var _defaultsLine = {
 
     },
     node: {
-        display: true,
-        type: {},
-        size: {},
-        fillOpacity: {},
-        strokeWidth: {}
+        display: [],
+        type: [],
+        size: [],
+        fillOpacity: [],
+        solidCircle: [],
+        strokeWidth: []
     },
     line: {
-        type: {},
-        width: {},
-        opacity: {}
+        type: [],
+        strokeWidth: [],
+        strokeOpacity: []
     }
 
 };
@@ -33,10 +34,6 @@ LineChart.prototype.constructor = LineChart;
 LineChart.prototype._drawLineChart = function () {
     var self = this;
     var xyOptions = self._initXYAxis();
-    self._drawLineSVG(xyOptions)._drawNodeSVG(xyOptions).node('refresh');
+    self._drawLineSVG(xyOptions)._drawNodeSVG(xyOptions);
     return self;
-
-
-
-
 };

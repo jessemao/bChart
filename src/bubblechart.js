@@ -10,11 +10,12 @@ var _defaultsBubble = {
 
     },
     node: {
-        display: true,
-        type: {},
-        size: {},
-        fillOpacity: {},
-        strokeWidth: {}
+        display: [],
+        type: [],
+        size: [],
+        fillOpacity: [],
+        solidCircle: [],
+        strokeWidth: []
     }
 
 };

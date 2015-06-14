@@ -5,7 +5,14 @@ bChart.prototype._drawStackBarSVG = function (options) {
     var self = this;
     var	_datasetTmp = self._options._dataset;
     var	groupTmp = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
-    var chartSVG = d3.select(self._options.selector).select('g.bChart');
+    var _parentSVG;
+    if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+        _parentSVG = d3.select(self._options.selector).append('div')
+            .attr('class', 'bChart_wrapper');
+    } else {
+        _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+    }
+    var chartSVG = _parentSVG.select('g.bChart');
 
     var barParentSVG;
     if (chartSVG.select('.bChart_bar_parent').empty()) {
@@ -92,7 +99,14 @@ bChart.prototype._drawGroupBarSVG = function (options) {
     var self = this;
     var	_datasetTmp = self._options._dataset;
     var	groupConcat = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
-    var chartSVG = d3.select(self._options.selector).select('g.bChart');
+    var _parentSVG;
+    if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+        _parentSVG = d3.select(self._options.selector).append('div')
+            .attr('class', 'bChart_wrapper');
+    } else {
+        _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+    }
+    var chartSVG = _parentSVG.select('g.bChart');
 
     var groupBarArray = [];
     bChart.each(self._options._uniqueXArray, function (value, key) {

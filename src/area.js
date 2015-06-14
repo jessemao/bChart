@@ -3,54 +3,13 @@
  */
 bChart.prototype.area = function (options) {
     var self = this;
-    var args;
 
-    var parseArguments = function (args) {
-        if (args.length === 2) {
-            if (args[0].indexOf('.') >= 0 && args[0].indexOf('$') >= 0) {
-                var groupIndex = parseInt(args[0].split('.')[1].split('$')[1]);
-                args[0] = args[0].split('.')[0] + '.' + groupIndex;
-            } else {
-                args[0] = args[0] + '.' + 'all';
-            }
-
-        }
-        return args;
-    }
     if (!bChart.existy(options)) {
         return self._options.area;
-    } else {
-        if (bChart.typeString(options)) {
-            if (options === "refresh") {
-                self._drawAreaSVG();
-
-            } else {
-                args = parseArguments(arguments);
-
-                setTimeout(function () {
-                    self.setOptions(args, 'area');
-                    self._drawAreaSVG();
-
-                }, 1);
-            }
-        } else {
-            bChart.each(options, function (value, key, obj) {
-                var newArgs = [key, value];
-                delete obj[key];
-                var newKey = parseArguments(newArgs);
-                obj[newKey[0]] = value;
-
-            });
-            setTimeout(function () {
-                self.setOptions(options, 'area');
-                self._drawAreaSVG();
-
-            }, 1);
-
-        }
-        return self;
     }
 
+    self._setSpecificPropertiesByChart(options, 'area');
+    return self;
 
 };
 
@@ -58,7 +17,14 @@ bChart.prototype._drawAreaSVG = function (options) {
     var self = this;
     var	_datasetTmp = self._options._dataset;
     var	groupConcat = self._options._uniqueGroupTmp.length ? self._options._uniqueGroupTmp : self._options._uniqueGroupArrayAll;
-    var chartSVG = d3.select(self._options.selector).select('g.bChart');
+    var _parentSVG;
+    if (d3.select(self._options.selector).select('.bChart_wrapper').empty()) {
+        _parentSVG = d3.select(self._options.selector).append('div')
+            .attr('class', 'bChart_wrapper');
+    } else {
+        _parentSVG = d3.select(self._options.selector).select('.bChart_wrapper');
+    }
+    var chartSVG = _parentSVG.select('g.bChart');
     var areaSVG, areaPathSVG;
     var dataArea = [];
 
@@ -120,9 +86,9 @@ bChart.prototype._drawAreaSVG = function (options) {
 
     if (!areaPathSVG.empty()) {
         areaPathSVG.attr('class', function (d, i) {
-            var groupIndex = groupConcat.indexOf(d[i].group);
-            return 'bChart_groups bChart_groups_' + groupIndex;
-        })
+                var groupIndex = groupConcat.indexOf(d[i].group);
+                return 'bChart_groups bChart_groups_' + groupIndex;
+            })
             .attr('fill', function (d, i) {
                 return self._options._colorMap[d[i].group];
             })
@@ -155,28 +121,12 @@ bChart.prototype._drawAreaSVG = function (options) {
 
 };
 
-bChart.initAreaStyle = function (property) {
-    return function (groupIndex, value) {
-        var self = this;
-        self._options.area[property][groupIndex] = bChart.existy(self._options.area[property][groupIndex])?self._options.area[property][groupIndex]: value;
-    };
-};
+bChart.initAreaType = bChart.initStyleProperty('type', 'area');
+bChart.initAreaFillOpacity = bChart.initStyleProperty('fillOpacity', 'area');
+bChart.initAreaStrokeWidth = bChart.initStyleProperty('strokeWidth', 'area');
+bChart.initAreaStrokeOpacity = bChart.initStyleProperty('strokeOpacity', 'area');
 
-bChart.initAreaType = bChart.initAreaStyle('type');
-bChart.initAreaFillOpacity = bChart.initAreaStyle('fillOpacity');
-bChart.initAreaStrokeWidth = bChart.initAreaStyle('strokeWidth');
-bChart.initAreaStrokeOpacity = bChart.initAreaStyle('strokeOpacity');
-
-bChart.removeAreaProperty = function (property) {
-    return function (groupIndex) {
-        var self = this;
-        if (bChart.existy(self._options.area[property][groupIndex])) {
-            delete self._options.area[property][groupIndex];
-        }
-    };
-};
-
-bChart.removeAreaType = bChart.removeAreaProperty('type');
-bChart.removeAreaStrokeWidth = bChart.removeAreaProperty('strokeWidth');
-bChart.removeAreaStrokeOpacity = bChart.removeAreaProperty('strokeOpacity');
-bChart.removeAreaFillOpacity = bChart.removeAreaProperty('fillOpacity');
+bChart.removeAreaType = bChart.removeStyleProperty('type', 'area');
+bChart.removeAreaStrokeWidth = bChart.removeStyleProperty('strokeWidth', 'area');
+bChart.removeAreaStrokeOpacity = bChart.removeStyleProperty('strokeOpacity', 'area');
+bChart.removeAreaFillOpacity = bChart.removeStyleProperty('fillOpacity', 'area');
