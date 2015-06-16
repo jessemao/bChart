@@ -143,7 +143,7 @@ bChart.prototype._updateChartSize = function () {
     var self = this;
     var childSVG, chartSVG;
     if (self._options.legend.position.indexOf('right')>=0 && self._options._secondAxis) {
-        self._options.padding.right = 150;
+        self._options.padding.right = 120;
     } else {
         self._options.padding.right = 90;
     }
@@ -213,10 +213,8 @@ bChart.prototype.draw = function () {
 
     self.colors('refresh')._drawChartSVG();
 
-    self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').legend('refresh').tooltip('refresh');
-    if (self._options._secondAxis) {
-        self.yLabel2('refresh').yAxis2('refresh');
-    }
+    self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').tooltip('refresh').legend('refresh');
+    self.yLabel2('refresh').yAxis2('refresh');
 };
 
 bChart.prototype._initXYAxis = function () {

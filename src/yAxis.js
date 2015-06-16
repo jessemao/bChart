@@ -102,17 +102,14 @@ bChart.prototype.yAxis2 = function (options) {
         return self._options.yAxis2;
 
     } else {
-        if (bChart.typeString(options) && options === 'refresh') {
-            self.yAxis('yAxis2');
-
-        } else {
+        if (!(bChart.typeString(options) && options === 'refresh')) {
             self.setOptions(arguments,'yAxis2');
-            if (!self._options._secondAxis) {
-                var chartSVG = d3.select(self._options.selector).select('g.bChart');
-                chartSVG.select('.bChart_y_axis_2').style('display', 'none');
-            } else {
-                self.yAxis('yAxis2');
-            }
+        }
+        if (!self._options._secondAxis) {
+            var chartSVG = d3.select(self._options.selector).select('g.bChart');
+            chartSVG.select('.bChart_y_axis_2').style('display', 'none');
+        } else {
+            self.yAxis('yAxis2');
         }
 
         return self;

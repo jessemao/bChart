@@ -178,7 +178,18 @@ bChart.prototype._updateDatasetBySelection = function (selections) {
     if (self.constructor === PieChart) {
         self.setOptions([displayDataset], '_dataset')._drawChartSVG().title('refresh').tooltip('refresh');
     } else {
-        self.setOptions([displayDataset], '_dataset').min('refresh').max('refresh').updateMin()._drawChartSVG().xAxis('refresh').yAxis('refresh').yLabel('refresh').yLabel2('refresh').yAxis2('refresh').tooltip('refresh');
+
+        self.setOptions([displayDataset], '_dataset');
+
+        self.min('refresh').max('refresh').updateMin();
+        if (self._options._secondAxis) {
+            self.min2('refresh').max2('refresh').updateMin2();
+        }
+
+        self._drawChartSVG();
+
+        self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').tooltip('refresh');
+        self.yLabel2('refresh').yAxis2('refresh');
     }
 
 };

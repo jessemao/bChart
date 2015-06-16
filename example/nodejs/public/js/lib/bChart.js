@@ -1378,7 +1378,7 @@
         var self = this;
         var childSVG, chartSVG;
         if (self._options.legend.position.indexOf('right')>=0 && self._options._secondAxis) {
-            self._options.padding.right = 150;
+            self._options.padding.right = 120;
         } else {
             self._options.padding.right = 90;
         }
@@ -1448,10 +1448,10 @@
 
         self.colors('refresh')._drawChartSVG();
 
-        self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').legend('refresh').tooltip('refresh');
-        if (self._options._secondAxis) {
-            self.yLabel2('refresh').yAxis2('refresh');
-        }
+        self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').tooltip('refresh').legend('refresh');
+        //if (self._options._secondAxis) {
+        self.yLabel2('refresh').yAxis2('refresh');
+        //}
     };
 
     bChart.prototype._initXYAxis = function () {
@@ -2231,7 +2231,20 @@
         if (self.constructor === PieChart) {
             self.setOptions([displayDataset], '_dataset')._drawChartSVG().title('refresh').tooltip('refresh');
         } else {
-            self.setOptions([displayDataset], '_dataset').min('refresh').max('refresh').updateMin()._drawChartSVG().xAxis('refresh').yAxis('refresh').yLabel('refresh').yLabel2('refresh').yAxis2('refresh').tooltip('refresh');
+
+            self.setOptions([displayDataset], '_dataset');
+
+            self.min('refresh').max('refresh').updateMin();
+            if (self._options._secondAxis) {
+                self.min2('refresh').max2('refresh').updateMin2();
+            }
+
+            self._drawChartSVG();
+
+            self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').tooltip('refresh');
+            //if (self._options._secondAxis) {
+            self.yLabel2('refresh').yAxis2('refresh');
+            //}
         }
 
     };
@@ -3550,17 +3563,14 @@
             return self._options.yAxis2;
 
         } else {
-            if (bChart.typeString(options) && options === 'refresh') {
-                self.yAxis('yAxis2');
-
-            } else {
+            if (!(bChart.typeString(options) && options === 'refresh')) {
                 self.setOptions(arguments,'yAxis2');
-                if (!self._options._secondAxis) {
-                    var chartSVG = d3.select(self._options.selector).select('g.bChart');
-                    chartSVG.select('.bChart_y_axis_2').style('display', 'none');
-                } else {
-                    self.yAxis('yAxis2');
-                }
+            }
+            if (!self._options._secondAxis) {
+                var chartSVG = d3.select(self._options.selector).select('g.bChart');
+                chartSVG.select('.bChart_y_axis_2').style('display', 'none');
+            } else {
+                self.yAxis('yAxis2');
             }
 
             return self;
@@ -3715,18 +3725,16 @@
             return self._options.yLabel2;
 
         } else {
-            if (bChart.typeString(options) && options === 'refresh') {
+            if (!(bChart.typeString(options) && options === 'refresh')) {
+                self.setOptions(arguments,'yLabel2');
+            }
+
+            if (!self._options._secondAxis) {
+                var chartSVG = d3.select(self._options.selector).select('g.bChart');
+                chartSVG.select('.bChart_ylabel_2').style('display', 'none');
+            } else {
                 self.yLabel('yLabel2');
 
-            } else {
-                self.setOptions(arguments,'yLabel2');
-                if (!self._options._secondAxis) {
-                    var chartSVG = d3.select(self._options.selector).select('g.bChart');
-                    chartSVG.select('.bChart_ylabel_2').style('display', 'none');
-                } else {
-                    self.yLabel('yLabel2');
-
-                }
             }
 
             return self;

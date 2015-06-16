@@ -40,13 +40,9 @@
             'solidCircle': true,
             'size': 64
         })
-        .yLabel({
-            'text': 'date',
-            'fontSize': '18',
-            'rotation': -45,
-            'offsetAdjust': {
-                'horizontal': 00
-            }
+        .legend({
+            'symbolSize': 20,
+            'offsetSymbol': 30
         })
         .yAxis({
             //'rotation': -45,

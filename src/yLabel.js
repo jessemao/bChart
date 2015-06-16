@@ -8,18 +8,16 @@ bChart.prototype.yLabel2 = function (options) {
         return self._options.yLabel2;
 
     } else {
-        if (bChart.typeString(options) && options === 'refresh') {
+        if (!(bChart.typeString(options) && options === 'refresh')) {
+            self.setOptions(arguments,'yLabel2');
+        }
+
+        if (!self._options._secondAxis) {
+            var chartSVG = d3.select(self._options.selector).select('g.bChart');
+            chartSVG.select('.bChart_ylabel_2').style('display', 'none');
+        } else {
             self.yLabel('yLabel2');
 
-        } else {
-            self.setOptions(arguments,'yLabel2');
-            if (!self._options._secondAxis) {
-                var chartSVG = d3.select(self._options.selector).select('g.bChart');
-                chartSVG.select('.bChart_ylabel_2').style('display', 'none');
-            } else {
-                self.yLabel('yLabel2');
-
-            }
         }
 
         return self;
