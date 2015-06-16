@@ -28,13 +28,28 @@ bChart.prototype._getYAxis = function (y, isSecond) {
     } else {
         yAxisType = 'yAxis';
     }
+
+    var innerSize, outerSize;
+    if (self._options[yAxisType].innerTickSize === 'auto') {
+        innerSize = -self._options._chartSVGWidth;
+    } else {
+        innerSize = self._options[yAxisType].innerTickSize;
+    }
+
+    if (self._options[yAxisType].outerTickSize === 'auto') {
+        outerSize = -self._options._chartSVGWidth;
+    } else {
+        outerSize = self._options[yAxisType].outerTickSize
+    }
+
     return d3.svg.axis()
         .scale(y)
         .orient(self._options[yAxisType].orientation)
         .tickFormat(self._options[yAxisType].tickFormat)
         .tickPadding(self._options[yAxisType].offsetAdjust + 3)
         .ticks(self._options[yAxisType].tickNumber)
-        .tickSize(self._options[yAxisType].tickSize, 0, 0);
+        .innerTickSize(innerSize)
+        .outerTickSize(outerSize);
 
 };
 

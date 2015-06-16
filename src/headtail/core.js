@@ -187,7 +187,8 @@ var _defaultOptions = {
 		"tickNumber": 8,
 		"tickFormat": d3.format(",.0f"),
 		"tickPadding": 3,
-		"tickSize": 10,
+		"innerTickSize": 0,
+		"outerTickSize": 0,
 		"orientation": "left",
 		"tickValue": [],
 		"fontColor": "#000",
@@ -209,7 +210,8 @@ var _defaultOptions = {
 		"tickNumber": 8,
 		"tickFormat": d3.format(",.0f"),
 		"tickPadding": 3,
-		"tickSize": 10,
+		"innerTickSize": 0,
+		"outerTickSize": 0,
 		"orientation": "right",
 		"tickValue": [],
 		"fontColor": "#000",
@@ -234,6 +236,8 @@ var _defaultOptions = {
 		"tickNumber": 5,
 		"tickFormat": "",
 		"tickPadding": 3,
+		"innerTickSize": 'auto',
+		"outerTickSize": 0,
 		"tickSize": 10,
 		"orientation": "bottom",
 		"tickValue": [],
@@ -409,6 +413,14 @@ bChart.clone = function (obj) {
 	}
 };
 
+bChart.copyPropertyOfObject = function (fromObj, toObj) {
+	if (bChart.typeObject(fromObj)) {
+	    bChart.each(fromObj, function (value, key) {
+			toObj[key] = value;
+		});
+	}
+};
+
 
 bChart.generateArray = function(length) {
 	var array = [];
@@ -525,7 +537,13 @@ bChart.setProperty = function (obj, key, value) {
 			if (!bChart.hasProperty(obj, key)) {
 				obj[key] = {};
 			}
-			obj[key] = value;
+
+			if (bChart.typeObject(value)) {
+				bChart.copyPropertyOfObject(value, obj[key]);
+			} else {
+				obj[key] = value;
+
+			}
 		}
 	}
 };

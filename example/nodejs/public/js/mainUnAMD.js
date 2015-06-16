@@ -25,7 +25,8 @@
     barchart.tooltip('type', 1).xAxis({
             "isTimeSeries": true,
             'timeFormat': 'Mm-yyyy',
-            'offsetAdjust': 10
+            'offsetAdjust': 10,
+            'fontSize': 16
         })
         .line({
             //"fillOpacity.$0": 1,
@@ -39,16 +40,33 @@
             'solidCircle': true,
             'size': 64
         })
-        .xLabel({
+        .yLabel({
             'text': 'date',
-            'fontSize': '18'
+            'fontSize': '18',
+            'rotation': -45,
+            'offsetAdjust': {
+                'horizontal': 00
+            }
         })
         .yAxis({
-            'rotation': -45,
-            'offsetAdjust': 10
+            //'rotation': -45,
+            'offsetAdjust': 10,
+            'tickLineColor': '#ff0000',
+            'tickLineWidth': 2,
+            'axisColor': '#00ff00',
+            'axisWidth': 2,
+            'innerTickSize': '-10',
+            'tickNumber': 4
+            //'tickFormat': d3.format(' $0.f')
         })
         .yAxis2({
-            'rotation': -45
+            'offsetAdjust': 10,
+            'tickLineColor': '#ff0000',
+            'tickLineWidth': 2,
+            'axisColor': '#00ff00',
+            'axisWidth': 2,
+            'innerTickSize': '-10',
+            'tickNumber': 4
 
         });
 

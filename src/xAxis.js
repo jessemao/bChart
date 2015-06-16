@@ -49,11 +49,26 @@ bChart.prototype._getComputedX = function () {
 
 bChart.prototype._getXAxis = function (x) {
     var self = this;
+
+    var innerSize, outerSize;
+    if (self._options.xAxis.innerTickSize === 'auto') {
+        innerSize = -self._options._chartSVGHeight;
+    } else {
+        innerSize = self._options.xAxis.innerTickSize;
+    }
+
+    if (self._options.xAxis.outerTickSize === 'auto') {
+        outerSize = -self._options._chartSVGHeight;
+    } else {
+        outerSize = self._options.xAxis.outerTickSize
+    }
+
     var axis = d3.svg.axis()
         .scale(x)
         .orient(self._options.xAxis.orientation)
         .tickPadding(self._options.xAxis.offsetAdjust + 3)
-        .tickSize(self._options.xAxis.tickSize, 0, 0);
+        .innerTickSize(innerSize)
+        .outerTickSize(outerSize);
     if (!self._options.xAxis.isTimeSeries) {
         axis.ticks(self._options.xAxis.tickNumber);
     } else {

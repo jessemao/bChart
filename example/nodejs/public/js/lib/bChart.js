@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-06-14
+/*! bChart - v0.1.0 - 2015-06-15
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -200,7 +200,8 @@
     		"tickNumber": 8,
     		"tickFormat": d3.format(",.0f"),
     		"tickPadding": 3,
-    		"tickSize": 10,
+    		"innerTickSize": 0,
+    		"outerTickSize": 0,
     		"orientation": "left",
     		"tickValue": [],
     		"fontColor": "#000",
@@ -222,7 +223,8 @@
     		"tickNumber": 8,
     		"tickFormat": d3.format(",.0f"),
     		"tickPadding": 3,
-    		"tickSize": 10,
+    		"innerTickSize": 0,
+    		"outerTickSize": 0,
     		"orientation": "right",
     		"tickValue": [],
     		"fontColor": "#000",
@@ -247,6 +249,8 @@
     		"tickNumber": 5,
     		"tickFormat": "",
     		"tickPadding": 3,
+    		"innerTickSize": 'auto',
+    		"outerTickSize": 0,
     		"tickSize": 10,
     		"orientation": "bottom",
     		"tickValue": [],
@@ -422,6 +426,14 @@
     	}
     };
 
+    bChart.copyPropertyOfObject = function (fromObj, toObj) {
+    	if (bChart.typeObject(fromObj)) {
+    	    bChart.each(fromObj, function (value, key) {
+    			toObj[key] = value;
+    		});
+    	}
+    };
+
 
     bChart.generateArray = function(length) {
     	var array = [];
@@ -538,7 +550,13 @@
     			if (!bChart.hasProperty(obj, key)) {
     				obj[key] = {};
     			}
-    			obj[key] = value;
+
+    			if (bChart.typeObject(value)) {
+    				bChart.copyPropertyOfObject(value, obj[key]);
+    			} else {
+    				obj[key] = value;
+
+    			}
     		}
     	}
     };
@@ -3210,11 +3228,26 @@
 
     bChart.prototype._getXAxis = function (x) {
         var self = this;
+
+        var innerSize, outerSize;
+        if (self._options.xAxis.innerTickSize === 'auto') {
+            innerSize = -self._options._chartSVGHeight;
+        } else {
+            innerSize = self._options.xAxis.innerTickSize;
+        }
+
+        if (self._options.xAxis.outerTickSize === 'auto') {
+            outerSize = -self._options._chartSVGHeight;
+        } else {
+            outerSize = self._options.xAxis.outerTickSize
+        }
+
         var axis = d3.svg.axis()
             .scale(x)
             .orient(self._options.xAxis.orientation)
             .tickPadding(self._options.xAxis.offsetAdjust + 3)
-            .tickSize(self._options.xAxis.tickSize, 0, 0);
+            .innerTickSize(innerSize)
+            .outerTickSize(outerSize);
         if (!self._options.xAxis.isTimeSeries) {
             axis.ticks(self._options.xAxis.tickNumber);
         } else {
@@ -3443,13 +3476,28 @@
         } else {
             yAxisType = 'yAxis';
         }
+
+        var innerSize, outerSize;
+        if (self._options[yAxisType].innerTickSize === 'auto') {
+            innerSize = -self._options._chartSVGWidth;
+        } else {
+            innerSize = self._options[yAxisType].innerTickSize;
+        }
+
+        if (self._options[yAxisType].outerTickSize === 'auto') {
+            outerSize = -self._options._chartSVGWidth;
+        } else {
+            outerSize = self._options[yAxisType].outerTickSize
+        }
+
         return d3.svg.axis()
             .scale(y)
             .orient(self._options[yAxisType].orientation)
             .tickFormat(self._options[yAxisType].tickFormat)
             .tickPadding(self._options[yAxisType].offsetAdjust + 3)
             .ticks(self._options[yAxisType].tickNumber)
-            .tickSize(self._options[yAxisType].tickSize, 0, 0);
+            .innerTickSize(innerSize)
+            .outerTickSize(outerSize);
 
     };
 
