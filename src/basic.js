@@ -285,7 +285,7 @@ bChart.prototype._setSpecificPropertiesByChart = function (options, type) {
             setTimeout(function () {
                 self.setOptions(args, type);
                 self._drawChartSVG();
-            }, 1);
+            }, 10);
         }
     } else {
         bChart.each(options, function (value, key, obj) {
@@ -299,7 +299,7 @@ bChart.prototype._setSpecificPropertiesByChart = function (options, type) {
             self.setOptions(options, type);
             self._drawChartSVG();
 
-        }, 1);
+        }, 10);
     }
     return self;
 

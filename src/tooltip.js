@@ -49,6 +49,82 @@ bChart.prototype.tooltip = function (options) {
             tooltipDIV.remove();
         }
 
+        var parseSingleCustomTooltip = function (tooltipHTML, d, group) {
+            var regExpress = /\#([^#]+)\#/g;
+            var matches = tooltipHTML.match(regExpress),
+                parsedString = tooltipHTML;
+            for (var i = 0; i < matches.length; i++) {
+                var obj = matches[i];
+                var matchValue = obj.substring(1, obj.length - 1).toLowerCase(),
+                    value;
+                switch (matchValue) {
+                    case "group":
+                        if (bChart.existy(group)) {
+                            value = group;
+                        } else {
+                            value = d.group;
+                        }
+                        break;
+                    case "x":
+                        value = d.x;
+                        break;
+                    case "value":
+                        if (bChart.existy(group)) {
+                            value = d[group];
+                        } else {
+                            value = d.value;
+                        }
+                        break;
+                }
+                parsedString = parsedString.replace(obj, value);
+            }
+            return parsedString;
+        };
+
+        var parseGroupCustomTooltip = function (tooltipHTML, d) {
+            var regExpress = /\{\{([^{}]+)\}\}/g;
+            var matches = tooltipHTML.match(regExpress);
+            var parsedHTML = tooltipHTML;
+            var parsedSingleHTML = "";
+            for (var i = 0; i < matches.length; i++) {
+                var obj = matches[i];
+                var matchValue = obj.split(':');
+                var objHTML = "";
+
+                if (matchValue[0].indexOf('group')>=0) {
+                    if (!self._options.tooltip.groupHTML) {
+                        self._options.tooltip._groupHTML = matchValue[1].slice(0, -2);
+                        objHTML = obj;
+                    } else {
+                        self._options.tooltip._groupHTML = self._options.tooltip.groupHTML;
+                        objHTML = self._options.tooltip._groupHTML;
+                        parsedHTML = parsedHTML.replace(obj, objHTML);
+                    }
+                    for (var j = 0; j < self._options._uniqueGroupArrayAll.length; j++) {
+                        var obj1 = self._options._uniqueGroupArrayAll[j];
+                        parsedSingleHTML = parseSingleCustomTooltip(self._options.tooltip._groupHTML, d, obj1);
+                        parsedHTML = parsedHTML.replace(objHTML, parsedSingleHTML);
+                        if (j < self._options._uniqueGroupArrayAll.length - 1) {
+                            parsedHTML += objHTML;
+                        }
+                    }
+                } else if (matchValue[0].indexOf('x')>= 0){
+
+                    if (!self._options.tooltip.xHTML) {
+                        self._options.tooltip._xHTML = matchValue[1].slice(0, -2);
+                        objHTML = obj;
+                    } else {
+                        self._options.tooltip._xHTML = self._options.tooltip.xHTML;
+                        objHTML = self._options.tooltip._xHTML;
+                        parsedHTML = parsedHTML.replace(obj, objHTML);
+                    }
+                    parsedSingleHTML = parseSingleCustomTooltip(self._options.tooltip._xHTML, d);
+                    parsedHTML = parsedHTML.replace(objHTML, parsedSingleHTML);
+                }
+            }
+            return parsedHTML;
+        };
+
         function drawGroupTooltip(_parentSVG) {
             var bisectData = d3.bisector(function (d) {
                 return self._options.xAxis.isTimeSeries ? new Date(d.x) : d.x;
@@ -151,11 +227,18 @@ bChart.prototype.tooltip = function (options) {
                     offx = xOptions.x0.rangeBand() === 0 ? leftEdge[j] + 80 : leftEdge[j] + rangeWidth / 2 + 80;
                 }
                 var tooltip_html = "";
-                tooltip_html += "<div class='bchart-tooltip-header'>"+ d.x +"</div>";
-                for (var k = 0; k < self._options._uniqueGroupArrayAll.length; k++) {
-                    var obj = self._options._uniqueGroupArrayAll[k];
-                    tooltip_html += "<div class='bchart-tooltip-row'><div class='bchart-tooltip-group'>"+obj+"</div><div class='bchart-tooltip-value'>"+d[obj]+"</div></div>";
+
+                if (bChart.existy(self._options.tooltip.html) && self._options.tooltip.html) {
+                    tooltip_html = self._options.tooltip.html;
+                    tooltip_html = parseGroupCustomTooltip(tooltip_html, d);
+                } else {
+                    tooltip_html += "<div class='bchart-tooltip-header'>"+ d.x +"</div>";
+                    for (var k = 0; k < self._options._uniqueGroupArrayAll.length; k++) {
+                        var obj = self._options._uniqueGroupArrayAll[k];
+                        tooltip_html += "<div class='bchart-tooltip-row'><div class='bchart-tooltip-group'>"+obj+"</div><div class='bchart-tooltip-value'>"+d[obj]+"</div></div>";
+                    }
                 }
+
                 var offy = d3.event.hasOwnProperty('offsetY') ? d3.event.offsetY : d3.event.layerY;
                 focus_x.attr('x2', 0)
                     .attr('transform', 'translate(' + (offx - 80) + ',0)');
@@ -189,6 +272,8 @@ bChart.prototype.tooltip = function (options) {
 
             }
         }
+
+
 
         function drawSingleTooltip(_parentSVG) {
             var groupSVG = _parentSVG.selectAll('.bChart_groups');

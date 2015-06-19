@@ -1,4 +1,4 @@
-/*! bChart - v0.1.0 - 2015-06-15
+/*! bChart - v0.1.0 - 2015-06-18
 * Copyright (c) 2015 Jingxian Mao; Licensed MIT */
 
     (function (factory) {
@@ -48,7 +48,7 @@
     	padding: {
     		"top": 80,
     		"right": 90,
-    		"bottom": 50,
+    		"bottom": 60,
     		"left": 60
     	},
     	data: {
@@ -117,8 +117,6 @@
     	_secondAxis: false,
     	legend: {
     		"position": "topright",
-    		"offsetText": 5,
-    		"offsetSymbol": 15,
     		"symbolSize": 10,
     		"multipleLine": false,
     		"textFirst": true,
@@ -130,8 +128,10 @@
     		"fontUnderline": false,
     		"fontColor": "#000000",
     		"offsetAdjust": {
+    			"between": 15,
     			"horizontal": 0,
-    			"vertical": 0
+    			"vertical": 0,
+    			"textToSymbol": 5
     		}
     	},
 
@@ -284,7 +284,12 @@
     		"fontUnderline": false,
     		"fontColor": "#fff",
     		"width": "auto",
-    		"height": "auto"
+    		"height": "auto",
+    		"xHTML": "",
+    		"groupHTML": "",
+    		"_xHTML": "",
+    		"_groupHTML": ""
+
     	}
     };
 
@@ -1449,9 +1454,7 @@
         self.colors('refresh')._drawChartSVG();
 
         self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').tooltip('refresh').legend('refresh');
-        //if (self._options._secondAxis) {
         self.yLabel2('refresh').yAxis2('refresh');
-        //}
     };
 
     bChart.prototype._initXYAxis = function () {
@@ -1522,7 +1525,7 @@
                 setTimeout(function () {
                     self.setOptions(args, type);
                     self._drawChartSVG();
-                }, 1);
+                }, 10);
             }
         } else {
             bChart.each(options, function (value, key, obj) {
@@ -1536,7 +1539,7 @@
                 self.setOptions(options, type);
                 self._drawChartSVG();
 
-            }, 1);
+            }, 10);
         }
         return self;
 
@@ -2076,7 +2079,7 @@
                 if (!chartSVG.selectAll('.bChart_legend').empty()) {
                     chartSVG.selectAll('.bChart_legend').remove();
                 }
-                var legendRectX, legendRectY, legendTextX, legendTextY, legendTextAnchor;
+                var legendRectX, legendRectY, legendTextX, legendTextY, legendTextAnchor, layoutStyle;
 
                 var groupConcat = self._options._uniqueGroupArrayAll;
                 var legendSVG = chartSVG.selectAll('.bChart_legend')
@@ -2086,31 +2089,101 @@
 
                 switch (self._options.legend.position) {
                     case 'topright':
-                        legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
-                        legendRectY = -60 - self._options.legend.offsetAdjust.vertical;
-                        legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20- self._options.legend.offsetText;
-                        legendTextY = -56 - self._options.legend.offsetAdjust.vertical;
-                        legendTextAnchor = 'end';
+                        if (self._options.legend.textFirst) {
+                            legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
+                            legendRectY = -60 - self._options.legend.offsetAdjust.vertical;
+                            legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20- self._options.legend.offsetAdjust.textToSymbol;
+                            legendTextY = -56 - self._options.legend.offsetAdjust.vertical;
+                            legendTextAnchor = 'end';
+                        } else {
+                            legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 50;
+                            legendTextY = -56 - self._options.legend.offsetAdjust.vertical;
+                            legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 60 - self._options.legend.offsetAdjust.textToSymbol;
+                            legendRectY = -60 - self._options.legend.offsetAdjust.vertical;
+                            legendTextAnchor = 'start';
+                        }
+                        layoutStyle = 1;
 
                         break;
                     case 'right':
-                        legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
-                        legendRectY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 60;
-                        legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20 - self._options.legend.offsetText;
-                        legendTextY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 56;
-                        legendTextAnchor = 'end';
+                        if (self._options.legend.textFirst) {
+                            legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
+                            legendRectY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 60;
+                            legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20 - self._options.legend.offsetAdjust.textToSymbol;
+                            legendTextY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 56;
+                            legendTextAnchor = 'end';
+                        } else {
+                            legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 50;
+                            legendTextY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 56;
+                            legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 60 - self._options.legend.offsetAdjust.textToSymbol;
+                            legendRectY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 60;
+                            legendTextAnchor = 'start';
+                        }
+                        layoutStyle = 1;
+
                         break;
                     case 'bottomright':
-                        legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
-                        legendRectY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 60;
-                        legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20 - self._options.legend.offsetText;
-                        legendTextY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 56;
-                        legendTextAnchor = 'end';
+                        if (self._options.legend.textFirst) {
+                            legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
+                            legendRectY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 60;
+                            legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20 - self._options.legend.offsetAdjust.textToSymbol;
+                            legendTextY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 56;
+                            legendTextAnchor = 'end';
+                        } else {
+                            legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 50;
+                            legendTextY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 56;
+                            legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 60 - self._options.legend.offsetAdjust.textToSymbol;
+                            legendRectY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 60;
+                            legendTextAnchor = 'start';
+                        }
+                        layoutStyle = 1;
+
+                        break;
+                    case 'top':
+                        if (self._options.legend.textFirst) {
+                            legendRectX = self._options.legend.offsetAdjust.horizontal;
+                            legendRectY = -30 + self._options.legend.offsetAdjust.vertical;
+                            legendTextX = self._options.legend.offsetAdjust.horizontal - self._options.legend.offsetAdjust.textToSymbol;
+                            legendTextY = -25 + self._options.legend.offsetAdjust.vertical;
+                            legendTextAnchor = 'end';
+                        } else {
+                            legendTextX = self._options.legend.offsetAdjust.horizontal;
+                            legendTextY = -25 + self._options.legend.offsetAdjust.vertical;
+                            legendRectX = self._options.legend.offsetAdjust.horizontal - self._options.legend.offsetAdjust.textToSymbol - 10;
+                            legendRectY = -30 + self._options.legend.offsetAdjust.vertical;
+                            legendTextAnchor = 'start';
+                        }
+                        layoutStyle = 0;
+
+                        break;
+                    case 'bottom':
+                        if (self._options.legend.textFirst) {
+                            legendRectX = self._options.legend.offsetAdjust.horizontal;
+                            legendRectY = self._options.legend.offsetAdjust.vertical + self._options._chartSVGHeight + 45;
+                            legendTextX = self._options.legend.offsetAdjust.horizontal - self._options.legend.offsetAdjust.textToSymbol;
+                            legendTextY = self._options.legend.offsetAdjust.vertical + self._options._chartSVGHeight + 50;
+                            legendTextAnchor = 'end';
+                        } else {
+                            legendTextX = self._options.legend.offsetAdjust.horizontal;
+                            legendTextY = self._options.legend.offsetAdjust.vertical + self._options._chartSVGHeight + 50;
+                            legendRectX = self._options.legend.offsetAdjust.horizontal - self._options.legend.offsetAdjust.textToSymbol - 10;
+                            legendRectY = self._options.legend.offsetAdjust.vertical + self._options._chartSVGHeight + 45;
+                            legendTextAnchor = 'start';
+                        }
+                        layoutStyle = 0;
+                        break;
                 }
 
                 legendSVG.attr('transform', function (d, i) {
-                    return 'translate(0, ' + (i * self._options.legend.offsetSymbol) + ')';
-                })
+                        if (layoutStyle === 1) {
+                            return 'translate(0, ' + (i * self._options.legend.offsetAdjust.between) + ')';
+
+                        } else {
+                            var startX = (self._options._chartSVGWidth - self._options._uniqueGroupArrayAll.length * 60) / 2;
+                            return 'translate('+ (i * (self._options.legend.offsetAdjust.between + 50) + startX) + ',0)';
+                        }
+
+                    })
                     .append('text')
                     .attr('x', legendTextX)
                     .attr('y', legendTextY)
@@ -2242,9 +2315,7 @@
             self._drawChartSVG();
 
             self.background('refresh').xLabel('refresh').yLabel('refresh').xAxis('refresh').yAxis('refresh').title('refresh').tooltip('refresh');
-            //if (self._options._secondAxis) {
             self.yLabel2('refresh').yAxis2('refresh');
-            //}
         }
 
     };
@@ -2979,6 +3050,82 @@
                 tooltipDIV.remove();
             }
 
+            var parseSingleCustomTooltip = function (tooltipHTML, d, group) {
+                var regExpress = /\#([^#]+)\#/g;
+                var matches = tooltipHTML.match(regExpress),
+                    parsedString = tooltipHTML;
+                for (var i = 0; i < matches.length; i++) {
+                    var obj = matches[i];
+                    var matchValue = obj.substring(1, obj.length - 1).toLowerCase(),
+                        value;
+                    switch (matchValue) {
+                        case "group":
+                            if (bChart.existy(group)) {
+                                value = group;
+                            } else {
+                                value = d.group;
+                            }
+                            break;
+                        case "x":
+                            value = d.x;
+                            break;
+                        case "value":
+                            if (bChart.existy(group)) {
+                                value = d[group];
+                            } else {
+                                value = d.value;
+                            }
+                            break;
+                    }
+                    parsedString = parsedString.replace(obj, value);
+                }
+                return parsedString;
+            };
+
+            var parseGroupCustomTooltip = function (tooltipHTML, d) {
+                var regExpress = /\{\{([^{}]+)\}\}/g;
+                var matches = tooltipHTML.match(regExpress);
+                var parsedHTML = tooltipHTML;
+                var parsedSingleHTML = "";
+                for (var i = 0; i < matches.length; i++) {
+                    var obj = matches[i];
+                    var matchValue = obj.split(':');
+                    var objHTML = "";
+
+                    if (matchValue[0].indexOf('group')>=0) {
+                        if (!self._options.tooltip.groupHTML) {
+                            self._options.tooltip._groupHTML = matchValue[1].slice(0, -2);
+                            objHTML = obj;
+                        } else {
+                            self._options.tooltip._groupHTML = self._options.tooltip.groupHTML;
+                            objHTML = self._options.tooltip._groupHTML;
+                            parsedHTML = parsedHTML.replace(obj, objHTML);
+                        }
+                        for (var j = 0; j < self._options._uniqueGroupArrayAll.length; j++) {
+                            var obj1 = self._options._uniqueGroupArrayAll[j];
+                            parsedSingleHTML = parseSingleCustomTooltip(self._options.tooltip._groupHTML, d, obj1);
+                            parsedHTML = parsedHTML.replace(objHTML, parsedSingleHTML);
+                            if (j < self._options._uniqueGroupArrayAll.length - 1) {
+                                parsedHTML += objHTML;
+                            }
+                        }
+                    } else if (matchValue[0].indexOf('x')>= 0){
+
+                        if (!self._options.tooltip.xHTML) {
+                            self._options.tooltip._xHTML = matchValue[1].slice(0, -2);
+                            objHTML = obj;
+                        } else {
+                            self._options.tooltip._xHTML = self._options.tooltip.xHTML;
+                            objHTML = self._options.tooltip._xHTML;
+                            parsedHTML = parsedHTML.replace(obj, objHTML);
+                        }
+                        parsedSingleHTML = parseSingleCustomTooltip(self._options.tooltip._xHTML, d);
+                        parsedHTML = parsedHTML.replace(objHTML, parsedSingleHTML);
+                    }
+                }
+                return parsedHTML;
+            };
+
             function drawGroupTooltip(_parentSVG) {
                 var bisectData = d3.bisector(function (d) {
                     return self._options.xAxis.isTimeSeries ? new Date(d.x) : d.x;
@@ -3081,11 +3228,18 @@
                         offx = xOptions.x0.rangeBand() === 0 ? leftEdge[j] + 80 : leftEdge[j] + rangeWidth / 2 + 80;
                     }
                     var tooltip_html = "";
-                    tooltip_html += "<div class='bchart-tooltip-header'>"+ d.x +"</div>";
-                    for (var k = 0; k < self._options._uniqueGroupArrayAll.length; k++) {
-                        var obj = self._options._uniqueGroupArrayAll[k];
-                        tooltip_html += "<div class='bchart-tooltip-row'><div class='bchart-tooltip-group'>"+obj+"</div><div class='bchart-tooltip-value'>"+d[obj]+"</div></div>";
+
+                    if (bChart.existy(self._options.tooltip.html) && self._options.tooltip.html) {
+                        tooltip_html = self._options.tooltip.html;
+                        tooltip_html = parseGroupCustomTooltip(tooltip_html, d);
+                    } else {
+                        tooltip_html += "<div class='bchart-tooltip-header'>"+ d.x +"</div>";
+                        for (var k = 0; k < self._options._uniqueGroupArrayAll.length; k++) {
+                            var obj = self._options._uniqueGroupArrayAll[k];
+                            tooltip_html += "<div class='bchart-tooltip-row'><div class='bchart-tooltip-group'>"+obj+"</div><div class='bchart-tooltip-value'>"+d[obj]+"</div></div>";
+                        }
                     }
+
                     var offy = d3.event.hasOwnProperty('offsetY') ? d3.event.offsetY : d3.event.layerY;
                     focus_x.attr('x2', 0)
                         .attr('transform', 'translate(' + (offx - 80) + ',0)');
@@ -3119,6 +3273,8 @@
 
                 }
             }
+
+
 
             function drawSingleTooltip(_parentSVG) {
                 var groupSVG = _parentSVG.selectAll('.bChart_groups');
@@ -3252,7 +3408,7 @@
         if (self._options.xAxis.outerTickSize === 'auto') {
             outerSize = -self._options._chartSVGHeight;
         } else {
-            outerSize = self._options.xAxis.outerTickSize
+            outerSize = self._options.xAxis.outerTickSize;
         }
 
         var axis = d3.svg.axis()
@@ -3434,7 +3590,7 @@
                     xLabelSVG = chartSVG.select('.bChart_xlabel').style('display', 'block');
                 }
                 xPos = self._options._chartSVGWidth / 2 + self._options.xLabel.offsetAdjust.horizontal;
-                yPos = self._options._chartSVGHeight + self._options.padding.bottom - 10 - self._options.xLabel.offsetAdjust.vertical;
+                yPos = self._options._chartSVGHeight + self._options.padding.bottom - 20 - self._options.xLabel.offsetAdjust.vertical;
                 xLabelSVG.style('font-size', self._options.xLabel.fontSize)
                     .style('font-family', self._options.xLabel.fontType)
                     .style('fill', self._options.xLabel.fontColor)
@@ -3500,7 +3656,7 @@
         if (self._options[yAxisType].outerTickSize === 'auto') {
             outerSize = -self._options._chartSVGWidth;
         } else {
-            outerSize = self._options[yAxisType].outerTickSize
+            outerSize = self._options[yAxisType].outerTickSize;
         }
 
         return d3.svg.axis()

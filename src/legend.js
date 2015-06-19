@@ -23,7 +23,7 @@ bChart.prototype.legend = function (options) {
             if (!chartSVG.selectAll('.bChart_legend').empty()) {
                 chartSVG.selectAll('.bChart_legend').remove();
             }
-            var legendRectX, legendRectY, legendTextX, legendTextY, legendTextAnchor;
+            var legendRectX, legendRectY, legendTextX, legendTextY, legendTextAnchor, layoutStyle;
 
             var groupConcat = self._options._uniqueGroupArrayAll;
             var legendSVG = chartSVG.selectAll('.bChart_legend')
@@ -33,31 +33,101 @@ bChart.prototype.legend = function (options) {
 
             switch (self._options.legend.position) {
                 case 'topright':
-                    legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
-                    legendRectY = -60 - self._options.legend.offsetAdjust.vertical;
-                    legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20- self._options.legend.offsetText;
-                    legendTextY = -56 - self._options.legend.offsetAdjust.vertical;
-                    legendTextAnchor = 'end';
+                    if (self._options.legend.textFirst) {
+                        legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
+                        legendRectY = -60 - self._options.legend.offsetAdjust.vertical;
+                        legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20- self._options.legend.offsetAdjust.textToSymbol;
+                        legendTextY = -56 - self._options.legend.offsetAdjust.vertical;
+                        legendTextAnchor = 'end';
+                    } else {
+                        legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 50;
+                        legendTextY = -56 - self._options.legend.offsetAdjust.vertical;
+                        legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 60 - self._options.legend.offsetAdjust.textToSymbol;
+                        legendRectY = -60 - self._options.legend.offsetAdjust.vertical;
+                        legendTextAnchor = 'start';
+                    }
+                    layoutStyle = 1;
 
                     break;
                 case 'right':
-                    legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
-                    legendRectY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 60;
-                    legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20 - self._options.legend.offsetText;
-                    legendTextY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 56;
-                    legendTextAnchor = 'end';
+                    if (self._options.legend.textFirst) {
+                        legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
+                        legendRectY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 60;
+                        legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20 - self._options.legend.offsetAdjust.textToSymbol;
+                        legendTextY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 56;
+                        legendTextAnchor = 'end';
+                    } else {
+                        legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 50;
+                        legendTextY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 56;
+                        legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 60 - self._options.legend.offsetAdjust.textToSymbol;
+                        legendRectY = self._options._chartSVGHeight / 2 - self._options.legend.offsetAdjust.vertical - 60;
+                        legendTextAnchor = 'start';
+                    }
+                    layoutStyle = 1;
+
                     break;
                 case 'bottomright':
-                    legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
-                    legendRectY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 60;
-                    legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20 - self._options.legend.offsetText;
-                    legendTextY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 56;
-                    legendTextAnchor = 'end';
+                    if (self._options.legend.textFirst) {
+                        legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20;
+                        legendRectY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 60;
+                        legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 20 - self._options.legend.offsetAdjust.textToSymbol;
+                        legendTextY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 56;
+                        legendTextAnchor = 'end';
+                    } else {
+                        legendTextX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 50;
+                        legendTextY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 56;
+                        legendRectX = self._options._chartSVGWidth + self._options.padding.right + self._options.legend.offsetAdjust.horizontal - 60 - self._options.legend.offsetAdjust.textToSymbol;
+                        legendRectY = self._options._chartSVGHeight + 15 - self._options.legend.offsetAdjust.vertical - 60;
+                        legendTextAnchor = 'start';
+                    }
+                    layoutStyle = 1;
+
+                    break;
+                case 'top':
+                    if (self._options.legend.textFirst) {
+                        legendRectX = self._options.legend.offsetAdjust.horizontal;
+                        legendRectY = -30 + self._options.legend.offsetAdjust.vertical;
+                        legendTextX = self._options.legend.offsetAdjust.horizontal - self._options.legend.offsetAdjust.textToSymbol;
+                        legendTextY = -25 + self._options.legend.offsetAdjust.vertical;
+                        legendTextAnchor = 'end';
+                    } else {
+                        legendTextX = self._options.legend.offsetAdjust.horizontal;
+                        legendTextY = -25 + self._options.legend.offsetAdjust.vertical;
+                        legendRectX = self._options.legend.offsetAdjust.horizontal - self._options.legend.offsetAdjust.textToSymbol - 10;
+                        legendRectY = -30 + self._options.legend.offsetAdjust.vertical;
+                        legendTextAnchor = 'start';
+                    }
+                    layoutStyle = 0;
+
+                    break;
+                case 'bottom':
+                    if (self._options.legend.textFirst) {
+                        legendRectX = self._options.legend.offsetAdjust.horizontal;
+                        legendRectY = self._options.legend.offsetAdjust.vertical + self._options._chartSVGHeight + 45;
+                        legendTextX = self._options.legend.offsetAdjust.horizontal - self._options.legend.offsetAdjust.textToSymbol;
+                        legendTextY = self._options.legend.offsetAdjust.vertical + self._options._chartSVGHeight + 50;
+                        legendTextAnchor = 'end';
+                    } else {
+                        legendTextX = self._options.legend.offsetAdjust.horizontal;
+                        legendTextY = self._options.legend.offsetAdjust.vertical + self._options._chartSVGHeight + 50;
+                        legendRectX = self._options.legend.offsetAdjust.horizontal - self._options.legend.offsetAdjust.textToSymbol - 10;
+                        legendRectY = self._options.legend.offsetAdjust.vertical + self._options._chartSVGHeight + 45;
+                        legendTextAnchor = 'start';
+                    }
+                    layoutStyle = 0;
+                    break;
             }
 
             legendSVG.attr('transform', function (d, i) {
-                return 'translate(0, ' + (i * self._options.legend.offsetSymbol) + ')';
-            })
+                    if (layoutStyle === 1) {
+                        return 'translate(0, ' + (i * self._options.legend.offsetAdjust.between) + ')';
+
+                    } else {
+                        var startX = (self._options._chartSVGWidth - self._options._uniqueGroupArrayAll.length * 60) / 2;
+                        return 'translate('+ (i * (self._options.legend.offsetAdjust.between + 50) + startX) + ',0)';
+                    }
+
+                })
                 .append('text')
                 .attr('x', legendTextX)
                 .attr('y', legendTextY)

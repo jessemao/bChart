@@ -39,7 +39,7 @@ bChart.prototype._getYAxis = function (y, isSecond) {
     if (self._options[yAxisType].outerTickSize === 'auto') {
         outerSize = -self._options._chartSVGWidth;
     } else {
-        outerSize = self._options[yAxisType].outerTickSize
+        outerSize = self._options[yAxisType].outerTickSize;
     }
 
     return d3.svg.axis()

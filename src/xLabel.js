@@ -30,7 +30,7 @@ bChart.prototype.xLabel = function (options) {
                 xLabelSVG = chartSVG.select('.bChart_xlabel').style('display', 'block');
             }
             xPos = self._options._chartSVGWidth / 2 + self._options.xLabel.offsetAdjust.horizontal;
-            yPos = self._options._chartSVGHeight + self._options.padding.bottom - 10 - self._options.xLabel.offsetAdjust.vertical;
+            yPos = self._options._chartSVGHeight + self._options.padding.bottom - 20 - self._options.xLabel.offsetAdjust.vertical;
             xLabelSVG.style('font-size', self._options.xLabel.fontSize)
                 .style('font-family', self._options.xLabel.fontType)
                 .style('fill', self._options.xLabel.fontColor)

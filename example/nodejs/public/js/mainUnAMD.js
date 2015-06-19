@@ -22,11 +22,20 @@
         x:'date'
     });
 
-    barchart.tooltip('type', 1).xAxis({
+    barchart.tooltip({
+            'type': 1,
+            "xHTML": "<div class='bchart-tooltip-header'> #x# </div>",
+            "groupHTML": "<div class='bchart-tooltip-row'><div class='bchart-tooltip-group'>#group#</div><div class='bchart-tooltip-value'>#value#</div></div>",
+            "html": "{{x}}{{group}}",
+            "fontSize": '20px'
+        })
+        .xAxis({
             "isTimeSeries": true,
             'timeFormat': 'Mm-yyyy',
             'offsetAdjust': 10,
-            'fontSize': 16
+            'fontSize': 16,
+
+            //"html": "{{x:<div class='bchart-tooltip-header'> #x# </div>}}{{group: <div class='bchart-tooltip-row'><div class='bchart-tooltip-group'>#group#</div><div class='bchart-tooltip-value'>#value#</div></div>}}"
         })
         .line({
             //"fillOpacity.$0": 1,
@@ -41,8 +50,9 @@
             'size': 64
         })
         .legend({
-            'symbolSize': 20,
-            'offsetSymbol': 30
+            //'textFirst': false,
+            //'symbolSize': 20
+            'position': 'bottom'
         })
         .yAxis({
             //'rotation': -45,

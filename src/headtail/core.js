@@ -35,7 +35,7 @@ var _defaultOptions = {
 	padding: {
 		"top": 80,
 		"right": 90,
-		"bottom": 50,
+		"bottom": 60,
 		"left": 60
 	},
 	data: {
@@ -104,8 +104,6 @@ var _defaultOptions = {
 	_secondAxis: false,
 	legend: {
 		"position": "topright",
-		"offsetText": 5,
-		"offsetSymbol": 15,
 		"symbolSize": 10,
 		"multipleLine": false,
 		"textFirst": true,
@@ -117,8 +115,10 @@ var _defaultOptions = {
 		"fontUnderline": false,
 		"fontColor": "#000000",
 		"offsetAdjust": {
+			"between": 15,
 			"horizontal": 0,
-			"vertical": 0
+			"vertical": 0,
+			"textToSymbol": 5
 		}
 	},
 
@@ -271,7 +271,12 @@ var _defaultOptions = {
 		"fontUnderline": false,
 		"fontColor": "#fff",
 		"width": "auto",
-		"height": "auto"
+		"height": "auto",
+		"xHTML": "",
+		"groupHTML": "",
+		"_xHTML": "",
+		"_groupHTML": ""
+
 	}
 };
 

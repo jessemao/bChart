@@ -60,7 +60,7 @@ bChart.prototype._getXAxis = function (x) {
     if (self._options.xAxis.outerTickSize === 'auto') {
         outerSize = -self._options._chartSVGHeight;
     } else {
-        outerSize = self._options.xAxis.outerTickSize
+        outerSize = self._options.xAxis.outerTickSize;
     }
 
     var axis = d3.svg.axis()
