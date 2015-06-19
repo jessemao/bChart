@@ -5,7 +5,7 @@
     //bChart
     //bChart('#skills', 'BarChart');
 
-    var barchart = bChart.LineChart('#skills', {
+    var barchart = bChart.BarChart('#skills', {
         //"isStack": true
         //"data": {
         //    dataValue: [['Label 1','45', '32', '15'],
@@ -27,28 +27,29 @@
             "xHTML": "<div class='bchart-tooltip-header'> #x# </div>",
             "groupHTML": "<div class='bchart-tooltip-row'><div class='bchart-tooltip-group'>#group#</div><div class='bchart-tooltip-value'>#value#</div></div>",
             "html": "{{x}}{{group}}",
-            "fontSize": '20px'
+            //"fontSize": '20px'
         })
         .xAxis({
-            "isTimeSeries": true,
-            'timeFormat': 'Mm-yyyy',
-            'offsetAdjust': 10,
-            'fontSize': 16,
+            "isTimeSeries": false,
+            "rotation": -45
+            //'timeFormat': 'Mm-yyyy',
+            //'offsetAdjust': 10,
+            //'fontSize': '13px',
 
             //"html": "{{x:<div class='bchart-tooltip-header'> #x# </div>}}{{group: <div class='bchart-tooltip-row'><div class='bchart-tooltip-group'>#group#</div><div class='bchart-tooltip-value'>#value#</div></div>}}"
         })
-        .line({
-            //"fillOpacity.$0": 1,
-            "strokeWidth.$1": 5,
-            "strokeOpacity": 1
-        })
-        .node({
-            'display': true,
-            'fillOpacity': 0,
-            'strokeWidth': 4,
-            'solidCircle': true,
-            'size': 64
-        })
+        //.line({
+        //    //"fillOpacity.$0": 1,
+        //    "strokeWidth.$1": 5,
+        //    "strokeOpacity": 1
+        //})
+        //.node({
+        //    'display': true,
+        //    'fillOpacity': 0,
+        //    'strokeWidth': 4,
+        //    'solidCircle': true,
+        //    'size': 64
+        //})
         .legend({
             //'textFirst': false,
             //'symbolSize': 20
@@ -97,7 +98,8 @@
             dataValue: [['Label 1','45'],
                 ['Label 2', '12']
             ]
-        }
+        },
+        "isDonut": true
     })
     //.node("type.Label 1", "cross");
     setTimeout(function () {

@@ -1538,11 +1538,9 @@
             setTimeout(function () {
                 self.setOptions(options, type);
                 self._drawChartSVG();
-
             }, 10);
         }
         return self;
-
     };
 
 
@@ -2725,29 +2723,24 @@
      * Created by CaptainMao on 5/22/15.
      */
     var _defaultsPie = {
-
         width: 400,
         height: 400,
-        textRadiusDefault: '',
-        outerRadiusDefault: '',
+        _textRadiusDefault: '',
+        _outerRadiusDefault: '',
+        _innerRadiusDefault: '',
         valueDisplay: {
             display: true
-
         },
         title: {
-            "text": "Pie Chart",
+            "text": "Pie Chart"
         },
-
+        _originCentroid: [],
+        isDonut: false,
+        isPullOut: false,
+        pullOutSize: 10,
         tooltip: {
             "type": 0
         }
-        //pie: {
-        //    type: {},
-        //    strokeWidth: {},
-        //    strokeOpacity: {},
-        //    fillOpacity: {}
-        //}
-
     };
 
     var PieChart = function (options) {
@@ -2791,27 +2784,24 @@
         var pieSUM = d3.sum(_datasetTmp, function (d) {
             return parseFloat(d.value);
         });
-        if (bChart.existy(self._options.outerRadius)) {
-            self._options.outerRadiusDefault = self._options.outerRadius;
+        if (bChart.existy(self._options.outerRadius) && self._options.outerRadius) {
+            self._options._outerRadiusDefault = self._options.outerRadius;
         } else {
-            self._options.outerRadiusDefault = self._options._chartSVGWidth > self._options._chartSVGHeight ? self._options._chartSVGHeight /2 : self._options._chartSVGWidth / 2;
+            self._options._outerRadiusDefault = self._options._chartSVGWidth > self._options._chartSVGHeight ? self._options._chartSVGHeight /2 : self._options._chartSVGWidth / 2;
         }
-        if (bChart.existy(self._options.textRadius)) {
-            self._options.textRadiusDefault = self._options.textRadius;
+        if (bChart.existy(self._options.textRadius) && self._options.textRadius) {
+            self._options._textRadiusDefault = self._options.textRadius;
         } else {
-            self._options.textRadiusDefault = self._options.outerRadiusDefault / 2;
+            self._options._textRadiusDefault = self._options._outerRadiusDefault * 2 / 3;
         }
 
-        var arc = d3.svg.arc()
-            .outerRadius(self._options.outerRadiusDefault)
-            .startAngle(function (d) {
-                return d.startAngle;
-            })
-            .endAngle(function (d) {
-                return d.endAngle;
-            });
-        //var arc_init = d3.svg.arc()
-        //    .outerRadius(1);
+        if (bChart.existy(self._options.innerRadius) && self._options.innerRadius) {
+            self._options._innerRadiusDefault = self._options.innerRadius;
+        } else {
+            self._options._innerRadiusDefault = self._options._outerRadiusDefault / 3;
+        }
+
+        var arc = self.getArc();
 
         var pie = d3.layout.pie()
             .value(function (d) {
@@ -2819,7 +2809,7 @@
             })
             .sort(null);
 
-        var pieSVG, arcSVG, pieDataset, textSVG;
+        var pieSVG, arcSVG, pieDataset, textSVG, pieSVGParent;
         pieDataset = pie(_datasetTmp);
 
         if (chartSVG.select('.bChart_pie').empty()) {
@@ -2836,15 +2826,29 @@
                 return arc(interpolate(t));
             };
         };
-        arcSVG = pieSVG.selectAll('.bChart_arc')
+
+        pieSVGParent = pieSVG.selectAll('.bChart_groups')
             .data(pieDataset);
+
+        pieSVGParent.enter().append('g')
+            .attr('class', function (d) {
+                return 'bChart_groups bChart_groups_' + groupConcat.indexOf(d.data.group);
+            });
+
+        pieSVGParent.exit()
+            .remove();
+
+        arcSVG = pieSVGParent.selectAll('.bChart_arc')
+            .data(function (d) {
+                return [d];
+            });
 
         arcSVG.exit()
             .remove();
 
         arcSVG.enter().append('path')
             .attr('class', function (d) {
-                return 'bChart_arc bChart_groups bChart_groups_' + groupConcat.indexOf(d.data.group);
+                return 'bChart_arc';
             })
             .attr('fill', function (d) {
                 return self._options._colorMap[d.data.group];
@@ -2864,7 +2868,7 @@
 
         arcSVG
             .attr('class', function (d) {
-                return 'bChart_arc bChart_groups bChart_groups_' + groupConcat.indexOf(d.data.group);
+                return 'bChart_arc';
             })
             .attr('fill', function (d) {
                 return self._options._colorMap[d.data.group];
@@ -2874,23 +2878,25 @@
             .attrTween("d", arcTween);
 
 
-        textSVG = pieSVG.selectAll('.bChart_arc_text')
-            .data(pieDataset);
+        textSVG = pieSVGParent.selectAll('.bChart_arc_text')
+            .data(function (d) {
+                return [d];
+            });
         if (self._options.valueDisplay.display) {
             textSVG.style('display', 'block');
 
             textSVG.exit().remove();
             textSVG.enter().append('text')
                 .attr('class', function (d) {
-                    return 'bChart_arc_text bChart_groups bChart_groups_' + groupConcat.indexOf(d.data.group);
+                    return 'bChart_arc_text';
                 });
 
             textSVG
                 .attr('class', function (d) {
-                    return 'bChart_arc_text bChart_groups bChart_groups_' + groupConcat.indexOf(d.data.group);
+                    return 'bChart_arc_text';
                 })
                 .attr('transform', function (d) {
-                    return 'translate(' + Math.cos((d.startAngle + d.endAngle - Math.PI) / 2) * self._options.textRadiusDefault + ',' + Math.sin((d.startAngle + d.endAngle - Math.PI) / 2) * self._options.textRadiusDefault + ')';
+                    return 'translate(' + Math.cos((d.startAngle + d.endAngle - Math.PI) / 2) * self._options._textRadiusDefault + ',' + Math.sin((d.startAngle + d.endAngle - Math.PI) / 2) * self._options._textRadiusDefault + ')';
                 })
                 .attr('text-anchor', 'middle')
                 .text(function (d) {
@@ -2901,13 +2907,67 @@
             textSVG.style('display', 'none');
         }
 
-
-
-
         return self;
 
     };
 
+    PieChart.prototype.pullOutSegement = function (that) {
+        var self = this;
+        var selectedArc = d3.select(that);
+        var arc = self.getArc();
+        selectedArc
+            .transition()
+            .duration(self._options.duration)
+            .attr('transform', function(d) {
+            self._options._originCentroid = arc.centroid(d);
+            var x = self._options._originCentroid[0],
+                y = self._options._originCentroid[1],
+                h = Math.sqrt(x*x + y*y);
+            return 'translate(' + ((x/h) * self._options.pullOutSize) + ',' + ((y/h) * self._options.pullOutSize) + ')';
+        });
+    };
+
+    PieChart.prototype.restoreOutSegement = function (that) {
+        var self = this;
+        var selectedArc = d3.select(that);
+        var arc = self.getArc();
+
+        selectedArc
+            .transition()
+            .duration(self._options.duration)
+            .attr('transform', function(d) {
+            var centroid = arc.centroid(d),
+                x = centroid[0],
+                y = centroid[1];
+            return 'translate(' + (self._options._originCentroid[0] - x) + ',' + (self._options._originCentroid[1] - y) + ')';
+        });
+    };
+
+    PieChart.prototype.getArc = function () {
+        var self = this;
+        var arc;
+        if (self._options.isDonut) {
+            arc = d3.svg.arc()
+                .innerRadius(self._options._innerRadiusDefault)
+                .outerRadius(self._options._outerRadiusDefault)
+                .startAngle(function (d) {
+                    return d.startAngle;
+                })
+                .endAngle(function (d) {
+                    return d.endAngle;
+                });
+        } else {
+            arc = d3.svg.arc()
+                .outerRadius(self._options._outerRadiusDefault)
+                .startAngle(function (d) {
+                    return d.startAngle;
+                })
+                .endAngle(function (d) {
+                    return d.endAngle;
+                });
+        }
+        return arc;
+    };
     /**
      * Created by CaptainMao on 5/22/15.
      */
@@ -3019,7 +3079,6 @@
 
             return self;
         }
-
 
         function drawTooltip () {
             var tooltipDIV;
@@ -3281,12 +3340,17 @@
                 _parentSVG.select('.bchart-focus-rect').remove();
                 _parentSVG.select('.bchart-focus-x-line').remove();
                 groupSVG.on('mouseover', function (d) {
-                    d3.select(this).style('opacity', 0.7);
-                    tooltipDIV.transition()
-                        .duration(self._options.duration)
-                        .style('opacity', 1)
-                        .style('display', 'block');
-                })
+                        d3.select(this).style('opacity', 0.7);
+                        tooltipDIV.transition()
+                            .duration(self._options.duration)
+                            .style('opacity', 1)
+                            .style('display', 'block');
+
+                        if (self.constructor === PieChart && self._options.isPullOut) {
+                            self.pullOutSegement(this);
+                        }
+
+                    })
                     .on('mousemove', function (d) {
                         var tooltip_html;
                         if (self.constructor === PieChart) {
@@ -3295,7 +3359,13 @@
                             tooltip_html = d.group + '(' + d.x + ') :' + d.value;
 
                         }
-                        var selectedColor = d3.select(this).style('fill');
+                        var selectedColor;
+                        if (self.constructor === PieChart) {
+                            selectedColor = d3.select(this).select('.bChart_arc').style('fill');
+                        } else {
+                            selectedColor = d3.select(this).style('fill');
+                        }
+
                         var offx = d3.event.hasOwnProperty('offsetX') ? d3.event.offsetX : d3.event.layerX;
                         var offy = d3.event.hasOwnProperty('offsetY') ? d3.event.offsetY : d3.event.layerY;
                         tooltipDIV.style('background', selectedColor)
@@ -3322,6 +3392,9 @@
                             .duration(self._options.duration)
                             .style('opacity', 0)
                             .style('display', 'none');
+                        if (self.constructor === PieChart && self._options.isPullOut) {
+                            self.restoreOutSegement(this);
+                        }
                     });
                 if (!_parentSVG.select('.bChart_lines').empty()) {
                     var groupLineSVG = _parentSVG.select('.bChart_lines').selectAll('.bChart_groups');
@@ -3333,13 +3406,6 @@
                 if (!_parentSVG.select('.bChart_areas').empty()) {
                     var groupAreaSVG = _parentSVG.select('.bChart_areas').selectAll('.bChart_groups');
                     groupAreaSVG.on('mouseover', null)
-                        .on('mousemove', null)
-                        .on('mouseout', null);
-                }
-
-                if (!_parentSVG.select('.bChart_pie').empty()) {
-                    var groupPieTextSVG = _parentSVG.select('.bChart_pie').selectAll('.bChart_arc_text');
-                    groupPieTextSVG.on('mouseover', null)
                         .on('mousemove', null)
                         .on('mouseout', null);
                 }

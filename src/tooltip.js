@@ -19,7 +19,6 @@ bChart.prototype.tooltip = function (options) {
         return self;
     }
 
-
     function drawTooltip () {
         var tooltipDIV;
         if (self._options.tooltip.display) {
@@ -280,12 +279,17 @@ bChart.prototype.tooltip = function (options) {
             _parentSVG.select('.bchart-focus-rect').remove();
             _parentSVG.select('.bchart-focus-x-line').remove();
             groupSVG.on('mouseover', function (d) {
-                d3.select(this).style('opacity', 0.7);
-                tooltipDIV.transition()
-                    .duration(self._options.duration)
-                    .style('opacity', 1)
-                    .style('display', 'block');
-            })
+                    d3.select(this).style('opacity', 0.7);
+                    tooltipDIV.transition()
+                        .duration(self._options.duration)
+                        .style('opacity', 1)
+                        .style('display', 'block');
+
+                    if (self.constructor === PieChart && self._options.isPullOut) {
+                        self.pullOutSegement(this);
+                    }
+
+                })
                 .on('mousemove', function (d) {
                     var tooltip_html;
                     if (self.constructor === PieChart) {
@@ -294,7 +298,13 @@ bChart.prototype.tooltip = function (options) {
                         tooltip_html = d.group + '(' + d.x + ') :' + d.value;
 
                     }
-                    var selectedColor = d3.select(this).style('fill');
+                    var selectedColor;
+                    if (self.constructor === PieChart) {
+                        selectedColor = d3.select(this).select('.bChart_arc').style('fill');
+                    } else {
+                        selectedColor = d3.select(this).style('fill');
+                    }
+
                     var offx = d3.event.hasOwnProperty('offsetX') ? d3.event.offsetX : d3.event.layerX;
                     var offy = d3.event.hasOwnProperty('offsetY') ? d3.event.offsetY : d3.event.layerY;
                     tooltipDIV.style('background', selectedColor)
@@ -321,6 +331,9 @@ bChart.prototype.tooltip = function (options) {
                         .duration(self._options.duration)
                         .style('opacity', 0)
                         .style('display', 'none');
+                    if (self.constructor === PieChart && self._options.isPullOut) {
+                        self.restoreOutSegement(this);
+                    }
                 });
             if (!_parentSVG.select('.bChart_lines').empty()) {
                 var groupLineSVG = _parentSVG.select('.bChart_lines').selectAll('.bChart_groups');
@@ -332,13 +345,6 @@ bChart.prototype.tooltip = function (options) {
             if (!_parentSVG.select('.bChart_areas').empty()) {
                 var groupAreaSVG = _parentSVG.select('.bChart_areas').selectAll('.bChart_groups');
                 groupAreaSVG.on('mouseover', null)
-                    .on('mousemove', null)
-                    .on('mouseout', null);
-            }
-
-            if (!_parentSVG.select('.bChart_pie').empty()) {
-                var groupPieTextSVG = _parentSVG.select('.bChart_pie').selectAll('.bChart_arc_text');
-                groupPieTextSVG.on('mouseover', null)
                     .on('mousemove', null)
                     .on('mouseout', null);
             }

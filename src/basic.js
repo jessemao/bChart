@@ -298,10 +298,8 @@ bChart.prototype._setSpecificPropertiesByChart = function (options, type) {
         setTimeout(function () {
             self.setOptions(options, type);
             self._drawChartSVG();
-
         }, 10);
     }
     return self;
-
 };
 
